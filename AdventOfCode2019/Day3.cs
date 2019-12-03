@@ -54,14 +54,14 @@ namespace AdventOfCode2019
         [Fact]
         public void Part1()
         {
-            int answer = _map.Min(kvp => kvp.Value.mask == 3 ? Math.Abs(kvp.Key.X) + Math.Abs(kvp.Key.Y) : int.MaxValue);
+            int answer = _map.Where(kvp => kvp.Value.mask == 3).Min(kvp => kvp.Key.Manhattan);
             Assert.Equal(248, answer);
         }
 
         [Fact]
         public void Part2()
         {
-            int answer = _map.Min(kvp => kvp.Value.mask == 3 ? kvp.Value.totalSteps : int.MaxValue);
+            int answer = _map.Values.Where(v => v.mask == 3).Min(v => v.totalSteps);
             Assert.Equal(28580, answer);
         }
 

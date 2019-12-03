@@ -9,6 +9,11 @@ namespace AdventOfCode2019
         public int X { get; set; }
         public int Y { get; set; }
 
+        /// <summary>
+        /// Returns the Manhattan Distance represented by this pair as a coordinate pair
+        /// </summary>
+        public int Manhattan => Math.Abs(X) + Math.Abs(Y);
+
         public IntPair(int x, int y)
         {
             X = x;
