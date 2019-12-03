@@ -18,7 +18,7 @@ namespace AdventOfCode2019
             program[2] = 2;
             RunIntCode(program);
 
-            Assert.Equal(0, program[0]);
+            Assert.Equal(3931283, program[0]);
         }
 
         [Fact]
@@ -50,7 +50,7 @@ namespace AdventOfCode2019
             }
 
             int answer = 100 * i + j;
-            Assert.Equal(0, answer);
+            Assert.Equal(6979, answer);
         }
 
         private void RunIntCode(int[] program)
