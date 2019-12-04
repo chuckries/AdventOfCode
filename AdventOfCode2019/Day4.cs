@@ -30,9 +30,9 @@ namespace AdventOfCode2019
 
         private bool HasAnyDouble(int[] digits)
         {
-            for (int i = digits.Length - 1; i > 0; i--)
+            for (int i = 0; i < digits.Length - 1; i++)
             {
-                if (digits[i] == digits[i - 1])
+                if (digits[i] == digits[i + 1])
                 {
                     return true;
                 }
@@ -64,9 +64,9 @@ namespace AdventOfCode2019
 
         private bool IsStrictlyIncreasing(int[] digits)
         {
-            for (int i = digits.Length - 1; i > 0; i--)
+            for (int i = 0; i < digits.Length - 1; i++)
             {
-                if (digits[i - 1] < digits[i])
+                if (digits[i + 1] > digits[i])
                 {
                     return false;
                 }
