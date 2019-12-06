@@ -9,7 +9,10 @@ namespace AdventOfCode2019
 {
     public class Day5
     {
-        int[] _memory = File.ReadAllText("Inputs/Day5.txt").Split(',').Select(int.Parse).ToArray();
+        int[] _memory = File.ReadAllText("Inputs/Day5.txt")
+            .Split(',')
+            .Select(int.Parse)
+            .ToArray();
 
         [Fact]
         public void Part1()

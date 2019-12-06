@@ -41,7 +41,11 @@ namespace AdventOfCode2019
 
         public Day3()
         {
-            Step[][] steps = File.ReadAllLines("Inputs/Day3.txt").Select(l => l.Split(',').Select(Step.Parse).ToArray()).ToArray();
+            Step[][] steps = File.ReadAllLines("Inputs/Day3.txt")
+                .Select(l => l.Split(',')
+                    .Select(Step.Parse)
+                    .ToArray())
+                .ToArray();
 
             _map = new Dictionary<IntPair, (int, int)>();
 
@@ -54,14 +58,18 @@ namespace AdventOfCode2019
         [Fact]
         public void Part1()
         {
-            int answer = _map.Where(kvp => kvp.Value.mask == 3).Min(kvp => kvp.Key.Manhattan);
+            int answer = _map.Where(kvp => kvp.Value.mask == 3)
+                .Min(kvp => kvp.Key.Manhattan);
+
             Assert.Equal(248, answer);
         }
 
         [Fact]
         public void Part2()
         {
-            int answer = _map.Values.Where(v => v.mask == 3).Min(v => v.totalSteps);
+            int answer = _map.Values.Where(v => v.mask == 3)
+                .Min(v => v.totalSteps);
+
             Assert.Equal(28580, answer);
         }
 

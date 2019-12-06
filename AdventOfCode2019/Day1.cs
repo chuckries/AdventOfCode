@@ -11,7 +11,10 @@ namespace AdventOfCode2019
         [Fact]
         public void Part1()
         {
-            int sum = File.ReadAllLines("Inputs/Day1.txt").Select(int.Parse).Select(i => (i / 3) - 2).Sum();
+            int sum = File.ReadAllLines("Inputs/Day1.txt")
+                .Select(int.Parse)
+                .Select(i => (i / 3) - 2)
+                .Sum();
 
             Assert.Equal(3363929, sum);
         }

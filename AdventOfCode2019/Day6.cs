@@ -33,7 +33,11 @@ namespace AdventOfCode2019
 
         public Day6()
         {
-            (string parent, string child)[] inputs = File.ReadAllLines("Inputs/Day6.txt").Select(s => s.Split(')')).Select(a => (a[0], a[1])).ToArray();
+            (string parent, string child)[] inputs = File.ReadAllLines("Inputs/Day6.txt")
+                .Select(s => s.Split(')'))
+                .Select(a => (a[0], a[1]))
+                .ToArray();
+
             foreach (var input in inputs)
             {
                 Node parent = GetNode(input.parent);
@@ -80,7 +84,43 @@ namespace AdventOfCode2019
                 foreach (Node child in current.Children) Add(child, distance);
             }
 
-            Assert.Equal(523, distances[target]);
+            int answer = distances[target];
+
+            Assert.Equal(523, answer);
+        }
+
+        [Fact]
+        public void Part2_Different()
+        {
+            Node source = GetNode("YOU").Parent;
+            Node target = GetNode("SAN").Parent;
+
+            Dictionary<Node, int> distances = new Dictionary<Node, int>();
+
+            Node current = source;
+            int distance = 0;
+            while (current != null)
+            {
+                distances.Add(current, distance++);
+                current = current.Parent;
+            }
+
+            distance = 0;
+            current = target;
+            while (current != null)
+            {
+                if (distances.TryGetValue(current, out int ancestorDistance))
+                {
+                    distance += ancestorDistance;
+                    break;
+                }
+
+                current = current.Parent;
+                distance++;
+            }
+
+            int answer = distance;
+            Assert.Equal(523, answer);
         }
 
         private Node GetNode(string name)

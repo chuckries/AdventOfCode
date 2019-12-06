@@ -17,14 +17,22 @@ namespace AdventOfCode2019
         [Fact]
         public void Part1()
         {
-            int answer = _range.Select(GetDigits).Where(IsStrictlyIncreasing).Where(HasAnyDouble).Count();
+            int answer = _range.Select(GetDigits)
+                .Where(IsStrictlyIncreasing)
+                .Where(HasAnyDouble)
+                .Count();
+
             Assert.Equal(1665, answer);
         }
 
         [Fact]
         public void Part2()
         {
-            int answer = _range.Select(GetDigits).Where(IsStrictlyIncreasing).Where(HasAtLeastExactlyOneDouble).Count();
+            int answer = _range.Select(GetDigits)
+                .Where(IsStrictlyIncreasing)
+                .Where(HasAtLeastExactlyOneDouble)
+                .Count();
+
             Assert.Equal(1131, answer);
         }
 

@@ -13,7 +13,11 @@ namespace AdventOfCode2019
         [Fact]
         public void Part1()
         {
-            int[] memory = File.ReadAllText("Inputs/Day2.txt").Split(',').Select(int.Parse).ToArray();
+            int[] memory = File.ReadAllText("Inputs/Day2.txt")
+                .Split(',')
+                .Select(int.Parse)
+                .ToArray();
+
             memory[1] = 12;
             memory[2] = 2;
 
@@ -26,7 +30,10 @@ namespace AdventOfCode2019
         [Fact]
         public void Part2()
         {
-            int[] memory = File.ReadAllText("Inputs/Day2.txt").Split(',').Select(int.Parse).ToArray();
+            int[] memory = File.ReadAllText("Inputs/Day2.txt")
+                .Split(',')
+                .Select(int.Parse)
+                .ToArray();
 
             const int target = 19690720;
 
