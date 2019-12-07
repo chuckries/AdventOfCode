@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace AdventOfCode2019
@@ -20,11 +21,11 @@ namespace AdventOfCode2019
             List<int> outputs = new List<int>();
             IntCode intCode = new IntCode(
                 _memory,
-                () => 1,
+                () => Task.FromResult(1),
                 (int value) => outputs.Add(value)
                 );
 
-            intCode.Run();
+            intCode.Run().Wait();
 
             Assert.True(outputs.SkipLast(1).All(0.Equals));
             Assert.Equal(8332629, outputs.Last());
@@ -36,11 +37,11 @@ namespace AdventOfCode2019
             int output = 0;
             IntCode intCode = new IntCode(
                 _memory,
-                () => 5,
+                () => Task.FromResult(5),
                 (int value) => output = value
                 );
 
-            intCode.Run();
+            intCode.Run().Wait();
 
             Assert.Equal(8805067, output);
         }

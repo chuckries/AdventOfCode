@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Buffers;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace AdventOfCode2019
 {
@@ -26,27 +28,39 @@ namespace AdventOfCode2019
             Imm = 1
         }
 
-        public delegate int ReadInput();
+        public delegate Task<int> ReadInput();
         public delegate void WriteOutput(int value);
-
-        public int[] Memory { get; private set; }
 
         public int PC { get; set; } = 0;
 
         public bool IsHalt { get; private set; } = false;
 
-        public IntCode(int[] memory, ReadInput reader, WriteOutput writer)
+        public int this[int index]
         {
-            Memory = memory;
-            _reader = reader;
-            _writer = writer;
+            get => _memory[index];
+            set => _memory[index] = value;
         }
 
-        public void Step()
+        public ReadInput Reader { get; set; }
+        public WriteOutput Writer { get; set; }
+
+        public IntCode(IEnumerable<int> memory)
+            : this(memory, null, null)
+        { 
+        }
+
+        public IntCode(IEnumerable<int> memory, ReadInput reader, WriteOutput writer)
+        {
+            _memory = memory.ToArray();
+            Reader = reader;
+            Writer = writer;
+        }
+
+        public async Task Step()
         {
             if (!IsHalt)
             {
-                Decode(Memory[PC++], out Op op, out Mode[] modes);
+                Decode(_memory[PC++], out Op op, out Mode[] modes);
 
                 if (op == Op.Halt)
                 {
@@ -54,11 +68,11 @@ namespace AdventOfCode2019
                 }
                 else if (op == Op.In)
                 {
-                    Memory[ReadArg(Mode.Imm)] = _reader();
+                    _memory[ReadArg(Mode.Imm)] = await Reader();
                 }
                 else if (op == Op.Out)
                 {
-                    _writer(ReadArg(modes[0]));
+                    Writer(ReadArg(modes[0]));
                 }
                 else
                 {
@@ -72,7 +86,7 @@ namespace AdventOfCode2019
                     }
                     else
                     {
-                        Memory[ReadArg(Mode.Imm)] = op switch
+                        _memory[ReadArg(Mode.Imm)] = op switch
                         {
                             Op.Add => val1 + val2,
                             Op.Mul => val1 * val2,
@@ -85,11 +99,11 @@ namespace AdventOfCode2019
             }
         }
 
-        public void Run()
+        public async Task Run()
         {
             while (!IsHalt)
             {
-                Step();
+                await Step();
             }
         }
 
@@ -108,12 +122,11 @@ namespace AdventOfCode2019
 
         private int ReadArg(Mode mode) => mode switch
         {
-            Mode.Imm => Memory[PC++],
-            Mode.Pos => Memory[Memory[PC++]],
+            Mode.Imm => _memory[PC++],
+            Mode.Pos => _memory[_memory[PC++]],
             _ => throw new InvalidOperationException()
         };
 
-        private ReadInput _reader;
-        private WriteOutput _writer;
+        private int[] _memory;
     }
 }

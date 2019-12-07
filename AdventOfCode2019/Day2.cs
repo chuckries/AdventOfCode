@@ -18,13 +18,12 @@ namespace AdventOfCode2019
                 .Select(int.Parse)
                 .ToArray();
 
-            memory[1] = 12;
-            memory[2] = 2;
+            IntCode intCode = new IntCode(memory);
+            intCode[1] = 12;
+            intCode[2] = 2;
+            intCode.Run().Wait();
 
-            IntCode intCode = new IntCode(memory, null, null);
-            intCode.Run();
-
-            Assert.Equal(3931283, intCode.Memory[0]);
+            Assert.Equal(3931283, intCode[0]);
         }
 
         [Fact]
@@ -44,14 +43,12 @@ namespace AdventOfCode2019
             {
                 for (j = 0; j < 100; j++)
                 {
-                    int[] testMemory = (int[])memory.Clone();
-                    testMemory[1] = i;
-                    testMemory[2] = j;
+                    IntCode intCode = new IntCode(memory);
+                    intCode[1] = i;
+                    intCode[2] = j;
+                    intCode.Run().Wait();
 
-                    IntCode intCode = new IntCode(testMemory, null, null);
-                    intCode.Run();
-
-                    if (intCode.Memory[0] == target)
+                    if (intCode[0] == target)
                     {
                         stop = true;
                         break;
