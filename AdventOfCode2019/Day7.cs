@@ -112,13 +112,14 @@ namespace AdventOfCode2019
             {
                 amplifiers[i].Reader = ports[i].Dequeue;
             }
+
             for (i = 0; i < amplifiers.Length - 1; i++)
             {
                 amplifiers[i].Writer = ports[i + 1].Enqueue;
             }
 
             int answer = 0;
-            amplifiers[amplifiers.Length - 1].Writer = (value) =>
+            amplifiers[^1].Writer = (value) =>
             {
                 answer = value;
                 ports[0].Enqueue(value);
