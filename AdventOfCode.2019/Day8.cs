@@ -32,7 +32,6 @@ namespace AdventOfCode._2019
         {
             int minLayer = -1 ;
             int minZeros = int.MaxValue;
-
             for (int layer = 0; layer < _layers.GetLength(0); layer++)
             {
                 int zeros = 0;
@@ -54,10 +53,8 @@ namespace AdventOfCode._2019
                 for (int width = 0; width < WIDTH; width++)
                 {
                     char c = _layers[minLayer, height, width];
-                    if (c == '1')
-                        ones++;
-                    else if (c == '2')
-                        twos++;
+                    if (c == '1') ones++;
+                    else if (c == '2') twos++;
                 }
 
             int answer = ones * twos;
@@ -78,14 +75,14 @@ namespace AdventOfCode._2019
                         if (render[height, width] == '2')
                             render[height, width] = _layers[layer, height, width];
 
-            StringBuilder sb = new StringBuilder(AREA + HEIGHT * 2);
-
+            StringBuilder sb = new StringBuilder(AREA + HEIGHT * Environment.NewLine.Length);
             for (int height = 0; height < HEIGHT; height++)
             {
                 for (int width = 0; width < WIDTH; width++)
                     sb.Append(render[height, width]);
                 sb.AppendLine();
             }
+            string answer = sb.ToString();
 
             const string expected =
 @"0110011110011001001001100
@@ -96,7 +93,6 @@ namespace AdventOfCode._2019
 0110010000011000110001110
 ";
 
-            string answer = sb.ToString();
             Assert.Equal(expected, answer);
         }
     }
