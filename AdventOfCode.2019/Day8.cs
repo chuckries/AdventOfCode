@@ -75,7 +75,11 @@ namespace AdventOfCode._2019
                         if (render[height, width] == '2')
                             render[height, width] = _layers[layer, height, width];
 
-            StringBuilder sb = new StringBuilder(AREA + HEIGHT * Environment.NewLine.Length);
+            StringBuilder sb = new StringBuilder(
+                Environment.NewLine, 
+                AREA + (HEIGHT + 1) * Environment.NewLine.Length
+                );
+
             for (int height = 0; height < HEIGHT; height++)
             {
                 for (int width = 0; width < WIDTH; width++)
@@ -84,8 +88,8 @@ namespace AdventOfCode._2019
             }
             string answer = sb.ToString();
 
-            const string expected =
-@"0110011110011001001001100
+            const string expected = @"
+0110011110011001001001100
 1001010000100101001010010
 1000011100100001001010000
 1000010000100001001010110
