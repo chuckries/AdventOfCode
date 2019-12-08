@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace AdventOfCode2019
+namespace AdventOfCode.Common
 {
     public static class EnumerableExtensions
     {

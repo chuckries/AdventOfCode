@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using Xunit;
 
-namespace AdventOfCode2019
+namespace AdventOfCode._2019
 {
     public class Day1
     {

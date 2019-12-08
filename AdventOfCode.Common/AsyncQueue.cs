@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AdventOfCode2019
+namespace AdventOfCode.Common
 {
-    class AsyncQueue<T>
+    public class AsyncQueue<T>
     {
         public AsyncQueue()
         {

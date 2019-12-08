@@ -1,11 +1,12 @@
-﻿using System;
+﻿using AdventOfCode.Common;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using Xunit;
 
-namespace AdventOfCode2019
+namespace AdventOfCode._2019
 {
     public class Day3
     {

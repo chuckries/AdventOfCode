@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace AdventOfCode2019
+namespace AdventOfCode.Common
 {
-    struct IntPair
+    public struct IntPair
     {
         public int X { get; set; }
         public int Y { get; set; }

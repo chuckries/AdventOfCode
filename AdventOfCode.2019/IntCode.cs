@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AdventOfCode2019
+namespace AdventOfCode._2019
 {
     class IntCode
     {
