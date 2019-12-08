@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.0</TargetFramework>
+    <RootNamespace>AdventOfCode._2019</RootNamespace>
 
     <IsPackable>false</IsPackable>
   </PropertyGroup>
