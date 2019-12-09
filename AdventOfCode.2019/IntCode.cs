@@ -51,7 +51,7 @@ namespace AdventOfCode._2019
 
         public IntCode(IEnumerable<int> memory)
             : this(memory, null, null)
-        { 
+        {
         }
 
         public IntCode(IEnumerable<int> program, ReadInput reader, WriteOutput writer)
@@ -59,9 +59,9 @@ namespace AdventOfCode._2019
         {
         }
 
-        public IntCode(IEnumerable<long> memory, ReadInput reader, WriteOutput writer)
+        public IntCode(IEnumerable<long> program, ReadInput reader, WriteOutput writer)
         {
-            _memory = memory.ToArray();
+            _memory = program.ToArray();
             Reader = reader;
             Writer = writer;
         }
@@ -75,17 +75,15 @@ namespace AdventOfCode._2019
                 if (op == Op.Halt)
                     IsHalt = true;
                 else if (op == Op.In)
-                {
-                    WriteMemory(ReadArgTarget(modes[0]), await Reader());
-                }
+                    WritePC(modes[0], await Reader());
                 else if (op == Op.Out)
-                    Writer(ReadArg(modes[0]));
+                    Writer(ReadPC(modes[0]));
                 else if (op == Op.Base)
-                    RelativeBase += ReadArg(modes[0]);
+                    RelativeBase += ReadPC(modes[0]);
                 else
                 {
-                    long val1 = ReadArg(modes[0]);
-                    long val2 = ReadArg(modes[1]);
+                    long val1 = ReadPC(modes[0]);
+                    long val2 = ReadPC(modes[1]);
 
                     if (op == Op.JumpTrue || op == Op.JumpFalse)
                     {
@@ -103,7 +101,7 @@ namespace AdventOfCode._2019
                             _ => throw new InvalidOperationException()
                         };
 
-                        WriteMemory(ReadArgTarget(modes[2]), val);
+                        WritePC(modes[2], val);
                     }
                 }
             }
@@ -120,7 +118,7 @@ namespace AdventOfCode._2019
         private (Op, Mode[]) Decode()
         {
             long instr = ReadPC();
-            
+
             Op op = (Op)(instr % 100);
             instr /= 100;
 
@@ -134,23 +132,27 @@ namespace AdventOfCode._2019
             return (op, modes);
         }
 
-        private long ReadArg(Mode mode) => mode switch
+        private long ReadPC() => ReadPC(Mode.Imm);
+
+        private long ReadPC(Mode mode) => ReadMemory(PC++, mode);
+
+        private long ReadMemory(long address, Mode mode) => mode switch
         {
-            Mode.Imm => ReadPC(),
-            _ => ReadMemory(ReadArgTarget(mode))
+            Mode.Imm => ReadMemory(address),
+            _ => ReadMemory(IndirectAddressTarget(address, mode))
         };
 
-        private long ReadArgTarget(Mode mode) => mode switch
-        {
-            Mode.Pos => ReadPC(),
-            Mode.Relative => ReadPC() + RelativeBase,
-            _ => throw new InvalidOperationException()
-        };
+        private void WritePC(Mode mode, long value) => WriteMemory(PC++, mode, value);
 
-        private long ReadPC()
+        private void WriteMemory(long address, Mode mode, long value) =>
+            WriteMemory(IndirectAddressTarget(address, mode), value);
+
+        private long IndirectAddressTarget(long address, Mode mode) => mode switch
         {
-            return ReadMemory(PC++);
-        }
+            Mode.Pos => ReadMemory(address),
+            Mode.Relative => ReadMemory(address) + RelativeBase,
+            _ => throw new InvalidOperationException("invalid address mode")
+        };
 
         private long ReadMemory(long address)
         {
@@ -168,11 +170,8 @@ namespace AdventOfCode._2019
         {
             if (address >= _memory.Length)
             {
-                long length = Math.Max((address + 1), _memory.Length * 2);
-                long[] newMemory = new long[length];
-                for (int i = 0; i < _memory.Length; i++)
-                    newMemory[i] = _memory[i];
-
+                long[] newMemory = new long[Math.Max(address + 1, _memory.Length * 2)];
+                Array.Copy(_memory, 0, newMemory, 0, _memory.Length);
                 _memory = newMemory;
             }
         }
