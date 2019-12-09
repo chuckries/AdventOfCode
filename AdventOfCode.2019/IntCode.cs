@@ -72,37 +72,35 @@ namespace AdventOfCode._2019
             {
                 (Op op, Mode[] modes) = Decode();
 
-                if (op == Op.Halt)
-                    IsHalt = true;
-                else if (op == Op.In)
-                    WritePC(modes[0], await Reader());
-                else if (op == Op.Out)
-                    Writer(ReadPC(modes[0]));
-                else if (op == Op.Base)
-                    RelativeBase += ReadPC(modes[0]);
-                else
+                switch (op)
                 {
-                    long val1 = ReadPC(modes[0]);
-                    long val2 = ReadPC(modes[1]);
+                    case Op.Halt:   IsHalt = true; break;
+                    case Op.In:     WritePC(modes[0], await Reader()); break;
+                    case Op.Out:    Writer(ReadPC(modes[0])); break;
+                    case Op.Base:   RelativeBase += ReadPC(modes[0]); break;
+                    default:
+                        long val1 = ReadPC(modes[0]);
+                        long val2 = ReadPC(modes[1]);
 
-                    if (op == Op.JumpTrue || op == Op.JumpFalse)
-                    {
-                        if ((op == Op.JumpTrue && val1 != 0) || (op == Op.JumpFalse && val1 == 0))
-                            PC = val2;
-                    }
-                    else
-                    {
-                        long val = op switch
+                        if (op == Op.JumpTrue || op == Op.JumpFalse)
                         {
-                            Op.Add => val1 + val2,
-                            Op.Mul => val1 * val2,
-                            Op.LessThan => val1 < val2 ? 1 : 0,
-                            Op.Equals => val1 == val2 ? 1 : 0,
-                            _ => throw new InvalidOperationException()
-                        };
+                            if ((op == Op.JumpTrue && val1 != 0) || (op == Op.JumpFalse && val1 == 0))
+                                PC = val2;
+                        }
+                        else
+                        {
+                            long val = op switch
+                            {
+                                Op.Add => val1 + val2,
+                                Op.Mul => val1 * val2,
+                                Op.LessThan => val1 < val2 ? 1 : 0,
+                                Op.Equals => val1 == val2 ? 1 : 0,
+                                _ => throw new InvalidOperationException("invalid op code")
+                            };
 
-                        WritePC(modes[2], val);
-                    }
+                            WritePC(modes[2], val);
+                        }
+                        break;
                 }
             }
         }
@@ -110,9 +108,7 @@ namespace AdventOfCode._2019
         public async Task Run()
         {
             while (!IsHalt)
-            {
                 await Step();
-            }
         }
 
         private (Op, Mode[]) Decode()
