@@ -58,7 +58,8 @@ namespace AdventOfCode._2019
                 );
             intCode.Run().Wait();
 
-            Assert.True(program.SequenceEqual(output));
+            Assert.Collection(output,
+                program.Select((long p) => new Action<long>((long item) => Assert.Equal(p, item))).ToArray());
         }
     }
 }

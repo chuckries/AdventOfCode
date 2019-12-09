@@ -12,10 +12,10 @@ namespace AdventOfCode._2019
     {
         struct Step
         {
-            public readonly IntPair Delta;
+            public readonly IntPoint2 Delta;
             public readonly int Count;
 
-            public Step(IntPair delta, int count)
+            public Step(IntPoint2 delta, int count)
             {
                 Delta = delta;
                 Count = count;
@@ -23,12 +23,12 @@ namespace AdventOfCode._2019
 
             public static Step Parse(string str)
             {
-                IntPair delta = str[0] switch
+                IntPoint2 delta = str[0] switch
                 {
-                    'U' => IntPair.Up,
-                    'D' => IntPair.Down,
-                    'L' => IntPair.Left,
-                    'R' => IntPair.Right,
+                    'U' => IntPoint2.Up,
+                    'D' => IntPoint2.Down,
+                    'L' => IntPoint2.Left,
+                    'R' => IntPoint2.Right,
                     _ => throw new InvalidOperationException("invalid direction")
                 };
 
@@ -38,7 +38,7 @@ namespace AdventOfCode._2019
             }
         }
 
-        private Dictionary<IntPair, (int mask, int totalSteps)> _map;
+        private Dictionary<IntPoint2, (int mask, int totalSteps)> _map;
 
         public Day3()
         {
@@ -48,7 +48,7 @@ namespace AdventOfCode._2019
                     .ToArray())
                 .ToArray();
 
-            _map = new Dictionary<IntPair, (int, int)>();
+            _map = new Dictionary<IntPoint2, (int, int)>();
 
             for (int i = 0; i < steps.Length; i++)
             {
@@ -74,9 +74,9 @@ namespace AdventOfCode._2019
             Assert.Equal(28580, answer);
         }
 
-        private void DoSteps(Dictionary<IntPair, (int mask, int totalSteps)> map, Step[] steps, int id)
+        private void DoSteps(Dictionary<IntPoint2, (int mask, int totalSteps)> map, Step[] steps, int id)
         {
-            IntPair current = new IntPair(0, 0);
+            IntPoint2 current = new IntPoint2(0, 0);
             int totalSteps = 0;
             foreach (Step step in steps)
             {
