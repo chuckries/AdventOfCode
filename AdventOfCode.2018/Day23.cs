@@ -27,7 +27,7 @@ namespace AdventOfCode._2018
                 R = r;
             }
 
-            public bool InRange(in IntPoint3 p)
+            public bool InRange(IntPoint3 p)
             {
                 return P.Distance(p) <= R;
             }
@@ -43,7 +43,7 @@ namespace AdventOfCode._2018
                     );
             }
 
-            static Regex _regex = new Regex(@"^pos=\<(?<X>-?[0-9]+),(?<Y>-?[0-9]+),(?<Z>-?[0-9]+)\>, r=(?<R>[0-9]+)$", RegexOptions.Compiled);
+            static Regex _regex = new Regex(@"^pos=\<(?<X>-?\d+),(?<Y>-?\d+),(?<Z>-?\d+)\>, r=(?<R>\d+)$", RegexOptions.Compiled);
         }
 
         [DebuggerDisplay("({Min}, {Max})")]
@@ -55,7 +55,7 @@ namespace AdventOfCode._2018
             public readonly bool IsPoint;
             public readonly long Volume;
 
-            public BoundingBox(IntPoint3 min, IntPoint3 max)
+            public BoundingBox(in IntPoint3 min, in IntPoint3 max)
             {
                 if (min.X > max.X || min.Y > max.Y || min.Z > max.Z)
                     throw new InvalidOperationException("min is greater than max");
@@ -63,8 +63,8 @@ namespace AdventOfCode._2018
                 Min = min;
                 Max = max;
                 Center = Min + ((Max - Min) / 2);
-                IsPoint = Min.X == Max.X && Min.Y == Max.Y && Min.Z == Max.Z;
-                Volume = (Max.X - Min.X) * (Max.Y - Min.Y) * (Max.Z - Min.Z);
+                Volume = (Max.X - Min.X + 1) * (Max.Y - Min.Y + 1) * (Max.Z - Min.Z + 1);
+                IsPoint = Volume == 1;
             }
 
             public IntPoint3 Closest(in IntPoint3 point)
@@ -145,13 +145,30 @@ namespace AdventOfCode._2018
 
             BoundingBox initialBox = new BoundingBox(new IntPoint3(minX, minY, minZ), new IntPoint3(maxX, maxY, maxZ));
 
-            var SearchSet = new List<(BoundingBox box, int botsInRage)> { (initialBox, _bots.Length) };
+            //var SearchSet = new List<(BoundingBox box, int botsInRage)> { (initialBox, _bots.Length) };
+
+            var comparer = Comparer<(BoundingBox box, int botsInRange)>.Create((left, right) =>
+            {
+                int value = right.botsInRange - left.botsInRange;
+                if (value == 0)
+                {
+                    value = (int)(left.box.Volume - right.box.Volume);
+                    if (value == 0)
+                    {
+                        value = left.box.Center.Manhattan - right.box.Center.Manhattan;
+                    }
+                }
+
+                return value;
+            });
+
+            var searchSet = new PriorityQueue<(BoundingBox, int botsInRange)>(comparer);
+            searchSet.Enqueue((initialBox, _bots.Length));
 
             IntPoint3 answer = IntPoint3.Zero;
             for (; ;)
             {
-                (BoundingBox current, _) = SearchSet[SearchSet.Count - 1];
-                SearchSet.RemoveAt(SearchSet.Count - 1);
+                (BoundingBox current, _) = searchSet.Dequeue();
 
                 if (current.IsPoint)
                 {
@@ -167,45 +184,27 @@ namespace AdventOfCode._2018
                             if (bot.InRange(subBox.Closest(bot.P)))
                                 botsInRange++;
 
-                        SearchSet.Add((subBox, botsInRange));
+                        searchSet.Enqueue((subBox, botsInRange));
                     }
 
-                    SearchSet.Sort((left, right) =>
-                    {
-                        int value = left.botsInRage - right.botsInRage;
-                        if (value == 0)
-                        {
-                            value = (int)(right.box.Volume - left.box.Volume);
-                            if (value == 0)
-                            {
-                                value = right.box.Center.Manhattan - left.box.Center.Manhattan;
-                            }
-                        }
+                    //SearchSet.Sort((left, right) =>
+                    //{
+                    //    int value = left.botsInRage - right.botsInRage;
+                    //    if (value == 0)
+                    //    {
+                    //        value = (int)(right.box.Volume - left.box.Volume);
+                    //        if (value == 0)
+                    //        {
+                    //            value = right.box.Center.Manhattan - left.box.Center.Manhattan;
+                    //        }
+                    //    }
 
-                        return value;
-                    });
+                    //    return value;
+                    //});
                 }
             }
 
-            Assert.Equal(0, answer.Manhattan);
-        }
-
-        [Fact]
-        public void BoundingBox_PointBox_CenterIsPoint()
-        {
-            BoundingBox box = new BoundingBox(new IntPoint3(1, 1, 1), new IntPoint3(1, 1, 1));
-            Assert.True(box.IsPoint);
-            Assert.Equal(new IntPoint3(1, 1, 1), box.Center);
-            Assert.Empty(box.SubBoxes().ToArray());
-        }
-
-        [Fact]
-        public void BoundBox_8PointBox_DividesCorrectly()
-        {
-            BoundingBox box = new BoundingBox(new IntPoint3(1, 1, 1), new IntPoint3(2, 2, 2));
-            BoundingBox[] subs = box.SubBoxes().ToArray();
-
-            Assert.Equal(8, subs.Length);
+            Assert.Equal(106323091, answer.Manhattan);
         }
     }
 }
