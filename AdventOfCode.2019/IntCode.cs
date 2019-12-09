@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Buffers;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,7 +10,7 @@ namespace AdventOfCode._2019
 {
     class IntCode
     {
-        enum Op : int
+        enum Op : long
         {
             Add = 1,
             Mul = 2,
@@ -19,26 +20,30 @@ namespace AdventOfCode._2019
             JumpFalse = 6,
             LessThan = 7,
             Equals = 8,
+            Base = 9,
             Halt = 99,
         }
 
-        enum Mode : int
+        enum Mode : long
         {
             Pos = 0,
-            Imm = 1
+            Imm = 1,
+            Relative = 2
         }
 
-        public delegate Task<int> ReadInput();
-        public delegate void WriteOutput(int value);
+        public delegate Task<long> ReadInput();
+        public delegate void WriteOutput(long value);
 
-        public int PC { get; set; } = 0;
+        public long PC { get; set; } = 0;
+
+        public long RelativeBase { get; set; } = 0;
 
         public bool IsHalt { get; private set; } = false;
 
-        public int this[int index]
+        public long this[int index]
         {
-            get => _memory[index];
-            set => _memory[index] = value;
+            get => ReadMemory(index);
+            set => WriteMemory(index, value);
         }
 
         public ReadInput Reader { get; set; }
@@ -49,7 +54,12 @@ namespace AdventOfCode._2019
         { 
         }
 
-        public IntCode(IEnumerable<int> memory, ReadInput reader, WriteOutput writer)
+        public IntCode(IEnumerable<int> program, ReadInput reader, WriteOutput writer)
+            : this(program.Select(i => (long)i), reader, writer)
+        {
+        }
+
+        public IntCode(IEnumerable<long> memory, ReadInput reader, WriteOutput writer)
         {
             _memory = memory.ToArray();
             Reader = reader;
@@ -60,24 +70,22 @@ namespace AdventOfCode._2019
         {
             if (!IsHalt)
             {
-                Decode(_memory[PC++], out Op op, out Mode[] modes);
+                (Op op, Mode[] modes) = Decode();
 
                 if (op == Op.Halt)
-                {
                     IsHalt = true;
-                }
                 else if (op == Op.In)
                 {
-                    _memory[ReadArg(Mode.Imm)] = await Reader();
+                    WriteMemory(ReadArgTarget(modes[0]), await Reader());
                 }
                 else if (op == Op.Out)
-                {
                     Writer(ReadArg(modes[0]));
-                }
+                else if (op == Op.Base)
+                    RelativeBase += ReadArg(modes[0]);
                 else
                 {
-                    int val1 = ReadArg(modes[0]);
-                    int val2 = ReadArg(modes[1]);
+                    long val1 = ReadArg(modes[0]);
+                    long val2 = ReadArg(modes[1]);
 
                     if (op == Op.JumpTrue || op == Op.JumpFalse)
                     {
@@ -86,7 +94,7 @@ namespace AdventOfCode._2019
                     }
                     else
                     {
-                        _memory[ReadArg(Mode.Imm)] = op switch
+                        long val = op switch
                         {
                             Op.Add => val1 + val2,
                             Op.Mul => val1 * val2,
@@ -94,6 +102,8 @@ namespace AdventOfCode._2019
                             Op.Equals => val1 == val2 ? 1 : 0,
                             _ => throw new InvalidOperationException()
                         };
+
+                        WriteMemory(ReadArgTarget(modes[2]), val);
                     }
                 }
             }
@@ -107,26 +117,66 @@ namespace AdventOfCode._2019
             }
         }
 
-        private void Decode(int instr, out Op op, out Mode[] modes)
+        private (Op, Mode[]) Decode()
         {
-            op = (Op)(instr % 100);
+            long instr = ReadPC();
+            
+            Op op = (Op)(instr % 100);
             instr /= 100;
 
-            modes = new Mode[3];
+            Mode[] modes = new Mode[3];
             modes[0] = (Mode)(instr % 10);
             instr /= 10;
             modes[1] = (Mode)(instr % 10);
             instr /= 10;
             modes[2] = (Mode)(instr % 10);
+
+            return (op, modes);
         }
 
-        private int ReadArg(Mode mode) => mode switch
+        private long ReadArg(Mode mode) => mode switch
         {
-            Mode.Imm => _memory[PC++],
-            Mode.Pos => _memory[_memory[PC++]],
+            Mode.Imm => ReadPC(),
+            _ => ReadMemory(ReadArgTarget(mode))
+        };
+
+        private long ReadArgTarget(Mode mode) => mode switch
+        {
+            Mode.Pos => ReadPC(),
+            Mode.Relative => ReadPC() + RelativeBase,
             _ => throw new InvalidOperationException()
         };
 
-        private int[] _memory;
+        private long ReadPC()
+        {
+            return ReadMemory(PC++);
+        }
+
+        private long ReadMemory(long address)
+        {
+            EnsureMemory(address);
+            return _memory[address];
+        }
+
+        private void WriteMemory(long address, long value)
+        {
+            EnsureMemory(address);
+            _memory[address] = value;
+        }
+
+        private void EnsureMemory(long address)
+        {
+            if (address >= _memory.Length)
+            {
+                long length = Math.Max((address + 1), _memory.Length * 2);
+                long[] newMemory = new long[length];
+                for (int i = 0; i < _memory.Length; i++)
+                    newMemory[i] = _memory[i];
+
+                _memory = newMemory;
+            }
+        }
+
+        private long[] _memory;
     }
 }

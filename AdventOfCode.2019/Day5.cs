@@ -18,27 +18,27 @@ namespace AdventOfCode._2019
         [Fact]
         public void Part1()
         {
-            List<int> outputs = new List<int>();
+            List<long> outputs = new List<long>();
             IntCode intCode = new IntCode(
                 _memory,
-                () => Task.FromResult(1),
-                (int value) => outputs.Add(value)
+                () => Task.FromResult(1L),
+                outputs.Add
                 );
 
             intCode.Run().Wait();
 
-            Assert.True(outputs.SkipLast(1).All(0.Equals));
+            Assert.True(outputs.SkipLast(1).All(0L.Equals));
             Assert.Equal(8332629, outputs.Last());
         }
 
         [Fact]
         public void Part2()
         {
-            int output = 0;
+            long output = 0;
             IntCode intCode = new IntCode(
                 _memory,
-                () => Task.FromResult(5),
-                (int value) => output = value
+                () => Task.FromResult(5L),
+                (value) => output = value
                 );
 
             intCode.Run().Wait();
