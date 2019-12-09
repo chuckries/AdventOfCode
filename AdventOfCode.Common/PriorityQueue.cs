@@ -16,7 +16,7 @@ namespace AdventOfCode.Common
         public PriorityQueue(IComparer<T> comparer)
         {
             _comparer = comparer;
-            _heap = new T[10];
+            _heap = new T[1];
             _size = 0;
         }
 
@@ -32,7 +32,7 @@ namespace AdventOfCode.Common
                 throw new InvalidOperationException();
 
             T toReturn = _heap[0];
-            _heap[0] = _heap[_heap.Length - 1];
+            _heap[0] = _heap[_size - 1];
             _size--;
             DownHeap(0);
             return toReturn;
@@ -57,7 +57,7 @@ namespace AdventOfCode.Common
                 int parentIndex = (index - 1) / 2;
                 if (_comparer.Compare(_heap[index], _heap[parentIndex]) < 0)
                 {
-                    Swap(ref _heap[index], ref _heap[parentIndex]);
+                    Swap(index, parentIndex);
                     UpHeap(parentIndex);
                 }
             }
@@ -78,16 +78,16 @@ namespace AdventOfCode.Common
 
             if (minIndex != index)
             {
-                Swap(ref _heap[minIndex], ref _heap[index]);
+                Swap(minIndex, index);
                 DownHeap(minIndex);
             }
         }
 
-        private void Swap(ref T a, ref T b)
+        private void Swap(int a, int b)
         {
-            T temp = a;
-            a = b;
-            b = temp;
+            T temp = _heap[a];
+            _heap[a] = _heap[b];
+            _heap[b] = temp;
         }
 
         private IComparer<T> _comparer;

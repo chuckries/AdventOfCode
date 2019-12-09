@@ -145,8 +145,6 @@ namespace AdventOfCode._2018
 
             BoundingBox initialBox = new BoundingBox(new IntPoint3(minX, minY, minZ), new IntPoint3(maxX, maxY, maxZ));
 
-            //var SearchSet = new List<(BoundingBox box, int botsInRage)> { (initialBox, _bots.Length) };
-
             var comparer = Comparer<(BoundingBox box, int botsInRange)>.Create((left, right) =>
             {
                 int value = right.botsInRange - left.botsInRange;
@@ -186,21 +184,6 @@ namespace AdventOfCode._2018
 
                         searchSet.Enqueue((subBox, botsInRange));
                     }
-
-                    //SearchSet.Sort((left, right) =>
-                    //{
-                    //    int value = left.botsInRage - right.botsInRage;
-                    //    if (value == 0)
-                    //    {
-                    //        value = (int)(right.box.Volume - left.box.Volume);
-                    //        if (value == 0)
-                    //        {
-                    //            value = right.box.Center.Manhattan - left.box.Center.Manhattan;
-                    //        }
-                    //    }
-
-                    //    return value;
-                    //});
                 }
             }
 
