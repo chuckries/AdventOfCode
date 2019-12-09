@@ -20,7 +20,7 @@ namespace AdventOfCode._2019
         [Fact]
         public void Part1()
         {
-            int answer = Enumerable.Range(0, 5)
+            long answer = Enumerable.Range(0, 5)
                 .FullPermutations()
                 .Select(p => RunAmplifiers(_code, p))
                 .Max();
@@ -31,7 +31,7 @@ namespace AdventOfCode._2019
         [Fact]
         public void Part2()
         {
-            int answer = Enumerable.Range(5, 5)
+            long answer = Enumerable.Range(5, 5)
                 .FullPermutations()
                 .Select(p => RunAmplifiersWithFeedback(_code, p))
                 .Max();
@@ -54,7 +54,7 @@ namespace AdventOfCode._2019
         [InlineData(new int[] { 3, 31, 3, 32, 1002, 32, 10, 32, 1001, 31, -2, 31, 1007, 31, 0, 33, 1002, 33, 7, 33, 1, 33, 31, 31, 1, 32, 31, 31, 4, 31, 99, 0, 0, 0 }, 65210)]
         public void Part1Examples(int[] code, int expected)
         {
-            int answer = Enumerable.Range(0, 5)
+            long answer = Enumerable.Range(0, 5)
                 .FullPermutations()
                 .Select(p => RunAmplifiers(code, p))
                 .Max();
@@ -70,12 +70,12 @@ namespace AdventOfCode._2019
             Assert.Equal(expected, RunAmplifiersWithFeedback(code, phases));
         }
 
-        private int RunAmplifiers(IEnumerable<int> code, IEnumerable<int> phaseSettings)
+        private long RunAmplifiers(IEnumerable<int> code, IEnumerable<int> phaseSettings)
         {
-            int answer = 0;
+            long answer = 0;
             IntCode.WriteOutput writer = (value) => { answer = value; };
 
-            Stack<int> inputs = new Stack<int>();
+            Stack<long> inputs = new Stack<long>();
             inputs.Push(0);
             foreach (int phaseSetting in phaseSettings)
             {
@@ -92,15 +92,15 @@ namespace AdventOfCode._2019
             return answer;
         }
 
-        private int RunAmplifiersWithFeedback(IEnumerable<int> code, IEnumerable<int> phaseSettings)
+        private long RunAmplifiersWithFeedback(IEnumerable<int> code, IEnumerable<int> phaseSettings)
         {
             IntCode[] amplifiers = new IntCode[5];
-            AsyncQueue<int>[] ports = new AsyncQueue<int>[5];
+            AsyncQueue<long>[] ports = new AsyncQueue<long>[5];
             int i = 0;
             for (i = 0; i < 5; i++)
             {
                 amplifiers[i] = new IntCode(code);
-                ports[i] = new AsyncQueue<int>();
+                ports[i] = new AsyncQueue<long>();
             }
 
             i = 0;
@@ -119,7 +119,7 @@ namespace AdventOfCode._2019
                 amplifiers[i].Writer = ports[i + 1].Enqueue;
             }
 
-            int answer = 0;
+            long answer = 0;
             amplifiers[^1].Writer = (value) =>
             {
                 answer = value;
