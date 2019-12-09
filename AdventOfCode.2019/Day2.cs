@@ -36,12 +36,9 @@ namespace AdventOfCode._2019
 
             const int target = 19690720;
 
-            int i = 0;
-            int j = 0;
-            bool stop = false;
-            for (i = 0; i < 100; i++)
+            for (int i = 0; i < 100; i++)
             {
-                for (j = 0; j < 100; j++)
+                for (int j = 0; j < 100; j++)
                 {
                     IntCode intCode = new IntCode(memory);
                     intCode[1] = i;
@@ -50,16 +47,12 @@ namespace AdventOfCode._2019
 
                     if (intCode[0] == target)
                     {
-                        stop = true;
-                        break;
+                        int answer = 100 * i + j;
+                        Assert.Equal(6979, answer);
+                        return;
                     }
                 }
-                if (stop)
-                    break;
             }
-
-            int answer = 100 * i + j;
-            Assert.Equal(6979, answer);
         }
     }
 }

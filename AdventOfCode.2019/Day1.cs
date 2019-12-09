@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using Xunit;
 
 namespace AdventOfCode._2019
@@ -13,7 +14,7 @@ namespace AdventOfCode._2019
         {
             int sum = File.ReadAllLines("Inputs/Day1.txt")
                 .Select(int.Parse)
-                .Select(i => (i / 3) - 2)
+                .Select(i => i / 3 - 2)
                 .Sum();
 
             Assert.Equal(3363929, sum);
@@ -22,20 +23,17 @@ namespace AdventOfCode._2019
         [Fact]
         public void Part2()
         {
-            var modules = File.ReadAllLines("Inputs/Day1.txt").Select(int.Parse);
+            var modules = File.ReadAllLines("Inputs/Day1.txt")
+                .Select(int.Parse);
 
             int total = 0;
-
             foreach(int module in modules)
             {
-                int newWeight = module;
-                while (newWeight > 0)
+                int weight = module / 3 - 2;
+                while (weight > 0)
                 {
-                    newWeight = (newWeight / 3) - 2;
-                    if (newWeight > 0)
-                    {
-                        total += newWeight;
-                    }
+                    total += weight;
+                    weight = weight / 3 - 2;
                 }
             }
 

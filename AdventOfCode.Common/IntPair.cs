@@ -1,9 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Diagnostics;
 
 namespace AdventOfCode.Common
 {
+    [DebuggerDisplay("({X}, {Y})")]
     public struct IntPair
     {
         public int X { get; set; }
@@ -19,6 +19,8 @@ namespace AdventOfCode.Common
             X = x;
             Y = y;
         }
+
+        public static IntPair Zero => new IntPair(0, 0);
 
         public static IntPair Up => new IntPair(0, 1);
         public static IntPair Down => new IntPair(0, -1);
