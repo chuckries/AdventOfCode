@@ -115,35 +115,29 @@ namespace AdventOfCode._2018
         {
             IEnumerable<Node> GetAdjacentNodes(Node current)
             {
-                if (current.Region.Terrain == Terrain.Rocky)
+                Tool newTool = current.Region.Terrain switch
                 {
-                    if (current.Tool == Tool.Climbing)
-                        yield return new Node(current.Region, Tool.Torch, current.Time + 7);
-                    else if (current.Tool == Tool.Torch)
-                        yield return new Node(current.Region, Tool.Climbing, current.Time + 7);
-                    else
-                        throw new InvalidOperationException("invalid tool");
-                }
-                else if (current.Region.Terrain == Terrain.Wet)
-                {
-                    if (current.Tool == Tool.None)
-                        yield return new Node(current.Region, Tool.Climbing, current.Time + 7);
-                    else if (current.Tool == Tool.Climbing)
-                        yield return new Node(current.Region, Tool.None, current.Time + 7);
-                    else
-                        throw new InvalidOperationException("invalid tool");
-                }
-                else if (current.Region.Terrain == Terrain.Narrow)
-                {
-                    if (current.Tool == Tool.None)
-                        yield return new Node(current.Region, Tool.Torch, current.Time + 7);
-                    else if (current.Tool == Tool.Torch)
-                        yield return new Node(current.Region, Tool.None, current.Time + 7);
-                    else
-                        throw new InvalidOperationException("invalid tool");
-                }
-                else
-                    throw new InvalidOperationException("invalid terrain");
+                    Terrain.Rocky => current.Tool switch
+                    {
+                        Tool.Climbing => Tool.Torch,
+                        Tool.Torch => Tool.Climbing,
+                        _ => throw new InvalidOperationException("invalid tool")
+                    },
+                    Terrain.Wet => current.Tool switch
+                    {
+                        Tool.None => Tool.Climbing,
+                        Tool.Climbing => Tool.None,
+                        _ => throw new InvalidOperationException("invalid tool")
+                    },
+                    Terrain.Narrow => current.Tool switch
+                    {
+                        Tool.None => Tool.Torch,
+                        Tool.Torch => Tool.None,
+                        _ => throw new InvalidOperationException("invalid tool")
+                    },
+                    _ => throw new InvalidOperationException("invalid region")
+                };
+                yield return new Node(current.Region, newTool, current.Time + 7);
 
                 foreach (IntPoint2 adjacent in current.Region.Coord.Adjacent())
                 {
