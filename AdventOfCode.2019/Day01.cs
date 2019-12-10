@@ -7,12 +7,12 @@ using Xunit;
 
 namespace AdventOfCode._2019
 {
-    public class Day1
+    public class Day01
     {
         [Fact]
         public void Part1()
         {
-            int sum = File.ReadAllLines("Inputs/Day1.txt")
+            int sum = File.ReadAllLines("Inputs/Day01.txt")
                 .Select(int.Parse)
                 .Select(i => i / 3 - 2)
                 .Sum();
@@ -23,7 +23,7 @@ namespace AdventOfCode._2019
         [Fact]
         public void Part2()
         {
-            var modules = File.ReadAllLines("Inputs/Day1.txt")
+            var modules = File.ReadAllLines("Inputs/Day01.txt")
                 .Select(int.Parse);
 
             int total = 0;

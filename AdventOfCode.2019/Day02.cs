@@ -8,12 +8,12 @@ using Xunit;
 
 namespace AdventOfCode._2019
 {
-    public class Day2
+    public class Day02
     {
         [Fact]
         public void Part1()
         {
-            int[] memory = File.ReadAllText("Inputs/Day2.txt")
+            int[] memory = File.ReadAllText("Inputs/Day02.txt")
                 .Split(',')
                 .Select(int.Parse)
                 .ToArray();
@@ -29,7 +29,7 @@ namespace AdventOfCode._2019
         [Fact]
         public void Part2()
         {
-            int[] memory = File.ReadAllText("Inputs/Day2.txt")
+            int[] memory = File.ReadAllText("Inputs/Day02.txt")
                 .Split(',')
                 .Select(int.Parse)
                 .ToArray();

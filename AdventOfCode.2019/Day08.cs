@@ -6,7 +6,7 @@ using Xunit;
 
 namespace AdventOfCode._2019
 {
-    public class Day8
+    public class Day08
     {
         const int WIDTH = 25;
         const int HEIGHT = 6;
@@ -14,9 +14,9 @@ namespace AdventOfCode._2019
 
         char[,,] _layers;
 
-        public Day8()
+        public Day08()
         {
-            string input = File.ReadAllText("Inputs/Day8.txt");
+            string input = File.ReadAllText("Inputs/Day08.txt");
             int countLayers = input.Length / AREA;
             _layers = new char[countLayers, HEIGHT, WIDTH];
 

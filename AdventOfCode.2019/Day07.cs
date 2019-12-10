@@ -10,9 +10,9 @@ using Xunit;
 
 namespace AdventOfCode._2019
 {
-    public class Day7
+    public class Day07
     {
-        int[] _code = File.ReadAllText("Inputs/Day7.txt")
+        int[] _code = File.ReadAllText("Inputs/Day07.txt")
             .Split(',')
             .Select(int.Parse)
             .ToArray();

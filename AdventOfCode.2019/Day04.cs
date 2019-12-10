@@ -7,7 +7,7 @@ using Xunit;
 
 namespace AdventOfCode._2019
 {
-    public class Day4
+    public class Day04
     {
         const int RANGE_START = 158126;
         const int RANGE_END = 624574;

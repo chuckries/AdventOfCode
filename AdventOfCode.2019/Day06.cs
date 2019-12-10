@@ -8,7 +8,7 @@ using Xunit;
 
 namespace AdventOfCode._2019
 {
-    public class Day6
+    public class Day06
     {
         [DebuggerDisplay("{Name,nq}")]
         class Node
@@ -31,9 +31,9 @@ namespace AdventOfCode._2019
         Node _root;
         Dictionary<string, Node> _nodes = new Dictionary<string, Node>();
 
-        public Day6()
+        public Day06()
         {
-            (string parent, string child)[] inputs = File.ReadAllLines("Inputs/Day6.txt")
+            (string parent, string child)[] inputs = File.ReadAllLines("Inputs/Day06.txt")
                 .Select(s => s.Split(')'))
                 .Select(a => (a[0], a[1]))
                 .ToArray();

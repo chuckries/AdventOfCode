@@ -8,7 +8,7 @@ using Xunit;
 
 namespace AdventOfCode._2019
 {
-    public class Day3
+    public class Day03
     {
         struct Step
         {
@@ -40,9 +40,9 @@ namespace AdventOfCode._2019
 
         private Dictionary<IntPoint2, (int mask, int totalSteps)> _map;
 
-        public Day3()
+        public Day03()
         {
-            Step[][] steps = File.ReadAllLines("Inputs/Day3.txt")
+            Step[][] steps = File.ReadAllLines("Inputs/Day03.txt")
                 .Select(l => l.Split(',')
                     .Select(Step.Parse)
                     .ToArray())
