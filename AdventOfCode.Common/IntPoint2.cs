@@ -34,6 +34,13 @@ namespace AdventOfCode.Common
             yield return this - UnitY;
         }
 
+        public IntPoint2 Transform(Func<int, int> transform)
+        {
+            return new IntPoint2(transform(X), transform(Y));
+        }
+
+        public void Deconstruct(out int x, out int y) => (x, y) = (X, Y);
+
         public override string ToString()
         {
             return $"({X}, {Y})";
