@@ -58,7 +58,7 @@ namespace AdventOfCode._2019
         {
             IntPoint2 origin = new IntPoint2(28, 29);
 
-            Dictionary<IntPoint2, int> distances = new Dictionary<IntPoint2, int>();
+            Dictionary<IntPoint2, (int distance, IntPoint2 vector)> slopeSearch = new Dictionary<IntPoint2, (int, IntPoint2)>();
             foreach (IntPoint2 asteroid in _asteroids)
             {
                 if (origin.Equals(asteroid))
@@ -68,20 +68,20 @@ namespace AdventOfCode._2019
                 IntPoint2 minSlope = MinimizeSlope(slope);
                 int distance = slope.Manhattan;
 
-                if (!distances.TryGetValue(minSlope, out int minDistance))
+                if (!slopeSearch.TryGetValue(minSlope, out (int minDistance, IntPoint2 _) state))
                 {
-                    distances.Add(minSlope, distance);
+                    slopeSearch.Add(minSlope, (distance, slope));
                 }
-                else if (distance < minDistance)
+                else if (distance < state.minDistance)
                 {
-                    distances[minSlope] = minDistance;
+                    slopeSearch[minSlope] = (distance, slope);
                 }
             }
 
-            Assert.Equal(340, distances.Count);
+            Assert.Equal(340, slopeSearch.Count);
 
-            List<IntPoint2> nearAsteroids = distances.Keys.ToList();
-            nearAsteroids.Sort(Comparer<IntPoint2>.Create((left, right) =>
+            List<IntPoint2> uniqueSlopes = slopeSearch.Values.Select(i => i.vector).ToList();
+            uniqueSlopes.Sort(Comparer<IntPoint2>.Create((left, right) =>
             {
                 left.Y *= -1;
                 right.Y *= -1;
@@ -116,8 +116,7 @@ namespace AdventOfCode._2019
                 return sortValue;
             }));
 
-            IntPoint2[] hitAsteroids = nearAsteroids.Select(a => a + origin).ToArray();
-            IntPoint2 correctAsteroid = hitAsteroids[199];
+            IntPoint2 correctAsteroid = uniqueSlopes[199] + origin;
             int answer = correctAsteroid.X * 100 + correctAsteroid.Y;
             Assert.Equal(2628, answer);
         }
