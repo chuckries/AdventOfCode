@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace AdventOfCode.Common
@@ -20,7 +21,28 @@ namespace AdventOfCode.Common
             Y = y;
         }
 
+        public int Distance(in IntPoint2 p)
+        {
+            return Math.Abs(X - p.X) + Math.Abs(Y - p.Y);
+        }
+
+        public IEnumerable<IntPoint2> Adjacent()
+        {
+            yield return this + UnitX;
+            yield return this + UnitY;
+            yield return this - UnitX;
+            yield return this - UnitY;
+        }
+
+        public override string ToString()
+        {
+            return $"({X}, {Y})";
+        }
+
         public static IntPoint2 Zero => new IntPoint2(0, 0);
+
+        public static IntPoint2 UnitX => new IntPoint2(1, 0);
+        public static IntPoint2 UnitY => new IntPoint2(0, 1);
 
         public static IntPoint2 Up => new IntPoint2(0, 1);
         public static IntPoint2 Down => new IntPoint2(0, -1);

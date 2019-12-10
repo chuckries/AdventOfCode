@@ -1,6 +1,9 @@
 ﻿using AdventOfCode.Common;
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using Xunit;
 
@@ -18,7 +21,15 @@ namespace AdventOfCode._2018
             Narrow = 2
         }
 
-        class Region
+        enum Tool
+        {
+            None,
+            Climbing,
+            Torch
+        }
+
+        [DebuggerDisplay("{Coord}, {Terrain}")]
+        struct Region : IEquatable<Region>
         {
             public readonly IntPoint2 Coord;
             public readonly int Index;
@@ -31,6 +42,54 @@ namespace AdventOfCode._2018
                 Index = index;
                 Erosion = erosion;
                 Terrain = terrain;
+            }
+
+            public override bool Equals(object obj)
+            {
+                return obj is Region region && Equals(region);
+            }
+
+            public bool Equals(Region other)
+            {
+                return EqualityComparer<IntPoint2>.Default.Equals(Coord, other.Coord);
+            }
+
+            public override int GetHashCode()
+            {
+                return HashCode.Combine(Coord);
+            }
+        }
+
+        [DebuggerDisplay("{Tool}, {Region}, {Time}")]
+        struct Node : IEquatable<Node>
+        {
+            public readonly Region Region;
+            public readonly Tool Tool;
+            public readonly int Time;
+            public readonly int Distance;
+
+            public Node(Region region, Tool tool, int time)
+            {
+                Region = region;
+                Tool = tool;
+                Time = time;
+                Distance = region.Coord.Distance(TARGET);
+            }
+
+            public override bool Equals(object obj)
+            {
+                return obj is Node node && Equals(node);
+            }
+
+            public bool Equals(Node other)
+            {
+                return Region.Equals(other.Region) &&
+                       Tool == other.Tool;
+            }
+
+            public override int GetHashCode()
+            {
+                return HashCode.Combine(Region, Tool);
             }
         }
 
@@ -51,6 +110,102 @@ namespace AdventOfCode._2018
             Assert.Equal(8575, answer);
         }
 
+        [Fact]
+        public void Part2()
+        {
+            IEnumerable<Node> GetAdjacentNodes(Node current)
+            {
+                if (current.Region.Terrain == Terrain.Rocky)
+                {
+                    if (current.Tool == Tool.Climbing)
+                        yield return new Node(current.Region, Tool.Torch, current.Time + 7);
+                    else if (current.Tool == Tool.Torch)
+                        yield return new Node(current.Region, Tool.Climbing, current.Time + 7);
+                    else
+                        throw new InvalidOperationException("invalid tool");
+                }
+                else if (current.Region.Terrain == Terrain.Wet)
+                {
+                    if (current.Tool == Tool.None)
+                        yield return new Node(current.Region, Tool.Climbing, current.Time + 7);
+                    else if (current.Tool == Tool.Climbing)
+                        yield return new Node(current.Region, Tool.None, current.Time + 7);
+                    else
+                        throw new InvalidOperationException("invalid tool");
+                }
+                else if (current.Region.Terrain == Terrain.Narrow)
+                {
+                    if (current.Tool == Tool.None)
+                        yield return new Node(current.Region, Tool.Torch, current.Time + 7);
+                    else if (current.Tool == Tool.Torch)
+                        yield return new Node(current.Region, Tool.None, current.Time + 7);
+                    else
+                        throw new InvalidOperationException("invalid tool");
+                }
+                else
+                    throw new InvalidOperationException("invalid terrain");
+
+                foreach (IntPoint2 adjacent in current.Region.Coord.Adjacent())
+                {
+                    if (adjacent.X >= 0 && adjacent.Y >= 0)
+                    {
+                        Region region = GetRegion(adjacent);
+                        if ((current.Tool == Tool.None &&
+                                (region.Terrain == Terrain.Wet || region.Terrain == Terrain.Narrow)) ||
+                            (current.Tool == Tool.Torch &&
+                                (region.Terrain == Terrain.Rocky || region.Terrain == Terrain.Narrow)) ||
+                            (current.Tool == Tool.Climbing &&
+                                (region.Terrain == Terrain.Rocky || region.Terrain == Terrain.Wet)))
+                        {
+                            yield return new Node(region, current.Tool, current.Time + 1);
+                        }
+                    }
+                }
+            }
+
+            IComparer<Node> comparer = Comparer<Node>.Create((left, right) =>
+            {
+                return (left.Time + left.Distance) -
+                       (right.Time + right.Distance);
+            });
+
+            PriorityQueue<Node> searchSet = new PriorityQueue<Node>(comparer);
+            Dictionary<Node, int> visited = new Dictionary<Node, int>();
+
+            Node start = new Node(GetRegion(IntPoint2.Zero), Tool.Torch, 0);
+            searchSet.Enqueue(start);
+            visited.Add(start, 0);
+
+            int answer = 0;
+            while (searchSet.Count > 0)
+            {
+                Node current = searchSet.Dequeue();
+                if (current.Region.Coord.Equals(TARGET) && current.Tool == Tool.Torch)
+                {
+                    answer = current.Time;
+                    break;
+                }
+                else
+                {
+                    foreach (Node adjacent in GetAdjacentNodes(current))
+                    {
+                        if (!visited.TryGetValue(adjacent, out int time))
+                        {
+                            visited.Add(adjacent, adjacent.Time);
+                            searchSet.Enqueue(adjacent);
+                        }
+                        else if (adjacent.Time < time)
+                        {
+                            visited[adjacent] = adjacent.Time;
+                            searchSet.Enqueue(adjacent);
+                        }
+                    }
+                }
+            }
+
+            Assert.Equal(999, answer);
+        }
+
         private Region GetRegion(in IntPoint2 coord)
         {
             if (!_regions.TryGetValue(coord, out Region region))
@@ -63,7 +218,7 @@ namespace AdventOfCode._2018
                 else if (coord.Y == 0)
                     index = coord.X * 16807;
                 else
-                    index = GetRegion(coord + IntPoint2.Left).Erosion * GetRegion(coord + IntPoint2.Down).Erosion;
+                    index = GetRegion(coord - IntPoint2.UnitX).Erosion * GetRegion(coord - IntPoint2.UnitY).Erosion;
 
                 int erosion = (index + DEPTH) % 20183;
                 Terrain terrain = (Terrain)(erosion % 3);

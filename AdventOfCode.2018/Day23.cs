@@ -164,7 +164,7 @@ namespace AdventOfCode._2018
             searchSet.Enqueue((initialBox, _bots.Length));
 
             IntPoint3 answer = IntPoint3.Zero;
-            for (; ;)
+            while (searchSet.Count > 0)
             {
                 (BoundingBox current, _) = searchSet.Dequeue();
 
