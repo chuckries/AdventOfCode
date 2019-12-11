@@ -25,10 +25,10 @@ namespace AdventOfCode._2019
             {
                 IntPoint2 delta = str[0] switch
                 {
-                    'U' => IntPoint2.Up,
-                    'D' => IntPoint2.Down,
-                    'L' => IntPoint2.Left,
-                    'R' => IntPoint2.Right,
+                    'U' => IntPoint2.UnitY,
+                    'D' => -IntPoint2.UnitY,
+                    'L' => -IntPoint2.UnitX,
+                    'R' => IntPoint2.UnitX,
                     _ => throw new InvalidOperationException("invalid direction")
                 };
 

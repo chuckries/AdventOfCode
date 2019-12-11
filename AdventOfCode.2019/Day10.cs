@@ -1,4 +1,5 @@
 ﻿using AdventOfCode.Common;
+using Newtonsoft.Json.Converters;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -58,46 +59,43 @@ namespace AdventOfCode._2019
         {
             IntPoint2 origin = new IntPoint2(28, 29);
 
-            Dictionary<IntPoint2, (int distance, IntPoint2 vector)> slopeSearch = new Dictionary<IntPoint2, (int, IntPoint2)>();
+            Dictionary<IntPoint2, IntPoint2> slopeSearch = new Dictionary<IntPoint2, IntPoint2>();
             foreach (IntPoint2 asteroid in _asteroids)
             {
                 if (origin.Equals(asteroid))
                     continue;
 
-                IntPoint2 slope = asteroid - origin;
-                IntPoint2 minSlope = MinimizeSlope(slope);
-                int distance = slope.Manhattan;
+                IntPoint2 vector = asteroid - origin;
+                IntPoint2 minSlope = MinimizeSlope(vector);
 
-                if (!slopeSearch.TryGetValue(minSlope, out (int minDistance, IntPoint2 _) state))
+                if (!slopeSearch.TryGetValue(minSlope, out IntPoint2 minVector))
                 {
-                    slopeSearch.Add(minSlope, (distance, slope));
+                    slopeSearch.Add(minSlope, vector);
                 }
-                else if (distance < state.minDistance)
+                else if (vector.Manhattan < minVector.Manhattan)
                 {
-                    slopeSearch[minSlope] = (distance, slope);
+                    slopeSearch[minSlope] = vector;
                 }
             }
 
             Assert.Equal(340, slopeSearch.Count);
 
-            List<IntPoint2> uniqueSlopes = slopeSearch.Values.Select(i => i.vector).ToList();
-            uniqueSlopes.Sort(Comparer<IntPoint2>.Create((left, right) =>
+            List<IntPoint2> uniqueVectors = slopeSearch.Values.ToList();
+            uniqueVectors.Sort(Comparer<IntPoint2>.Create((left, right) =>
             {
-                left.Y *= -1;
-                right.Y *= -1;
                 IntPoint2 signLeft = left.Transform(Sign);
                 IntPoint2 signRight = right.Transform(Sign);
 
                 int GetSlopeSortValue(IntPoint2 slope) => slope switch
                 {
-                    ( 0,  1) => 0,
-                    ( 1,  1) => 1,
+                    ( 0, -1) => 0,
+                    ( 1, -1) => 1,
                     ( 1,  0) => 2,
-                    ( 1, -1) => 3,
-                    ( 0, -1) => 4,
-                    (-1, -1) => 5,
+                    ( 1,  1) => 3,
+                    ( 0,  1) => 4,
+                    (-1,  1) => 5,
                     (-1,  0) => 6,
-                    (-1,  1) => 7,
+                    (-1, -1) => 7,
                     _ => throw new InvalidOperationException()
                 };
 
@@ -108,15 +106,15 @@ namespace AdventOfCode._2019
                     int rightTop = Abs(right.Y * left.X);
 
                     if (signLeft.X == signLeft.Y)
-                        sortValue = rightTop - leftTop;
-                    else
                         sortValue = leftTop - rightTop;
+                    else
+                        sortValue = rightTop - leftTop;
                 }
 
                 return sortValue;
             }));
 
-            IntPoint2 correctAsteroid = uniqueSlopes[199] + origin;
+            IntPoint2 correctAsteroid = uniqueVectors[199] + origin;
             int answer = correctAsteroid.X * 100 + correctAsteroid.Y;
             Assert.Equal(2628, answer);
         }

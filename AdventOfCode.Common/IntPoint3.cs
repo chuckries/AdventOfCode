@@ -8,9 +8,9 @@ namespace AdventOfCode.Common
     [DebuggerDisplay("({X}, {Y}, {Z})")]
     public struct IntPoint3
     {
-        public int X { get; set; }
-        public int Y { get; set; }
-        public int Z { get; set; }
+        public readonly int X;
+        public readonly int Y;
+        public readonly int Z;
 
         public int Manhattan => Math.Abs(X) + Math.Abs(Y) + Math.Abs(Z);
 
@@ -23,6 +23,14 @@ namespace AdventOfCode.Common
 
         public int Distance(in IntPoint3 other) =>
             Math.Abs(X - other.X) + Math.Abs(Y - other.Y) + Math.Abs(Z - other.Z);
+
+        public void Destructure(out int x, out int y, out int z) =>
+            (x, y, z) = (X, Y, Z);
+
+        public override string ToString()
+        {
+            return $"({X}, {Y}, {Z})";
+        }
 
         public static IntPoint3 Zero => new IntPoint3(0, 0, 0);
         public static IntPoint3 UnitX => new IntPoint3(1, 0, 0);
