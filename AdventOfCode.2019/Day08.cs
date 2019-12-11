@@ -75,26 +75,24 @@ namespace AdventOfCode._2019
                         if (render[height, width] == '2')
                             render[height, width] = _layers[layer, height, width];
 
-            StringBuilder sb = new StringBuilder(
-                Environment.NewLine, 
-                AREA + (HEIGHT + 1) * Environment.NewLine.Length
-                );
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine();
 
             for (int height = 0; height < HEIGHT; height++)
             {
                 for (int width = 0; width < WIDTH; width++)
-                    sb.Append(render[height, width]);
+                    sb.Append(render[height, width] == '1' ? '█' : ' ');
                 sb.AppendLine();
             }
             string answer = sb.ToString();
 
             const string expected = @"
-0110011110011001001001100
-1001010000100101001010010
-1000011100100001001010000
-1000010000100001001010110
-1001010000100101001010010
-0110010000011000110001110
+ ██  ████  ██  █  █  ██  
+█  █ █    █  █ █  █ █  █ 
+█    ███  █    █  █ █    
+█    █    █    █  █ █ ██ 
+█  █ █    █  █ █  █ █  █ 
+ ██  █     ██   ██   ███ 
 ";
 
             Assert.Equal(expected, answer);

@@ -46,6 +46,9 @@ namespace AdventOfCode.Common
             return $"({X}, {Y})";
         }
 
+        public IntPoint2 TurnRight() => new IntPoint2(Y * 1, X * -1);
+        public IntPoint2 TurnLeft() => new IntPoint2(Y * -1, X * 1);
+
         public static IntPoint2 Zero => new IntPoint2(0, 0);
 
         public static IntPoint2 UnitX => new IntPoint2(1, 0);
