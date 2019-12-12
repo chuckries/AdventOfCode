@@ -7,10 +7,10 @@ namespace AdventOfCode.Common
 {
     public static class EnumerableExtensions
     {
-        public static IEnumerable<IEnumerable<T>> FullPermutations<T>(this IEnumerable<T> inputEnumerable)
+        public static IEnumerable<IEnumerable<T>> FullPermutations<T>(this IEnumerable<T> source)
         {
             Stack<(List<T> solution, List<T> candidates)> stack = new Stack<(List<T> solution, List<T> candidates)>();
-            stack.Push((new List<T>(), new List<T>(inputEnumerable)));
+            stack.Push((new List<T>(), new List<T>(source)));
 
             while (stack.Count > 0)
             {
@@ -29,6 +29,14 @@ namespace AdventOfCode.Common
                     }
                 }
             }
+        }
+
+        public static IEnumerable<(T, T)> UniquePairs<T>(this IEnumerable<T> source)
+        {
+            T[] items = source.ToArray();
+            for (int i = 0; i < items.Length - 1; i++)
+                for (int j = i + 1; j < items.Length; j++)
+                    yield return (items[i], items[j]);
         }
     }
 }
