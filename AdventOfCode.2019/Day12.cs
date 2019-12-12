@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using System.Text.RegularExpressions;
 using Xunit;
@@ -13,13 +14,13 @@ namespace AdventOfCode._2019
     {
         class Moon
         {
-            public IntPoint3 Position { get; set; }
-            public IntPoint3 Velocity { get; set; }
+            public IntPoint3 P { get; set; }
+            public IntPoint3 V { get; set; }
 
             public Moon(IntPoint3 position)
             {
-                Position = position;
-                Velocity = IntPoint3.Zero;
+                P = position;
+                V = IntPoint3.Zero;
             }
         }
 
@@ -45,7 +46,7 @@ namespace AdventOfCode._2019
             for (int i = 0; i < 1000; i++)
                 Tick();
 
-            int answer = _moons.Select(m => m.Position.Manhattan * m.Velocity.Manhattan).Sum();
+            int answer = _moons.Select(m => m.P.Manhattan * m.V.Manhattan).Sum();
 
             Assert.Equal(7687, answer);
         }
@@ -53,80 +54,72 @@ namespace AdventOfCode._2019
         [Fact]
         public void Part2()
         {
-            IntPoint3[] initialPos = _moons.Select(m => m.Position).ToArray();
-            IntPoint3[] initialVel = _moons.Select(m => m.Velocity).ToArray();
+            IntPoint3[] initialPositions = _moons.Select(m => m.P).ToArray();
 
-            //HashSet<(IntPoint3, IntPoint3)> states = new HashSet<(IntPoint3, IntPoint3)>();
-            HashSet<(int, int)> statesX0 = new HashSet<(int, int)>();
+            long? xPeriod = null;
+            long? yPeriod = null;
+            long? zPeriod = null;
+
+            void CheckMatch(
+                ref long? period,
+                int ticks,
+                Func<Moon, int> getPosition, 
+                Func<Moon, int> getVelocity, 
+                Func<int, int> getInitialPosition
+                )
+            {
+                bool isMatch = true;
+                for (int i = 0; i < _moons.Length; i++)
+                {
+                    if (getPosition(_moons[i]) != getInitialPosition(i) || getVelocity(_moons[i]) != 0)
+                    {
+                        isMatch = false;
+                        break;
+                    }
+                }
+                if (isMatch)
+                    period = ticks;
+            }
 
             int ticks = 0;
-            int lastTicks = 0;
-            int deltaTicks = 0;
-            for (; ;)
+            do
             {
-                while (!statesX0.Contains((_moons[0].Position.X, _moons[0].Velocity.X)))
-                {
-                    statesX0.Add((_moons[0].Position.X, _moons[0].Velocity.X));
-                    Tick();
-                    ticks++;
-                }
-                //while (!states.Contains((_moons[0].Position, _moons[0].Velocity)))
-                //{
-                //    states.Add((_moons[0].Position, _moons[0].Velocity));
-                //    Tick();
-                //    ticks++;
-                //}
-                //do
-                //{
-                //    Tick();
-                //    ticks++;
-                //} while (!(_moons[0].Position.Equals(initialPos[0]) && _moons[0].Velocity.Equals(initialVel[0])));
+                Tick();
+                ticks++;
 
-                int i = 0;
+                if (!xPeriod.HasValue)
+                    CheckMatch(ref xPeriod, ticks, moon => moon.P.X, moon => moon.V.X, i => initialPositions[i].X);
+
+                if (!yPeriod.HasValue)
+                    CheckMatch(ref yPeriod, ticks, moon => moon.P.Y, moon => moon.V.Y, i => initialPositions[i].Y);
+
+                if (!zPeriod.HasValue)
+                    CheckMatch(ref zPeriod, ticks, moon => moon.P.Z, moon => moon.V.Z, i => initialPositions[i].Z);
             }
+            while (!(xPeriod.HasValue && yPeriod.HasValue && zPeriod.HasValue));
+
+            long answer = MathUtils.LeastCommonMultiple(xPeriod.Value, MathUtils.LeastCommonMultiple(yPeriod.Value, zPeriod.Value));
+
+            Assert.Equal(334945516288044, answer);
         }
 
         private void Tick()
         {
             foreach ((Moon left, Moon right) in _moons.UniquePairs())
             {
-                if (left.Position.X < right.Position.X)
-                {
-                    left.Velocity += IntPoint3.UnitX;
-                    right.Velocity -= IntPoint3.UnitX;
-                }
-                else if (left.Position.X > right.Position.X)
-                {
-                    left.Velocity -= IntPoint3.UnitX;
-                    right.Velocity += IntPoint3.UnitX;
-                }
+                IntPoint3 delta = IntPoint3.Zero;
 
-                if (left.Position.Y < right.Position.Y)
-                {
-                    left.Velocity += IntPoint3.UnitY;
-                    right.Velocity -= IntPoint3.UnitY;
-                }
-                else if (left.Position.Y > right.Position.Y)
-                {
-                    left.Velocity -= IntPoint3.UnitY;
-                    right.Velocity += IntPoint3.UnitY;
-                }
+                delta += left.P.X < right.P.X ? IntPoint3.UnitX : left.P.X > right.P.X ? -IntPoint3.UnitX : IntPoint3.Zero;
+                delta += left.P.Y < right.P.Y ? IntPoint3.UnitY : left.P.Y > right.P.Y ? -IntPoint3.UnitY : IntPoint3.Zero;
+                delta += left.P.Z < right.P.Z ? IntPoint3.UnitZ : left.P.Z > right.P.Z ? -IntPoint3.UnitZ : IntPoint3.Zero;
 
-                if (left.Position.Z < right.Position.Z)
-                {
-                    left.Velocity += IntPoint3.UnitZ;
-                    right.Velocity -= IntPoint3.UnitZ;
-                }
-                else if (left.Position.Z > right.Position.Z)
-                {
-                    left.Velocity -= IntPoint3.UnitZ;
-                    right.Velocity += IntPoint3.UnitZ;
-                }
+                left.V += delta;
+                right.V -= delta;
             }
 
             foreach (Moon moon in _moons)
             {
-                moon.Position += moon.Velocity;
+                moon.P += moon.V;
             }
         }
 
