@@ -130,20 +130,8 @@ namespace AdventOfCode._2018
         [Fact]
         public void Part2()
         {
-            int minX, maxX, minY, maxY, minZ, maxZ;
-            minX = minY = minZ = int.MaxValue;
-            maxX = maxY = maxZ = int.MinValue;
-            foreach (Bot bot in _bots)
-            {
-                if (bot.P.X < minX) minX = bot.P.X;
-                if (bot.P.X > maxX) maxX = bot.P.X;
-                if (bot.P.Y < minY) minY = bot.P.Y;
-                if (bot.P.Y > maxY) maxY = bot.P.Y;
-                if (bot.P.Z < minZ) minZ = bot.P.Z;
-                if (bot.P.Z > maxZ) maxZ = bot.P.Z;
-            }
-
-            BoundingBox initialBox = new BoundingBox(new IntPoint3(minX, minY, minZ), new IntPoint3(maxX, maxY, maxZ));
+            (IntPoint3 min, IntPoint3 max) = IntPoint3.MinMax(_bots.Select(b => b.P));
+            BoundingBox initialBox = new BoundingBox(min, max);
 
             var comparer = Comparer<(BoundingBox box, int botsInRange)>.Create((left, right) =>
             {

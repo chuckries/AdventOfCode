@@ -32,6 +32,25 @@ namespace AdventOfCode.Common
             return $"({X}, {Y}, {Z})";
         }
 
+        public static (IntPoint3 min, IntPoint3 max) MinMax(IEnumerable<IntPoint3> points)
+        {
+            int minX, minY, minZ, maxX, maxY, maxZ;
+            minX = minY = minZ = int.MaxValue;
+            maxX = maxY = maxZ = int.MinValue;
+
+            foreach(IntPoint3 point in points)
+            {
+                if (point.X < minX) minX = point.X;
+                if (point.X > maxX) maxX = point.X;
+                if (point.Y < minY) minY = point.Y;
+                if (point.Y > maxY) maxY = point.Y;
+                if (point.Z < minZ) minZ = point.Z;
+                if (point.Z > maxZ) maxZ = point.Z;
+            }
+
+            return (new IntPoint3(minX, minY, minZ), new IntPoint3(maxX, maxY, maxZ));
+        }
+
         public static IntPoint3 Zero => new IntPoint3(0, 0, 0);
         public static IntPoint3 UnitX => new IntPoint3(1, 0, 0);
         public static IntPoint3 UnitY => new IntPoint3(0, 1, 0);

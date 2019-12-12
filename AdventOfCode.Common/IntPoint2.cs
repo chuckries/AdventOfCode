@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 
 namespace AdventOfCode.Common
 {
@@ -44,6 +45,48 @@ namespace AdventOfCode.Common
         public override string ToString()
         {
             return $"({X}, {Y})";
+        }
+
+        public static IntPoint2 Min(IEnumerable<IntPoint2> points)
+        {
+            int minX, minY;
+            minX = minY = int.MaxValue;
+            foreach (IntPoint2 point in points)
+            {
+                if (point.X < minX) minX = point.X;
+                if (point.Y < minY) minY = point.Y;
+            }
+
+            return new IntPoint2(minX, minY);
+        }
+
+        public static IntPoint2 Max(IEnumerable<IntPoint2> points)
+        {
+            int maxX, maxY;
+            maxX = maxY = int.MinValue;
+            foreach (IntPoint2 point in points)
+            {
+                if (point.X > maxX) maxX = point.X;
+                if (point.Y > maxY) maxY = point.Y;
+            }
+
+            return new IntPoint2(maxX, maxY);
+        }
+
+        public static (IntPoint2 min, IntPoint2 max) MinMax(IEnumerable<IntPoint2> points)
+        {
+            int minX, minY, maxX, maxY;
+            minX = minY = int.MaxValue;
+            maxX = maxY = int.MinValue;
+            foreach (IntPoint2 point in points)
+            {
+                if (point.X < minX) minX = point.X;
+                if (point.X > maxX) maxX = point.X;
+                if (point.Y < minY) minY = point.Y;
+                if (point.Y > maxY) maxY = point.Y;
+            }
+
+            return (new IntPoint2(minX, minY), new IntPoint2(maxX, maxY));
         }
 
         public IntPoint2 TurnRight() => new IntPoint2(Y * 1, X * -1);

@@ -32,28 +32,14 @@ namespace AdventOfCode._2019
             { { IntPoint2.Zero, true } };
             Run(_program, canvas);
 
-            int minX = int.MaxValue;
-            int maxX = int.MinValue;
-            int minY = int.MaxValue;
-            int maxY = int.MinValue;
-            foreach (IntPoint2 coord in canvas.Keys)
-            {
-                if (coord.X < minX)
-                    minX = coord.X;
-                if (coord.X > maxX)
-                    maxX = coord.X;
-                if (coord.Y < minY)
-                    minY = coord.Y;
-                if (coord.Y > maxY)
-                    maxY = coord.Y;
-            }
+            (IntPoint2 min, IntPoint2 max) = IntPoint2.MinMax(canvas.Keys);
 
             StringBuilder sb = new StringBuilder();
             sb.AppendLine();
 
-            for (int y = maxY; y >= minY; y--)
+            for (int y = max.Y; y >= min.Y; y--)
             {
-                for (int x = minX; x <= maxX; x++)
+                for (int x = min.X; x <= max.X; x++)
                 {
                     if (canvas.TryGetValue((x, y), out bool val))
                         sb.Append(val ? '█' : ' ');
