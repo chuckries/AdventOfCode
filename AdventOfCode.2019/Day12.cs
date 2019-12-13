@@ -61,8 +61,6 @@ namespace AdventOfCode._2019
             long zPeriod = 0;
 
             bool IsMatch(
-                ref long period,
-                int ticks,
                 Func<Moon, int> getPosition, 
                 Func<Moon, int> getVelocity, 
                 Func<int, int> getInitialPosition
@@ -86,13 +84,13 @@ namespace AdventOfCode._2019
                 Tick();
                 ticks++;
 
-                if (xPeriod == 0 && IsMatch(ref xPeriod, ticks, moon => moon.P.X, moon => moon.V.X, i => initialPositions[i].X))
+                if (xPeriod == 0 && IsMatch(moon => moon.P.X, moon => moon.V.X, i => initialPositions[i].X))
                     xPeriod = ticks;
 
-                if (yPeriod == 0 && IsMatch(ref yPeriod, ticks, moon => moon.P.Y, moon => moon.V.Y, i => initialPositions[i].Y))
+                if (yPeriod == 0 && IsMatch(moon => moon.P.Y, moon => moon.V.Y, i => initialPositions[i].Y))
                     yPeriod = ticks;
 
-                if (zPeriod == 0 && IsMatch(ref zPeriod, ticks, moon => moon.P.Z, moon => moon.V.Z, i => initialPositions[i].Z))
+                if (zPeriod == 0 && IsMatch(moon => moon.P.Z, moon => moon.V.Z, i => initialPositions[i].Z))
                     zPeriod = ticks;
             }
             while (xPeriod == 0 || yPeriod == 0 || zPeriod == 0);
@@ -106,11 +104,11 @@ namespace AdventOfCode._2019
         {
             foreach ((Moon left, Moon right) in _moons.UniquePairs())
             {
-                IntPoint3 delta = IntPoint3.Zero;
-
-                delta += left.P.X < right.P.X ? IntPoint3.UnitX : left.P.X > right.P.X ? -IntPoint3.UnitX : IntPoint3.Zero;
-                delta += left.P.Y < right.P.Y ? IntPoint3.UnitY : left.P.Y > right.P.Y ? -IntPoint3.UnitY : IntPoint3.Zero;
-                delta += left.P.Z < right.P.Z ? IntPoint3.UnitZ : left.P.Z > right.P.Z ? -IntPoint3.UnitZ : IntPoint3.Zero;
+                IntPoint3 delta = new IntPoint3(
+                    Math.Sign(right.P.X - left.P.X),
+                    Math.Sign(right.P.Y - left.P.Y),
+                    Math.Sign(right.P.Z - left.P.Z)
+                    );
 
                 left.V += delta;
                 right.V -= delta;

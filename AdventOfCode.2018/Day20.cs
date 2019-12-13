@@ -61,20 +61,23 @@ namespace AdventOfCode._2018
             }
         }
 
-        public class RegexMap
+        class RegexMap
         {
+            public delegate T Visitor<T>(T current, ReadOnlySpan<char> directions);
+
             public RegexMap(string pattern)
             {
                 _pattern = pattern;
             }
 
-            public IEnumerable<T> Traverse<T>(T seed, Func<T, string, T> visit)
+            public IEnumerable<T> Traverse<T>(T seed, Visitor<T> visitor)
             {
-                (_, IEnumerable<T> allOptions) = Parse(0, new List<T> { seed }, visit);
+                int index = 0;
+                IEnumerable<T> allOptions = Parse(ref index, new List<T> { seed }, visitor);
                 return allOptions;
             }
 
-            private (int index, IEnumerable<T> newHeads) Parse<T>(int index, IEnumerable<T> heads, Func<T, string, T> visit)
+            private IEnumerable<T> Parse<T>(ref int index, IEnumerable<T> heads, Visitor<T> visitor)
             {
                 List<T> currentOptionHeads = heads.ToList();
                 HashSet<T> newHeads = new HashSet<T>();
@@ -86,9 +89,7 @@ namespace AdventOfCode._2018
                     if (c == '(')
                     {
                         index++;
-                        (int newIndex, IEnumerable<T> newOptionHeads) = Parse(index, currentOptionHeads, visit);
-                        index = newIndex;
-                        currentOptionHeads = newOptionHeads.ToList();
+                        currentOptionHeads = Parse(ref index, currentOptionHeads, visitor).ToList();
                     }
                     else if (c == '|')
                     {
@@ -105,7 +106,7 @@ namespace AdventOfCode._2018
                         foreach (T n in currentOptionHeads)
                             newHeads.Add(n);
 
-                        return (index, newHeads);
+                        return newHeads;
                     }
                     else if (c == '^')
                     {
@@ -114,16 +115,17 @@ namespace AdventOfCode._2018
                     else if (c == '$')
                     {
                         index++;
-                        return (index, currentOptionHeads);
+                        return currentOptionHeads;
                     }
                     else
                     {
                         int oldIndex = index;
                         index = _pattern.IndexOfAny(s_tokens, oldIndex);
-                        string directions = _pattern.Substring(oldIndex, index - oldIndex);
+
+                        ReadOnlySpan<char> directions = _pattern.AsSpan(oldIndex, index - oldIndex);
                         for (int i = 0; i < currentOptionHeads.Count; i++)
                         {
-                            currentOptionHeads[i] = visit(currentOptionHeads[i], directions);
+                            currentOptionHeads[i] = visitor(currentOptionHeads[i], directions);
                         }
                     }
                 }
@@ -164,7 +166,7 @@ namespace AdventOfCode._2018
             }
 
             Node origin = GetNode(IntPoint2.Zero);
-            Func<Node, string, Node> parseDirections = (Node current, string directions) =>
+            RegexMap.Visitor<Node> parseDirections = (current, directions) =>
             {
                 foreach (char c in directions)
                 {

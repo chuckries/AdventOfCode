@@ -18,14 +18,16 @@ namespace AdventOfCode._2018
         {
             Rocky = 0,
             Wet = 1,
-            Narrow = 2
+            Narrow = 2,
+            Invalid = int.MaxValue
         }
 
         enum Tool
         {
-            None,
-            Climbing,
-            Torch
+            None = 0,
+            Climbing = 1,
+            Torch = 2,
+            Invalid = int.MaxValue
         }
 
         [DebuggerDisplay("{Coord}, {Terrain}")]
@@ -113,30 +115,23 @@ namespace AdventOfCode._2018
         [Fact]
         public void Part2()
         {
+            Tool[,] otherValidTool =
+            {
+                { Tool.Invalid, Tool.Torch, Tool.Climbing },
+                { Tool.Climbing, Tool.None, Tool.Invalid },
+                { Tool.Torch, Tool.Invalid, Tool.None }
+            };
+
+            bool[,] validToolRegions =
+            {
+                { false, true, true },
+                { true, true, false },
+                { true, false, true },
+            };
+
             IEnumerable<Node> GetAdjacentNodes(Node current)
             {
-                Tool newTool = current.Region.Terrain switch
-                {
-                    Terrain.Rocky => current.Tool switch
-                    {
-                        Tool.Climbing => Tool.Torch,
-                        Tool.Torch => Tool.Climbing,
-                        _ => throw new InvalidOperationException("invalid tool")
-                    },
-                    Terrain.Wet => current.Tool switch
-                    {
-                        Tool.None => Tool.Climbing,
-                        Tool.Climbing => Tool.None,
-                        _ => throw new InvalidOperationException("invalid tool")
-                    },
-                    Terrain.Narrow => current.Tool switch
-                    {
-                        Tool.None => Tool.Torch,
-                        Tool.Torch => Tool.None,
-                        _ => throw new InvalidOperationException("invalid tool")
-                    },
-                    _ => throw new InvalidOperationException("invalid region")
-                };
+                Tool newTool = otherValidTool[(int)current.Region.Terrain, (int)current.Tool];
                 yield return new Node(current.Region, newTool, current.Time + 7);
 
                 foreach (IntPoint2 adjacent in current.Region.Coord.Adjacent())
@@ -144,15 +139,8 @@ namespace AdventOfCode._2018
                     if (adjacent.X >= 0 && adjacent.Y >= 0)
                     {
                         Region region = GetRegion(adjacent);
-                        if ((current.Tool == Tool.None &&
-                                (region.Terrain == Terrain.Wet || region.Terrain == Terrain.Narrow)) ||
-                            (current.Tool == Tool.Torch &&
-                                (region.Terrain == Terrain.Rocky || region.Terrain == Terrain.Narrow)) ||
-                            (current.Tool == Tool.Climbing &&
-                                (region.Terrain == Terrain.Rocky || region.Terrain == Terrain.Wet)))
-                        {
+                        if (validToolRegions[(int)current.Tool, (int)region.Terrain])
                             yield return new Node(region, current.Tool, current.Time + 1);
-                        }
                     }
                 }
             }
