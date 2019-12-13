@@ -69,7 +69,7 @@ namespace AdventOfCode._2019
             IntPoint2 heading = IntPoint2.UnitY;
             bool writeMode = false;
 
-            IntCode.ReadInput reader = () =>
+            IntCode.InputReader reader = () =>
             {
                 if (!canvas.TryGetValue(position, out bool value))
                     value = false;
@@ -77,7 +77,7 @@ namespace AdventOfCode._2019
                 return Task.FromResult<long>(value ? 1 : 0);
             };
 
-            IntCode.WriteOutput writer = value =>
+            IntCode.OutputWriter writer = value =>
             {
                 if (!writeMode)
                 {

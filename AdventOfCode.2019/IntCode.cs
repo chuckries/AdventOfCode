@@ -31,8 +31,8 @@ namespace AdventOfCode._2019
             Relative = 2
         }
 
-        public delegate Task<long> ReadInput();
-        public delegate void WriteOutput(long value);
+        public delegate Task<long> InputReader();
+        public delegate void OutputWriter(long value);
 
         public long PC { get; set; } = 0;
 
@@ -46,20 +46,15 @@ namespace AdventOfCode._2019
             set => WriteMemory(index, value);
         }
 
-        public ReadInput Reader { get; set; }
-        public WriteOutput Writer { get; set; }
+        public InputReader Reader { get; set; }
+        public OutputWriter Writer { get; set; }
 
-        public IntCode(IEnumerable<int> memory)
-            : this(memory, null, null)
+        public IntCode(IEnumerable<long> program)
+            : this(program, null, null)
         {
         }
 
-        public IntCode(IEnumerable<int> program, ReadInput reader, WriteOutput writer)
-            : this(program.Select(i => (long)i), reader, writer)
-        {
-        }
-
-        public IntCode(IEnumerable<long> program, ReadInput reader, WriteOutput writer)
+        public IntCode(IEnumerable<long> program, InputReader reader, OutputWriter writer)
         {
             _memory = program.ToArray();
             Reader = reader;

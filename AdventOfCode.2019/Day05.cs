@@ -10,9 +10,9 @@ namespace AdventOfCode._2019
 {
     public class Day05
     {
-        int[] _memory = File.ReadAllText("Inputs/Day05.txt")
+        long[] _program = File.ReadAllText("Inputs/Day05.txt")
             .Split(',')
-            .Select(int.Parse)
+            .Select(long.Parse)
             .ToArray();
 
         [Fact]
@@ -20,7 +20,7 @@ namespace AdventOfCode._2019
         {
             List<long> outputs = new List<long>();
             IntCode intCode = new IntCode(
-                _memory,
+                _program,
                 () => Task.FromResult(1L),
                 outputs.Add
                 );
@@ -36,7 +36,7 @@ namespace AdventOfCode._2019
         {
             long output = 0;
             IntCode intCode = new IntCode(
-                _memory,
+                _program,
                 () => Task.FromResult(5L),
                 (value) => output = value
                 );

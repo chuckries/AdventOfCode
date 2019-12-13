@@ -10,15 +10,15 @@ namespace AdventOfCode._2019
 {
     public class Day02
     {
+        long[] _program = File.ReadAllText("Inputs/Day02.txt")
+            .Split(',')
+            .Select(long.Parse)
+            .ToArray();
+
         [Fact]
         public void Part1()
         {
-            int[] memory = File.ReadAllText("Inputs/Day02.txt")
-                .Split(',')
-                .Select(int.Parse)
-                .ToArray();
-
-            IntCode intCode = new IntCode(memory);
+            IntCode intCode = new IntCode(_program);
             intCode[1] = 12;
             intCode[2] = 2;
             intCode.Run().Wait();
@@ -29,18 +29,13 @@ namespace AdventOfCode._2019
         [Fact]
         public void Part2()
         {
-            int[] memory = File.ReadAllText("Inputs/Day02.txt")
-                .Split(',')
-                .Select(int.Parse)
-                .ToArray();
-
             const int target = 19690720;
 
             for (int i = 0; i < 100; i++)
             {
                 for (int j = 0; j < 100; j++)
                 {
-                    IntCode intCode = new IntCode(memory);
+                    IntCode intCode = new IntCode(_program);
                     intCode[1] = i;
                     intCode[2] = j;
                     intCode.Run().Wait();
