@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace AdventOfCode._2019
@@ -45,6 +46,42 @@ namespace AdventOfCode._2019
 
             int answer = canvas.Values.Count(t => t == Tile.Block);
             Assert.Equal(173, answer);
+        }
+
+        [Fact]
+        public void Part2()
+        {
+            List<long> outputs = new List<long>(3);
+            long score = 0;
+            long ballX = 0;
+            long paddleX = 0;
+
+            IntCode.OutputWriter writer = output =>
+            {
+                outputs.Add(output);
+                if (outputs.Count == 3)
+                {
+                    if (outputs[0] == -1 && outputs[1] == 0)
+                        score = outputs[2];
+                    else
+                    {
+                        Tile tile = (Tile)outputs[2];
+                        long x = outputs[0];
+                        if (tile == Tile.Ball) ballX = x;
+                        if (tile == Tile.Paddle) paddleX = x;
+                    }
+                    outputs.Clear();
+                }
+            };
+
+            IntCode.InputReader reader = () => 
+                Task.FromResult<long>(Math.Sign(ballX - paddleX));
+
+            IntCode arcade = new IntCode(_program, reader, writer);
+            arcade[0] = 2;
+            arcade.Run().Wait();
+
+            Assert.Equal(8942, score);
         }
     }
 }
