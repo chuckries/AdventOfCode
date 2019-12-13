@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace AdventOfCode.Common
@@ -11,7 +12,7 @@ namespace AdventOfCode.Common
             a = Math.Abs(a);
             b = Math.Abs(b);
 
-            for (; ; )
+            for (; ;)
             {
                 long remainder = a % b;
                 if (remainder == 0) return b;
@@ -27,5 +28,13 @@ namespace AdventOfCode.Common
 
             return (a * b) / GreatestCommonFactor(a, b);
         }
+
+        public static long LeastCommonMultiple(params long[] numbers) => numbers.Length switch
+        {
+            0 => 0,
+            1 => numbers[0],
+            2 => LeastCommonMultiple(numbers[0], numbers[1]),
+            _ => numbers.Skip(1).Aggregate(numbers[0], LeastCommonMultiple)
+        };
     }
 }

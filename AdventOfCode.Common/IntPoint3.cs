@@ -6,7 +6,7 @@ using System.Text;
 namespace AdventOfCode.Common
 {
     [DebuggerDisplay("({X}, {Y}, {Z})")]
-    public struct IntPoint3
+    public struct IntPoint3 : IEquatable<IntPoint3>
     {
         public readonly int X;
         public readonly int Y;
@@ -30,6 +30,23 @@ namespace AdventOfCode.Common
         public override string ToString()
         {
             return $"({X}, {Y}, {Z})";
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is IntPoint3 point && Equals(point);
+        }
+
+        public bool Equals(IntPoint3 other)
+        {
+            return X == other.X &&
+                   Y == other.Y &&
+                   Z == other.Z;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(X, Y, Z);
         }
 
         public static (IntPoint3 min, IntPoint3 max) MinMax(IEnumerable<IntPoint3> points)

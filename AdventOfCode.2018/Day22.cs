@@ -51,7 +51,7 @@ namespace AdventOfCode._2018
 
             public bool Equals(Region other)
             {
-                return EqualityComparer<IntPoint2>.Default.Equals(Coord, other.Coord);
+                return Coord.Equals(other.Coord);
             }
 
             public override int GetHashCode()

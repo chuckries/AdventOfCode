@@ -56,12 +56,12 @@ namespace AdventOfCode._2019
         {
             IntPoint3[] initialPositions = _moons.Select(m => m.P).ToArray();
 
-            long? xPeriod = null;
-            long? yPeriod = null;
-            long? zPeriod = null;
+            long xPeriod = 0;
+            long yPeriod = 0;
+            long zPeriod = 0;
 
-            void CheckMatch(
-                ref long? period,
+            bool IsMatch(
+                ref long period,
                 int ticks,
                 Func<Moon, int> getPosition, 
                 Func<Moon, int> getVelocity, 
@@ -77,8 +77,7 @@ namespace AdventOfCode._2019
                         break;
                     }
                 }
-                if (isMatch)
-                    period = ticks;
+                return isMatch;
             }
 
             int ticks = 0;
@@ -87,18 +86,18 @@ namespace AdventOfCode._2019
                 Tick();
                 ticks++;
 
-                if (!xPeriod.HasValue)
-                    CheckMatch(ref xPeriod, ticks, moon => moon.P.X, moon => moon.V.X, i => initialPositions[i].X);
+                if (xPeriod == 0 && IsMatch(ref xPeriod, ticks, moon => moon.P.X, moon => moon.V.X, i => initialPositions[i].X))
+                    xPeriod = ticks;
 
-                if (!yPeriod.HasValue)
-                    CheckMatch(ref yPeriod, ticks, moon => moon.P.Y, moon => moon.V.Y, i => initialPositions[i].Y);
+                if (yPeriod == 0 && IsMatch(ref yPeriod, ticks, moon => moon.P.Y, moon => moon.V.Y, i => initialPositions[i].Y))
+                    yPeriod = ticks;
 
-                if (!zPeriod.HasValue)
-                    CheckMatch(ref zPeriod, ticks, moon => moon.P.Z, moon => moon.V.Z, i => initialPositions[i].Z);
+                if (zPeriod == 0 && IsMatch(ref zPeriod, ticks, moon => moon.P.Z, moon => moon.V.Z, i => initialPositions[i].Z))
+                    zPeriod = ticks;
             }
-            while (!(xPeriod.HasValue && yPeriod.HasValue && zPeriod.HasValue));
+            while (xPeriod == 0 || yPeriod == 0 || zPeriod == 0);
 
-            long answer = MathUtils.LeastCommonMultiple(xPeriod.Value, MathUtils.LeastCommonMultiple(yPeriod.Value, zPeriod.Value));
+            long answer = MathUtils.LeastCommonMultiple(xPeriod, yPeriod, zPeriod);
 
             Assert.Equal(334945516288044, answer);
         }

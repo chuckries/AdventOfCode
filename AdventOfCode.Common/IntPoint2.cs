@@ -6,7 +6,7 @@ using System.Drawing;
 namespace AdventOfCode.Common
 {
     [DebuggerDisplay("({X}, {Y})")]
-    public struct IntPoint2
+    public struct IntPoint2 : IEquatable<IntPoint2>
     {
         public readonly int X;
         public readonly int Y;
@@ -35,6 +35,9 @@ namespace AdventOfCode.Common
             yield return this - UnitY;
         }
 
+        public IntPoint2 TurnRight() => new IntPoint2(Y * 1, X * -1);
+        public IntPoint2 TurnLeft() => new IntPoint2(Y * -1, X * 1);
+
         public IntPoint2 Transform(Func<int, int> transform)
         {
             return new IntPoint2(transform(X), transform(Y));
@@ -45,6 +48,22 @@ namespace AdventOfCode.Common
         public override string ToString()
         {
             return $"({X}, {Y})";
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is IntPoint2 point && Equals(point);
+        }
+
+        public bool Equals(IntPoint2 other)
+        {
+            return X == other.X &&
+                   Y == other.Y;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(X, Y);
         }
 
         public static IntPoint2 Min(IEnumerable<IntPoint2> points)
@@ -88,9 +107,6 @@ namespace AdventOfCode.Common
 
             return (new IntPoint2(minX, minY), new IntPoint2(maxX, maxY));
         }
-
-        public IntPoint2 TurnRight() => new IntPoint2(Y * 1, X * -1);
-        public IntPoint2 TurnLeft() => new IntPoint2(Y * -1, X * 1);
 
         public static IntPoint2 Zero => new IntPoint2(0, 0);
 
