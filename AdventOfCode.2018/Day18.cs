@@ -18,7 +18,6 @@ namespace AdventOfCode._2018
         }
 
         IntPoint2 _bounds;
-        Cell[][,] _map;
         Cell[,] _current;
         Cell[,] _next;
 
@@ -26,9 +25,8 @@ namespace AdventOfCode._2018
         {
             string[] input = File.ReadAllLines("Inputs/Day18.txt").ToArray();
             _bounds = new IntPoint2(input[0].Length, input.Length);
-            _map = new Cell[][,] { new Cell[_bounds.X, _bounds.Y], new Cell[_bounds.X, _bounds.Y] };
-            _current = _map[0];
-            _next = _map[1];
+            _current = new Cell[_bounds.X, _bounds.Y];
+            _next = (Cell[,])_current.Clone();
 
             int j = 0;
             foreach (string s in File.ReadAllLines("Inputs/Day18.txt"))
@@ -36,7 +34,7 @@ namespace AdventOfCode._2018
                 int i = 0;
                 foreach (char c in s)
                 {
-                    _current[j, i++] = (Cell)c;
+                    _current[i++, j] = (Cell)c;
                 }
                 j++;
             }
@@ -140,18 +138,13 @@ namespace AdventOfCode._2018
                     }
 
                     Cell current = _current[x, y];
-                    Cell next;
-
-                    if (current == Cell.Open && adjacentTrees >= 3)
-                        next = Cell.Tree;
-                    else if (current == Cell.Tree && adjacentLumber >= 3)
-                        next = Cell.Lumber;
-                    else if (current == Cell.Lumber && !(adjacentLumber >= 1 && adjacentTrees >= 1))
-                        next = Cell.Open;
-                    else
-                        next = current;
-
-                    _next[x, y] = next;
+                    _next[x, y] = current switch
+                    {
+                        Cell.Open when adjacentTrees >= 3 => Cell.Tree,
+                        Cell.Tree when adjacentLumber >=3 => Cell.Lumber,
+                        Cell.Lumber when !(adjacentLumber >= 1 && adjacentTrees >= 1) => Cell.Open,
+                        _ => current
+                    };
                 }
             }
 

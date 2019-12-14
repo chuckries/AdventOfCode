@@ -39,7 +39,7 @@ namespace AdventOfCode._2019
                     if (candidate.Equals(asteroid))
                         continue;
 
-                    IntPoint2 slope = MinimizeSlope(asteroid - candidate);
+                    IntPoint2 slope = ReduceSlope(asteroid - candidate);
                     slopes.Add(slope);
                 }
 
@@ -66,7 +66,7 @@ namespace AdventOfCode._2019
                     continue;
 
                 IntPoint2 vector = asteroid - origin;
-                IntPoint2 minSlope = MinimizeSlope(vector);
+                IntPoint2 minSlope = ReduceSlope(vector);
 
                 if (!slopeSearch.TryGetValue(minSlope, out IntPoint2 minVector))
                 {
@@ -119,7 +119,7 @@ namespace AdventOfCode._2019
             Assert.Equal(2628, answer);
         }
 
-        private IntPoint2 MinimizeSlope(IntPoint2 slope)
+        private IntPoint2 ReduceSlope(IntPoint2 slope)
         {
             if (slope.X == 0)
                 return new IntPoint2(0, Sign(slope.Y));
@@ -129,24 +129,17 @@ namespace AdventOfCode._2019
             {
                 IntPoint2 absSlope = new IntPoint2(Abs(slope.X), Abs(slope.Y));
 
+                int divisor = 0;
                 if (absSlope.Y % absSlope.X == 0)
-                    slope /= absSlope.X;
+                    divisor = absSlope.X;
                 else if (absSlope.X % absSlope.Y == 0)
-                    slope /= absSlope.Y;
+                    divisor = absSlope.Y;
                 else
                 {
-                    int max = Min(absSlope.X, absSlope.Y) / 2;
-                    for (int i = max; i >= 2; i--)
-                    {
-                        if (absSlope.X % i == 0 && absSlope.Y % i == 0)
-                        {
-                            slope /= i;
-                            break;
-                        }
-                    }
+                    divisor = (int)MathUtils.GreatestCommonFactor(slope.X, slope.Y);
                 }
 
-                return slope;
+                return divisor > 1 ? slope / divisor : slope;
             }
         }
     }

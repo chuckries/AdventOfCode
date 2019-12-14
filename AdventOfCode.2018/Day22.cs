@@ -171,12 +171,7 @@ namespace AdventOfCode._2018
                 {
                     foreach (Node adjacent in GetAdjacentNodes(current))
                     {
-                        if (!visited.TryGetValue(adjacent, out int time))
-                        {
-                            visited.Add(adjacent, adjacent.Time);
-                            searchSet.Enqueue(adjacent);
-                        }
-                        else if (adjacent.Time < time)
+                        if (!visited.TryGetValue(adjacent, out int time) || adjacent.Time < time)
                         {
                             visited[adjacent] = adjacent.Time;
                             searchSet.Enqueue(adjacent);
@@ -205,7 +200,7 @@ namespace AdventOfCode._2018
                 int erosion = (index + DEPTH) % 20183;
                 Terrain terrain = (Terrain)(erosion % 3);
 
-                _regions.Add(coord, (region = new Region(coord, index, erosion, terrain)));
+                _regions.Add(coord, region = new Region(coord, index, erosion, terrain));
             }
             return region;
         }

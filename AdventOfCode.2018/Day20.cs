@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using Xunit;
 
@@ -70,17 +71,13 @@ namespace AdventOfCode._2018
                 _pattern = pattern;
             }
 
-            public IEnumerable<T> Traverse<T>(T seed, Visitor<T> visitor)
+            public IEnumerable<T> Traverse<T>(T origin, Visitor<T> visitor)
             {
                 int index = 0;
-                IEnumerable<T> allOptions = Parse(ref index, new List<T> { seed }, visitor);
-                return allOptions;
-            }
-
-            private IEnumerable<T> Parse<T>(ref int index, IEnumerable<T> heads, Visitor<T> visitor)
-            {
-                List<T> currentOptionHeads = heads.ToList();
+                T[] currentOptionHeads = { origin };
                 HashSet<T> newHeads = new HashSet<T>();
+                Stack<T[]> currentOptionsHeadsStack = new Stack<T[]>();
+                Stack<HashSet<T>> newHeadsStack = new Stack<HashSet<T>>();
 
                 while (index < _pattern.Length)
                 {
@@ -89,7 +86,10 @@ namespace AdventOfCode._2018
                     if (c == '(')
                     {
                         index++;
-                        currentOptionHeads = Parse(ref index, currentOptionHeads, visitor).ToList();
+                        currentOptionsHeadsStack.Push(currentOptionHeads);
+                        currentOptionHeads = (T[])currentOptionHeads.Clone();
+                        newHeadsStack.Push(newHeads);
+                        newHeads = new HashSet<T>();
                     }
                     else if (c == '|')
                     {
@@ -97,39 +97,35 @@ namespace AdventOfCode._2018
                         foreach (T n in currentOptionHeads)
                             newHeads.Add(n);
 
-                        currentOptionHeads = heads.ToList();
+                        currentOptionHeads = (T[])currentOptionsHeadsStack.Peek().Clone();
                     }
                     else if (c == ')')
                     {
                         index++;
-
                         foreach (T n in currentOptionHeads)
                             newHeads.Add(n);
 
-                        return newHeads;
+                        currentOptionHeads = newHeads.ToArray();
+                        newHeads = newHeadsStack.Pop();
+                        _ = currentOptionsHeadsStack.Pop();
+                    }
+                    else if (c == '$')
+                    {
+                        return currentOptionHeads;
                     }
                     else if (c == '^')
                     {
                         index++;
                     }
-                    else if (c == '$')
-                    {
-                        index++;
-                        return currentOptionHeads;
-                    }
                     else
                     {
-                        int oldIndex = index;
-                        index = _pattern.IndexOfAny(s_tokens, oldIndex);
-
-                        ReadOnlySpan<char> directions = _pattern.AsSpan(oldIndex, index - oldIndex);
-                        for (int i = 0; i < currentOptionHeads.Count; i++)
-                        {
+                        int tokenIndex = _pattern.IndexOfAny(s_tokens, index);
+                        ReadOnlySpan<char> directions = _pattern.AsSpan(index, tokenIndex - index);
+                        for (int i = 0; i < currentOptionHeads.Length; i++)
                             currentOptionHeads[i] = visitor(currentOptionHeads[i], directions);
-                        }
+                        index = tokenIndex;
                     }
                 }
-
                 throw new InvalidOperationException("reached end without returning?");
             }
 
@@ -152,6 +148,93 @@ namespace AdventOfCode._2018
             IEnumerable<Node> map = TraverseMap(File.ReadAllText("Inputs/Day20.txt"));
             int answer = map.Count(n => n.Distance >= 1000);
             Assert.Equal(8409, answer);
+        }
+
+        [Fact]
+        public void Part1_Different()
+        {
+            RegexMap regex = new RegexMap(File.ReadAllText("Inputs/Day20.txt"));
+            Dictionary<IntPoint2, HashSet<IntPoint2>> map = new Dictionary<IntPoint2, HashSet<IntPoint2>>();
+
+            void AddEdge(IntPoint2 a, IntPoint2 b)
+            {
+                if (!map.TryGetValue(a, out HashSet<IntPoint2> edges))
+                {
+                    map.Add(a, edges = new HashSet<IntPoint2>());
+                }
+                edges.Add(b);
+            }
+
+            IntPoint2 origin = IntPoint2.Zero;
+            regex.Traverse(origin, (current, directions) =>
+            {
+                foreach (char c in directions)
+                {
+                    IntPoint2 newCoord = current + c switch
+                    {
+                        'N' => IntPoint2.UnitY,
+                        'S' => -IntPoint2.UnitY,
+                        'W' => -IntPoint2.UnitX,
+                        'E' => IntPoint2.UnitX,
+                        _ => throw new InvalidOperationException()
+                    };
+
+                    AddEdge(current, newCoord);
+                    AddEdge(newCoord, current);
+
+                    current = newCoord;
+                }
+                return current;
+            });
+
+            var bounds = IntPoint2.MinMax(map.Keys);
+            int countNodes = map.Keys.Count;
+            bool[,] graph = new bool[countNodes, countNodes];
+            foreach (var kvp in map)
+            {
+                int index = kvp.Key.ToIndex(bounds.min, bounds.max);
+                foreach (var adjacent in kvp.Value)
+                {
+                    graph[index, adjacent.ToIndex(bounds.min, bounds.max)] = true;
+                }
+            }
+
+            int[] distances = new int[countNodes];
+            bool[] visited = new bool[countNodes];
+            for (int i = 0; i < countNodes; i++)
+            {
+                distances[i] = int.MaxValue;
+            }
+
+            int currentIndex = origin.ToIndex(bounds.min, bounds.max);
+            distances[currentIndex] = 0;
+            for (int i = 0; i < countNodes - 1; i++)
+            {
+                visited[currentIndex] = true;
+                int newDistance = distances[currentIndex] + 1;
+                int minIndex = -1;
+                int minDistance = int.MaxValue;
+                for (int j = 0; j < countNodes; j++)
+                {
+                    if (visited[j])
+                        continue;
+
+                    ref int distance = ref distances[j];
+                    if (graph[currentIndex, j] && newDistance < distance)
+                        distance = newDistance;
+
+                    if (distance < minDistance)
+                    {
+                        minDistance = distance;
+                        minIndex = j;
+                    }
+                }
+                currentIndex = minIndex;
+            }
+
+            int answer = distances.Max();
+
+            Assert.Equal(3739, answer);
         }
 
         private IEnumerable<Node> TraverseMap(string input)

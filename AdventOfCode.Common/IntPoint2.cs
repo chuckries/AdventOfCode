@@ -43,6 +43,18 @@ namespace AdventOfCode.Common
             return new IntPoint2(transform(X), transform(Y));
         }
 
+        public int ToIndex(IntPoint2 min, IntPoint2 max)
+        {
+            int width = max.X - min.X + 1;
+            return (Y - min.Y) * width + (X - min.X);
+        }
+
+        public static IntPoint2 FromIndex(int index, IntPoint2 min, IntPoint2 max)
+        {
+            int width = max.X - min.X + 1;
+            return new IntPoint2(index % width, index / width);
+        }
+
         public void Deconstruct(out int x, out int y) => (x, y) = (X, Y);
 
         public override string ToString()

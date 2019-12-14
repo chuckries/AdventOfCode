@@ -21,20 +21,17 @@ namespace AdventOfCode.Common
             }
         }
 
-        public static long LeastCommonMultiple(long a, long b)
+        public static long LeastCommonMultiple(long a, params long[] b)
         {
-            if (a % b == 0) return a;
-            if (b % a == 0) return b;
+            static long LCM(long a, long b)
+            {
+                if (a % b == 0) return a;
+                if (b % a == 0) return b;
 
-            return (a * b) / GreatestCommonFactor(a, b);
+                return (a * b) / GreatestCommonFactor(a, b);
+            }
+
+            return b.Length == 0 ? a : b.Aggregate(a, LCM);
         }
-
-        public static long LeastCommonMultiple(params long[] numbers) => numbers.Length switch
-        {
-            0 => 0,
-            1 => numbers[0],
-            2 => LeastCommonMultiple(numbers[0], numbers[1]),
-            _ => numbers.Skip(1).Aggregate(numbers[0], LeastCommonMultiple)
-        };
     }
 }
