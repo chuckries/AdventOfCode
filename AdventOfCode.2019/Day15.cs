@@ -34,7 +34,7 @@ namespace AdventOfCode._2019
             .Select(long.Parse)
             .ToArray();
 
-        HashSet<IntPoint2> _map = new HashSet<IntPoint2>();
+        Dictionary<IntPoint2, Status> _map = new Dictionary<IntPoint2, Status>();
         IntPoint2 _oxygen = IntPoint2.Zero;
 
         public Day15()
@@ -55,12 +55,12 @@ namespace AdventOfCode._2019
                 foreach (Direction d in s_directions)
                 {
                     IntPoint2 candidatePosition = position + s_deltas[(int)d];
-                    if (!_map.Contains(candidatePosition))
+                    if (!_map.ContainsKey(candidatePosition))
                     {
                         Status status = (Status)await sendCommand(d);
                         if (status != Status.Wall)
                         {
-                            _map.Add(candidatePosition);
+                            _map.Add(candidatePosition, status);
                             if (status == Status.Oxygen)
                                 _oxygen = candidatePosition;
 
@@ -100,7 +100,7 @@ namespace AdventOfCode._2019
                 int newDistance = current.distance + 1;
                 foreach (IntPoint2 adjacent in current.position.Adjacent())
                 {
-                    if (_map.Contains(adjacent) && !visisted.Contains(adjacent))
+                    if (_map.TryGetValue(adjacent, out Status status) && status != Status.Wall && !visisted.Contains(adjacent))
                     {
                         toExplore.Enqueue((adjacent, newDistance));
                     }
@@ -132,7 +132,7 @@ namespace AdventOfCode._2019
                 {
                     foreach (IntPoint2 adjacent in current.Adjacent())
                     {
-                        if (_map.Contains(adjacent) && !filled.Contains(adjacent))
+                        if (_map.TryGetValue(adjacent, out Status status) && status != Status.Wall && !filled.Contains(adjacent))
                         {
                             toFill.Add(adjacent);
                         }
