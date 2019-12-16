@@ -42,7 +42,6 @@ namespace AdventOfCode._2019
         private long RunAmplifiers(IEnumerable<long> code, IEnumerable<int> phaseSettings)
         {
             long answer = 0;
-            IntCode.OutputWriter writer = (value) => { answer = value; };
 
             Stack<long> inputs = new Stack<long>();
             inputs.Push(0);
@@ -52,7 +51,7 @@ namespace AdventOfCode._2019
                 IntCode amp = new IntCode(
                     code,
                     () => Task.FromResult(inputs.Pop()),
-                    writer
+                    value => answer = value
                     );
                 amp.Run().Wait();
                 inputs.Push(answer);

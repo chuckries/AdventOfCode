@@ -121,25 +121,11 @@ namespace AdventOfCode._2019
 
         private IntPoint2 ReduceSlope(IntPoint2 slope)
         {
-            if (slope.X == 0)
-                return new IntPoint2(0, Sign(slope.Y));
-            else if (slope.Y == 0)
-                return new IntPoint2(Sign(slope.X), 0);
+            if (slope.X == 0 || slope.Y == 0)
+                return new IntPoint2(Sign(slope.X), Sign(slope.Y));
             else
             {
-                IntPoint2 absSlope = new IntPoint2(Abs(slope.X), Abs(slope.Y));
-
-                int divisor = 0;
-                if (absSlope.Y % absSlope.X == 0)
-                    divisor = absSlope.X;
-                else if (absSlope.X % absSlope.Y == 0)
-                    divisor = absSlope.Y;
-                else
-                {
-                    divisor = (int)MathUtils.GreatestCommonFactor(slope.X, slope.Y);
-                }
-
-                return divisor > 1 ? slope / divisor : slope;
+                return slope / (int)MathUtils.GreatestCommonFactor(slope.X, slope.Y);
             }
         }
     }

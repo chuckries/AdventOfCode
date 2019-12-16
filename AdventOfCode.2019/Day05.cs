@@ -38,7 +38,7 @@ namespace AdventOfCode._2019
             IntCode intCode = new IntCode(
                 _program,
                 () => Task.FromResult(5L),
-                (value) => output = value
+                value => output = value
                 );
 
             intCode.Run().Wait();

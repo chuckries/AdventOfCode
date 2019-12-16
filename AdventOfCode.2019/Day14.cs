@@ -102,8 +102,8 @@ namespace AdventOfCode._2019
 
             const long inputOre = 1_000_000_000_000;
 
-            long lowerBound = (inputOre / orePerFuel) + orePerFuel;
-            long upperBound = lowerBound + orePerFuel;
+            long lowerBound = (inputOre / orePerFuel);
+            long upperBound = lowerBound + 2 * orePerFuel;
 
             long answer = 0;
             for (; ; )

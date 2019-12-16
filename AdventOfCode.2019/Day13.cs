@@ -28,24 +28,24 @@ namespace AdventOfCode._2019
         [Fact]
         public void Part1()
         {
-            Dictionary<IntPoint2, Tile> canvas = new Dictionary<IntPoint2, Tile>();
+            int countBlocks = 0;
             List<long> outputs = new List<long>(3);
-
-            IntCode.OutputWriter writer = output =>
-            {
-                outputs.Add(output);
-                if (outputs.Count == 3)
+            IntCode arcade = new IntCode(
+                _program,
+                null,
+                output =>
                 {
-                    canvas[((int)outputs[0], (int)outputs[1])] = (Tile)outputs[2];
-                    outputs.Clear();
-                }
-            };
-
-            IntCode arcade = new IntCode(_program, null, writer);
+                    outputs.Add(output);
+                    if (outputs.Count == 3)
+                    {
+                        if ((Tile)outputs[2] == Tile.Block)
+                            countBlocks++;
+                        outputs.Clear();
+                    }
+                });
             arcade.Run().Wait();
 
-            int answer = canvas.Values.Count(t => t == Tile.Block);
-            Assert.Equal(173, answer);
+            Assert.Equal(173, countBlocks);
         }
 
         [Fact]

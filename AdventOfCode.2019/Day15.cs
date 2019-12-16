@@ -39,8 +39,6 @@ namespace AdventOfCode._2019
 
         public Day15()
         {
-            using CancellationTokenSource cts = new CancellationTokenSource();
-
             AsyncQueue<long> programInputs = new AsyncQueue<long>();
             AsyncQueue<long> programOutputs = new AsyncQueue<long>();
             IntCode intCode = new IntCode(_program, programInputs.Dequeue, programOutputs.Enqueue);
@@ -74,7 +72,6 @@ namespace AdventOfCode._2019
             }
 
             Task.Run(() => backtrackHelper(IntPoint2.Zero)).Wait();
-            cts.Cancel();
         }
 
         [Fact]
@@ -86,7 +83,7 @@ namespace AdventOfCode._2019
                     return (left.position.Distance(_oxygen) + left.distance) - 
                            (right.position.Distance(_oxygen) + right.distance);
                 }));
-            Dictionary<IntPoint2, int> distances = new Dictionary<IntPoint2, int> { { IntPoint2.Zero, 0 } };
+            HashSet<IntPoint2> visisted = new HashSet<IntPoint2>(_map.Count);
             toExplore.Enqueue((IntPoint2.Zero, 0));
 
             int answer = 0;
@@ -103,15 +100,13 @@ namespace AdventOfCode._2019
                 int newDistance = current.distance + 1;
                 foreach (IntPoint2 adjacent in current.position.Adjacent())
                 {
-                    if (_map.Contains(adjacent))
+                    if (_map.Contains(adjacent) && !visisted.Contains(adjacent))
                     {
-                        if (!distances.TryGetValue(adjacent, out int minDistance) || newDistance < minDistance)
-                        {
-                            distances[adjacent] = newDistance;
-                            toExplore.Enqueue((adjacent, newDistance));
-                        }
+                        toExplore.Enqueue((adjacent, newDistance));
                     }
                 }
+
+                visisted.Add(current.position);
             } while (toExplore.Count > 0);
 
             Assert.Equal(380, answer);
@@ -121,8 +116,7 @@ namespace AdventOfCode._2019
         public void Part2()
         {
             HashSet<IntPoint2> filled = new HashSet<IntPoint2>();
-            Queue<IntPoint2> toFill = new Queue<IntPoint2>();
-            toFill.Enqueue(_oxygen);
+            List<IntPoint2> toFill = new List<IntPoint2>() { _oxygen };
 
             int iterations = -1;
             do
@@ -140,7 +134,7 @@ namespace AdventOfCode._2019
                     {
                         if (_map.Contains(adjacent) && !filled.Contains(adjacent))
                         {
-                            toFill.Enqueue(adjacent);
+                            toFill.Add(adjacent);
                         }
                     }
                 }
