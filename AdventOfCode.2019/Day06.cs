@@ -24,7 +24,11 @@ namespace AdventOfCode._2019
 
             public int TotalChildren()
             {
-                return Children.Count + Children.Select(c => c.TotalChildren()).Sum();
+                int total = Children.Count;
+                foreach (Node c in Children)
+                    total += c.TotalChildren();
+
+                return total;
             }
         }
 
@@ -54,43 +58,15 @@ namespace AdventOfCode._2019
         [Fact]
         public void Part1()
         {
-            int answer = _nodes.Values.Select(n => n.TotalChildren()).Sum();
-            Assert.Equal(417916, answer);
+            int total = 0;
+            foreach (Node n in _nodes.Values)
+                total += n.TotalChildren();
+
+            Assert.Equal(417916, total);
         }
 
         [Fact]
         public void Part2()
-        {
-            Node source = GetNode("YOU").Parent;
-            Node target = GetNode("SAN").Parent;
-
-            Dictionary<Node, int> distances = new Dictionary<Node, int>() { { source, 0 } };
-            Queue<Node> toVisit = new Queue<Node>(new[] { source });
-
-            void Add(Node candidate, int distance)
-            {
-                if (candidate != null && !distances.ContainsKey(candidate))
-                {
-                    distances.Add(candidate, distance);
-                    toVisit.Enqueue(candidate);
-                }
-            }
-
-            while (!distances.ContainsKey(target))
-            {
-                Node current = toVisit.Dequeue();
-                int distance = distances[current] + 1;
-                Add(current.Parent, distance);
-                foreach (Node child in current.Children) Add(child, distance);
-            }
-
-            int answer = distances[target];
-
-            Assert.Equal(523, answer);
-        }
-
-        [Fact]
-        public void Part2_Different()
         {
             Node source = GetNode("YOU").Parent;
             Node target = GetNode("SAN").Parent;
