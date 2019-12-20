@@ -11,19 +11,35 @@ namespace AdventOfCode._2019
 {
     public class Day19
     {
-        long[] _program = File.ReadAllText("Inputs/Day19.txt")
-            .Split(',')
-            .Select(long.Parse)
-            .ToArray();
-        IntCode _bot;
-        Queue<long> _input = new Queue<long>();
+        class Bot
+        {
+            public Bot(long[] program)
+            {
+                _bot = new IntCode(
+                    program,
+                    () => Task.FromResult(_input.Dequeue()),
+                    value => _output = value);
+            }
+
+            public long Query(int x, int y)
+            {
+                _input.Enqueue(x);
+                _input.Enqueue(y);
+                _bot.Reset();
+                _bot.Run().Wait();
+                return _output;
+            }
+
+            IntCode _bot;
+            Queue<long> _input = new Queue<long>();
+            long _output = 0;
+        }
+
+        Bot _bot;
 
         public Day19()
         {
-            _bot = new IntCode(
-                _program,
-                () => Task.FromResult(_input.Dequeue()),
-                null);
+            _bot = new Bot(File.ReadAllText("Inputs/Day19.txt").Split(',').Select(long.Parse).ToArray());
         }
 
         [Fact]
@@ -34,23 +50,12 @@ namespace AdventOfCode._2019
             {
                 for (int j = 0; j < 50; j++)
                 {
-                    if (QueryBot(i, j) == 1)
+                    if (_bot.Query(i, j) == 1)
                         total++;
                 }
             }
 
             Assert.Equal(112, total);
-        }
-
-        private long QueryBot(int x, int y)
-        {
-            long output = 0;
-            _input.Enqueue(x);
-            _input.Enqueue(y);
-            _bot.Reset();
-            _bot.Writer = value => output = value;
-            _bot.Run().Wait();
-            return output;
         }
     }
 }

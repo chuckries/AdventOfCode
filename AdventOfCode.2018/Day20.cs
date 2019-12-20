@@ -144,17 +144,20 @@ namespace AdventOfCode._2018
             {
                 currentIndex = toVisit.Dequeue();
 
+                if (visited[currentIndex])
+                    continue;
+
+                visited[currentIndex] = true;
+
                 int newDistance = _distances[currentIndex] + 1;
                 foreach (int adjacentIndex in graph[currentIndex])
                 {
-                    if (!visited[adjacentIndex] && !toVisit.Contains(adjacentIndex))
+                    if (!visited[adjacentIndex])
                     {
                         _distances[adjacentIndex] = newDistance;
                         toVisit.Enqueue(adjacentIndex);
                     }
                 }
-
-                visited[currentIndex] = true;
             } while (toVisit.Count > 0);
         }
 
