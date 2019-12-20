@@ -34,11 +34,11 @@ namespace AdventOfCode._2019
         public delegate Task<long> InputReader();
         public delegate void OutputWriter(long value);
 
-        public long PC { get; set; } = 0;
+        public long PC { get; set; }
 
-        public long RelativeBase { get; set; } = 0;
+        public long RelativeBase { get; set; }
 
-        public bool IsHalt { get; private set; } = false;
+        public bool IsHalt { get; private set; }
 
         public long this[int index]
         {
@@ -56,9 +56,30 @@ namespace AdventOfCode._2019
 
         public IntCode(IEnumerable<long> program, InputReader reader, OutputWriter writer)
         {
-            _memory = program.ToArray();
+            _program = program.ToArray();
             Reader = reader;
             Writer = writer;
+
+            Reset();
+        }
+
+        public void Reset()
+        {
+            if (_memory == null || _memory.Length < _program.Length)
+            {
+                _memory = new long[_program.Length];
+            }
+            else
+            {
+                for (int i = _program.Length; i < _memory.Length; i++)
+                    _memory[i] = 0;
+            }
+
+            Array.Copy(_program, 0, _memory, 0, _program.Length);
+
+            PC = 0;
+            RelativeBase = 0;
+            IsHalt = false;
         }
 
         public async Task Step()
@@ -167,6 +188,7 @@ namespace AdventOfCode._2019
             }
         }
 
+        private long[] _program;
         private long[] _memory;
     }
 }

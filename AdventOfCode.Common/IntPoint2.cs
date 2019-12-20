@@ -35,12 +35,30 @@ namespace AdventOfCode.Common
             yield return this - UnitY;
         }
 
+        public IEnumerable<IntPoint2> Adjacent(IntPoint2 bounds)
+        {
+            if (X - 1 >= 0) yield return this - UnitX;
+            if (X + 1 < bounds.X) yield return this + UnitX;
+            if (Y - 1 >= 0) yield return this - UnitY;
+            if (Y + 1 < bounds.Y) yield return this + UnitY;
+        }
+
         public IntPoint2 TurnRight() => new IntPoint2(Y * 1, X * -1);
         public IntPoint2 TurnLeft() => new IntPoint2(Y * -1, X * 1);
 
         public IntPoint2 Transform(Func<int, int> transform)
         {
             return new IntPoint2(transform(X), transform(Y));
+        }
+
+        public int ToIndex(IntPoint2 max)
+        {
+            return Y * max.X + X;
+        }
+
+        public static IntPoint2 FromIndex(int index, IntPoint2 max)
+        {
+            return new IntPoint2(index % max.X, index / max.X);
         }
 
         public int ToIndex(IntPoint2 min, IntPoint2 max)

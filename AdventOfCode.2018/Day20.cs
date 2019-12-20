@@ -147,7 +147,7 @@ namespace AdventOfCode._2018
                 int newDistance = _distances[currentIndex] + 1;
                 foreach (int adjacentIndex in graph[currentIndex])
                 {
-                    if (!visited[adjacentIndex])
+                    if (!visited[adjacentIndex] && !toVisit.Contains(adjacentIndex))
                     {
                         _distances[adjacentIndex] = newDistance;
                         toVisit.Enqueue(adjacentIndex);
