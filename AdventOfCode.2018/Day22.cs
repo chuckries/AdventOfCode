@@ -152,11 +152,11 @@ namespace AdventOfCode._2018
             });
 
             PriorityQueue<Node> searchSet = new PriorityQueue<Node>(comparer);
-            Dictionary<Node, int> visited = new Dictionary<Node, int>();
+            Dictionary<Node, int> distances = new Dictionary<Node, int>();
 
             Node start = new Node(GetRegion(IntPoint2.Zero), Tool.Torch, 0);
             searchSet.Enqueue(start);
-            visited.Add(start, 0);
+            distances.Add(start, 0);
 
             int answer = 0;
             while (searchSet.Count > 0)
@@ -171,9 +171,9 @@ namespace AdventOfCode._2018
                 {
                     foreach (Node adjacent in GetAdjacentNodes(current))
                     {
-                        if (!visited.TryGetValue(adjacent, out int time) || adjacent.Time < time)
+                        if (!distances.TryGetValue(adjacent, out int time) || adjacent.Time < time)
                         {
-                            visited[adjacent] = adjacent.Time;
+                            distances[adjacent] = adjacent.Time;
                             searchSet.Enqueue(adjacent);
                         }
                     }
