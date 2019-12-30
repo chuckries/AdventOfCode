@@ -19,7 +19,7 @@ namespace AdventOfCode._2019
         public void Part1()
         {
             StringBuilder sb = new StringBuilder();
-            IntCode intCode = new IntCode(
+            IntCodeAsync intCode = new IntCodeAsync(
                 _program,
                 null,
                 value =>
@@ -30,7 +30,7 @@ namespace AdventOfCode._2019
                         sb.Append((char)value);
                 });
 
-            intCode.Run().Wait();
+            intCode.RunAsync().Wait();
 
             string[] map = sb.ToString().Split().Where(s => s != string.Empty).ToArray();
 

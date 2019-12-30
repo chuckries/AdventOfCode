@@ -3,14 +3,15 @@ using System.Buffers;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace AdventOfCode._2019
 {
-    class IntCode
+    public abstract class IntCodeBase
     {
-        enum Op : long
+        protected enum Op : long
         {
             Add = 1,
             Mul = 2,
@@ -24,14 +25,13 @@ namespace AdventOfCode._2019
             Halt = 99,
         }
 
-        enum Mode : long
+        protected enum Mode : long
         {
             Pos = 0,
             Imm = 1,
             Relative = 2
         }
 
-        public delegate Task<long> InputReader();
         public delegate void OutputWriter(long value);
 
         public long PC { get; set; }
@@ -46,18 +46,16 @@ namespace AdventOfCode._2019
             set => WriteMemory(index, value);
         }
 
-        public InputReader Reader { get; set; }
         public OutputWriter Writer { get; set; }
 
-        public IntCode(IEnumerable<long> program)
-            : this(program, null, null)
+        protected IntCodeBase(IEnumerable<long> program)
+            : this(program, null)
         {
         }
 
-        public IntCode(IEnumerable<long> program, InputReader reader, OutputWriter writer)
+        protected IntCodeBase(IEnumerable<long> program, OutputWriter writer)
         {
             _program = program.ToArray();
-            Reader = reader;
             Writer = writer;
 
             Reset();
@@ -67,117 +65,111 @@ namespace AdventOfCode._2019
         {
             if (_memory == null || _memory.Length < _program.Length)
             {
-                _memory = new long[_program.Length];
+                _memory = (long[])_program.Clone();
             }
             else
             {
-                for (int i = _program.Length; i < _memory.Length; i++)
-                    _memory[i] = 0;
+                Array.Clear(_memory, _program.Length, _memory.Length - _program.Length);
+                Array.Copy(_program, 0, _memory, 0, _program.Length);
             }
-
-            Array.Copy(_program, 0, _memory, 0, _program.Length);
 
             PC = 0;
             RelativeBase = 0;
             IsHalt = false;
         }
 
-        public async Task Step()
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        protected void StepCore(Op op, Mode[] modes)
         {
-            if (!IsHalt)
+            switch (op)
             {
-                (Op op, Mode[] modes) = Decode();
+                case Op.Halt: IsHalt = true; break;
+                case Op.Out: Writer(ReadPC(modes[0])); break;
+                case Op.Base: RelativeBase += ReadPC(modes[0]); break;
+                default:
+                    long val1 = ReadPC(modes[0]);
+                    long val2 = ReadPC(modes[1]);
 
-                switch (op)
-                {
-                    case Op.Halt:   IsHalt = true; break;
-                    case Op.In:     WritePC(modes[0], await Reader()); break;
-                    case Op.Out:    Writer(ReadPC(modes[0])); break;
-                    case Op.Base:   RelativeBase += ReadPC(modes[0]); break;
-                    default:
-                        long val1 = ReadPC(modes[0]);
-                        long val2 = ReadPC(modes[1]);
-
-                        if (op == Op.JumpTrue || op == Op.JumpFalse)
+                    if (op == Op.JumpTrue || op == Op.JumpFalse)
+                    {
+                        if ((op == Op.JumpTrue && val1 != 0) || (op == Op.JumpFalse && val1 == 0))
+                            PC = val2;
+                    }
+                    else
+                    {
+                        long val = op switch
                         {
-                            if ((op == Op.JumpTrue && val1 != 0) || (op == Op.JumpFalse && val1 == 0))
-                                PC = val2;
-                        }
-                        else
-                        {
-                            long val = op switch
-                            {
-                                Op.Add => val1 + val2,
-                                Op.Mul => val1 * val2,
-                                Op.LessThan => val1 < val2 ? 1 : 0,
-                                Op.Equals => val1 == val2 ? 1 : 0,
-                                _ => throw new InvalidOperationException("invalid op code")
-                            };
+                            Op.Add => val1 + val2,
+                            Op.Mul => val1 * val2,
+                            Op.LessThan => val1 < val2 ? 1 : 0,
+                            Op.Equals => val1 == val2 ? 1 : 0,
+                            _ => throw new InvalidOperationException("invalid op code")
+                        };
 
-                            WritePC(modes[2], val);
-                        }
-                        break;
-                }
+                        WritePC(modes[2], val);
+                    }
+                    break;
             }
         }
 
-        public async Task Run()
-        {
-            while (!IsHalt)
-                await Step();
-        }
-
-        private (Op, Mode[]) Decode()
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        protected void Decode(out Op op, Mode[] modes)
         {
             long instr = ReadPC();
 
-            Op op = (Op)(instr % 100);
+            op = (Op)(instr % 100);
             instr /= 100;
 
-            Mode[] modes = new Mode[3];
             modes[0] = (Mode)(instr % 10);
             instr /= 10;
             modes[1] = (Mode)(instr % 10);
             instr /= 10;
             modes[2] = (Mode)(instr % 10);
-
-            return (op, modes);
         }
 
-        private long ReadPC() => ReadPC(Mode.Imm);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        protected long ReadPC() => ReadPC(Mode.Imm);
 
-        private long ReadPC(Mode mode) => ReadMemory(PC++, mode);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        protected long ReadPC(Mode mode) => ReadMemory(PC++, mode);
 
-        private long ReadMemory(long address, Mode mode) => mode switch
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        protected long ReadMemory(long address, Mode mode) => mode switch
         {
             Mode.Imm => ReadMemory(address),
             _ => ReadMemory(IndirectAddressTarget(address, mode))
         };
 
-        private void WritePC(Mode mode, long value) => WriteMemory(PC++, mode, value);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        protected void WritePC(Mode mode, long value) => WriteMemory(PC++, mode, value);
 
-        private void WriteMemory(long address, Mode mode, long value) =>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        protected void WriteMemory(long address, Mode mode, long value) =>
             WriteMemory(IndirectAddressTarget(address, mode), value);
 
-        private long IndirectAddressTarget(long address, Mode mode) => mode switch
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        protected long IndirectAddressTarget(long address, Mode mode) => mode switch
         {
             Mode.Pos => ReadMemory(address),
             Mode.Relative => ReadMemory(address) + RelativeBase,
             _ => throw new InvalidOperationException("invalid address mode")
         };
 
-        private long ReadMemory(long address)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        protected long ReadMemory(long address)
         {
             EnsureMemory(address);
             return _memory[address];
         }
 
-        private void WriteMemory(long address, long value)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        protected void WriteMemory(long address, long value)
         {
             EnsureMemory(address);
             _memory[address] = value;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void EnsureMemory(long address)
         {
             if (address >= _memory.Length)
@@ -191,4 +183,71 @@ namespace AdventOfCode._2019
         private long[] _program;
         private long[] _memory;
     }
+
+    public class IntCodeAsync : IntCodeBase
+    {
+        public delegate Task<long> InputReaderAsync();
+        public InputReaderAsync Reader { get; set; }
+
+        public IntCodeAsync(IEnumerable<long> program)
+            : base(program)
+        { 
+        }
+
+        public IntCodeAsync(IEnumerable<long> program, InputReaderAsync reader, OutputWriter writer)
+            : base(program, writer)
+        {
+            Reader = reader;
+        }
+
+        public async Task RunAsync()
+        {
+            Op op;
+            Mode[] modes = new Mode[3];
+            while (!IsHalt)
+            {
+                Decode(out op, modes);
+
+                switch (op)
+                {
+                    case Op.In: WritePC(modes[0], await Reader()); break;
+                    default: StepCore(op, modes); break;
+                }
+            }
+        }
+    }
+
+    public class IntCode : IntCodeBase
+    {
+        public delegate long InputReader();
+        public InputReader Reader { get; set; }
+
+        public IntCode(IEnumerable<long> program)
+            : base(program)
+        {
+        }
+
+        public IntCode(IEnumerable<long> program, InputReader reader, OutputWriter writer)
+            : base(program, writer)
+        {
+            Reader = reader;
+        }
+
+        public void Run()
+        {
+            Op op;
+            Mode[] modes = new Mode[3];
+            while (!IsHalt)
+            {
+                Decode(out op, modes);
+
+                switch(op)
+                {
+                    case Op.In: WritePC(modes[0], Reader()); break;
+                    default: StepCore(op, modes); break;
+                }
+            }
+        }
+    }
+
 }

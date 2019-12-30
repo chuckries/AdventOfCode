@@ -48,12 +48,12 @@ namespace AdventOfCode._2019
             foreach (int phaseSetting in phaseSettings)
             {
                 inputs.Push(phaseSetting);
-                IntCode amp = new IntCode(
+                IntCodeAsync amp = new IntCodeAsync(
                     code,
                     () => Task.FromResult(inputs.Pop()),
                     value => answer = value
                     );
-                amp.Run().Wait();
+                amp.RunAsync().Wait();
                 inputs.Push(answer);
             }
 
@@ -62,12 +62,12 @@ namespace AdventOfCode._2019
 
         private long RunAmplifiersWithFeedback(IEnumerable<long> code, IEnumerable<int> phaseSettings)
         {
-            IntCode[] amplifiers = new IntCode[5];
+            IntCodeAsync[] amplifiers = new IntCodeAsync[5];
             AsyncQueue<long>[] ports = new AsyncQueue<long>[5];
             int i = 0;
             for (i = 0; i < 5; i++)
             {
-                amplifiers[i] = new IntCode(code);
+                amplifiers[i] = new IntCodeAsync(code);
                 ports[i] = new AsyncQueue<long>();
             }
 
@@ -97,7 +97,7 @@ namespace AdventOfCode._2019
             Task[] tasks = new Task[amplifiers.Length];
             for (i = 0; i < amplifiers.Length; i++)
             {
-                tasks[i] = Task.Run(amplifiers[i].Run);
+                tasks[i] = Task.Run(amplifiers[i].RunAsync);
             }
 
             Task.WaitAll(tasks);

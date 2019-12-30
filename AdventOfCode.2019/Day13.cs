@@ -30,7 +30,7 @@ namespace AdventOfCode._2019
         {
             int countBlocks = 0;
             List<long> outputs = new List<long>(3);
-            IntCode arcade = new IntCode(
+            IntCodeAsync arcade = new IntCodeAsync(
                 _program,
                 null,
                 output =>
@@ -43,7 +43,7 @@ namespace AdventOfCode._2019
                         outputs.Clear();
                     }
                 });
-            arcade.Run().Wait();
+            arcade.RunAsync().Wait();
 
             Assert.Equal(173, countBlocks);
         }
@@ -56,7 +56,7 @@ namespace AdventOfCode._2019
             long ballX = 0;
             long paddleX = 0;
 
-            IntCode.OutputWriter writer = output =>
+            IntCodeBase.OutputWriter writer = output =>
             {
                 outputs.Add(output);
                 if (outputs.Count == 3)
@@ -74,12 +74,12 @@ namespace AdventOfCode._2019
                 }
             };
 
-            IntCode.InputReader reader = () => 
+            IntCodeAsync.InputReaderAsync reader = () => 
                 Task.FromResult<long>(Math.Sign(ballX - paddleX));
 
-            IntCode arcade = new IntCode(_program, reader, writer);
+            IntCodeAsync arcade = new IntCodeAsync(_program, reader, writer);
             arcade[0] = 2;
-            arcade.Run().Wait();
+            arcade.RunAsync().Wait();
 
             Assert.Equal(8942, score);
         }

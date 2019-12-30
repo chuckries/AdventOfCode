@@ -41,8 +41,8 @@ namespace AdventOfCode._2019
         {
             AsyncQueue<long> programInputs = new AsyncQueue<long>();
             AsyncQueue<long> programOutputs = new AsyncQueue<long>();
-            IntCode intCode = new IntCode(_program, programInputs.Dequeue, programOutputs.Enqueue);
-            Task vm = Task.Run(intCode.Run);
+            IntCodeAsync intCode = new IntCodeAsync(_program, programInputs.Dequeue, programOutputs.Enqueue);
+            Task vm = Task.Run(intCode.RunAsync);
 
             Task<long> sendCommand(Direction d)
             {

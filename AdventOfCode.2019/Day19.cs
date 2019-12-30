@@ -15,7 +15,7 @@ namespace AdventOfCode._2019
         {
             public Bot(long[] program)
             {
-                _bot = new IntCode(
+                _bot = new IntCodeAsync(
                     program,
                     () => Task.FromResult(_input.Dequeue()),
                     value => _output = value);
@@ -26,11 +26,11 @@ namespace AdventOfCode._2019
                 _input.Enqueue(x);
                 _input.Enqueue(y);
                 _bot.Reset();
-                _bot.Run().Wait();
+                _bot.RunAsync().Wait();
                 return _output;
             }
 
-            IntCode _bot;
+            IntCodeAsync _bot;
             Queue<long> _input = new Queue<long>();
             long _output = 0;
         }

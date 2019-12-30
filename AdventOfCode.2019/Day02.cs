@@ -21,7 +21,7 @@ namespace AdventOfCode._2019
             IntCode intCode = new IntCode(_program);
             intCode[1] = 12;
             intCode[2] = 2;
-            intCode.Run().Wait();
+            intCode.Run();
 
             Assert.Equal(3931283, intCode[0]);
         }
@@ -38,7 +38,7 @@ namespace AdventOfCode._2019
                     IntCode intCode = new IntCode(_program);
                     intCode[1] = i;
                     intCode[2] = j;
-                    intCode.Run().Wait();
+                    intCode.Run();
 
                     if (intCode[0] == target)
                     {
