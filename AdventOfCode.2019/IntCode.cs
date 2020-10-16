@@ -235,13 +235,21 @@ namespace AdventOfCode._2019
 
         public void Run()
         {
+            while (!IsHalt)
+            {
+                Step();
+            }
+        }
+
+        public void Step()
+        {
             Op op;
             Mode[] modes = new Mode[3];
-            while (!IsHalt)
+            if (!IsHalt)
             {
                 Decode(out op, modes);
 
-                switch(op)
+                switch (op)
                 {
                     case Op.In: WritePC(modes[0], Reader()); break;
                     default: StepCore(op, modes); break;

@@ -41,7 +41,7 @@ namespace AdventOfCode.Common
                     return Task.FromResult(_items.Dequeue());
                 else
                 {
-                    TaskCompletionSource<T> request = new TaskCompletionSource<T>();
+                    TaskCompletionSource<T> request = new TaskCompletionSource<T>(TaskCreationOptions.RunContinuationsAsynchronously);
                     _outstandingRequests.Enqueue(request);
                     return request.Task;
                 }

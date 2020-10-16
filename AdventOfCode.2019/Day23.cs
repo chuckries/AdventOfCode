@@ -12,11 +12,14 @@ namespace AdventOfCode._2019
     {
         public class Computer
         {
+            public bool Idle { get; private set; } = false;
+
             public Computer(int address, long[] program, Action<long, long, long> send)
             {
                 _address = address;
                 _receivedPackets = new Queue<long>();
                 _receivedPackets.Enqueue(address);
+                _receivedPackets.Enqueue(-1);
                 _outputs = new List<long>();
 
                 _intCode = new IntCode(program,
@@ -25,7 +28,10 @@ namespace AdventOfCode._2019
                         lock (_receivedPackets)
                         {
                             if (_receivedPackets.Count == 0)
-                                return -1L;
+                            {
+                                Idle = true;
+                                return -1;
+                            }
                             else
                                 return _receivedPackets.Dequeue();
                         }
@@ -47,12 +53,19 @@ namespace AdventOfCode._2019
                 {
                     _receivedPackets.Enqueue(x);
                     _receivedPackets.Enqueue(y);
+                    _receivedPackets.Enqueue(-1);
+                    Idle = false;
                 }
             }
 
             public void Run()
             {
                 _intCode.Run();
+            }
+
+            public void Step()
+            {
+                _intCode.Step();
             }
 
             IntCode _intCode;
@@ -84,13 +97,61 @@ namespace AdventOfCode._2019
                 });
             }
 
-            foreach(Computer c in network)
+            Task.Run(() =>
             {
-                Task.Run(c.Run);
-            }
+                while (true)
+                {
+                    foreach (Computer c in network)
+                    {
+                        c.Step();
+                    }
+                }
+            });
 
             long answer = answerTcs.Task.Result;
-            Assert.Equal(0, answer);
+            Assert.Equal(22134, answer);
+        }
+
+        [Fact]
+        public void Part2()
+        {
+            TaskCompletionSource<long> answerTcs = new TaskCompletionSource<long>();
+            Computer[] network = new Computer[50];
+            (long x, long y) natPacket = (-1, -1);
+            long lastYSent = -1;
+            for (int i = 0; i < 50; i++)
+            {
+                network[i] = new Computer(i, _program, (address, x, y) =>
+                {
+                    if (address == 255)
+                        natPacket = (x, y);
+                    else
+                        network[address].Receive(x, y);
+                });
+            }
+
+            Task.Run(() =>
+            {
+                while (true)
+                {
+                    foreach (Computer c in network)
+                    {
+                        c.Step();
+                    }
+
+                    if (network.All(c => c.Idle))
+                    {
+                        network[0].Receive(natPacket.x, natPacket.y);
+                        if (natPacket.y == lastYSent)
+                            answerTcs.SetResult(lastYSent);
+
+                        lastYSent = natPacket.y;
+                    }
+                }
+            });
+
+            long answer = answerTcs.Task.Result;
+            Assert.Equal(16084, answer);
         }
     }
 }
