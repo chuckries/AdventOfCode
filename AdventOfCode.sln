@@ -9,10 +9,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AdventOfCode.2019", "Advent
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AdventOfCode.2018", "AdventOfCode.2018\AdventOfCode.2018.csproj", "{202D39DA-7400-4C77-86A3-C6F098D6F99D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpringJumpTest", "SpringJumpTest\SpringJumpTest.csproj", "{74581C4F-B91C-4C62-915D-9033B3849A59}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpringDroidUI", "SpringDroidUI\SpringDroidUI.csproj", "{465074F8-F44D-47C3-81EA-2BD1B099FF5C}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,14 +27,6 @@ Global
 		{202D39DA-7400-4C77-86A3-C6F098D6F99D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{202D39DA-7400-4C77-86A3-C6F098D6F99D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{202D39DA-7400-4C77-86A3-C6F098D6F99D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{74581C4F-B91C-4C62-915D-9033B3849A59}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{74581C4F-B91C-4C62-915D-9033B3849A59}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{74581C4F-B91C-4C62-915D-9033B3849A59}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{74581C4F-B91C-4C62-915D-9033B3849A59}.Release|Any CPU.Build.0 = Release|Any CPU
-		{465074F8-F44D-47C3-81EA-2BD1B099FF5C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{465074F8-F44D-47C3-81EA-2BD1B099FF5C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{465074F8-F44D-47C3-81EA-2BD1B099FF5C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{465074F8-F44D-47C3-81EA-2BD1B099FF5C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
