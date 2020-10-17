@@ -69,7 +69,7 @@ namespace AdventOfCode._2019
             IntPoint2 heading = IntPoint2.UnitY;
             bool writeMode = false;
 
-            IntCodeAsync.InputReaderAsync reader = () =>
+            IntCodeAsync.InputReaderAsync reader = _ =>
             {
                 if (!canvas.TryGetValue(position, out bool value))
                     value = false;

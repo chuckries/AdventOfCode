@@ -17,7 +17,7 @@ namespace AdventOfCode._2019
             {
                 _bot = new IntCodeAsync(
                     program,
-                    () => Task.FromResult(_input.Dequeue()),
+                    _ => Task.FromResult(_input.Dequeue()),
                     value => _output = value);
             }
 

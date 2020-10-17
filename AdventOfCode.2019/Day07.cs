@@ -50,7 +50,7 @@ namespace AdventOfCode._2019
                 inputs.Push(phaseSetting);
                 IntCodeAsync amp = new IntCodeAsync(
                     code,
-                    () => Task.FromResult(inputs.Pop()),
+                    _ => Task.FromResult(inputs.Pop()),
                     value => answer = value
                     );
                 amp.RunAsync().Wait();

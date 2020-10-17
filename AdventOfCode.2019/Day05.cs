@@ -21,7 +21,7 @@ namespace AdventOfCode._2019
             List<long> outputs = new List<long>();
             IntCodeAsync intCode = new IntCodeAsync(
                 _program,
-                () => Task.FromResult(1L),
+                _ => Task.FromResult(1L),
                 outputs.Add
                 );
 
@@ -37,7 +37,7 @@ namespace AdventOfCode._2019
             long output = 0;
             IntCodeAsync intCode = new IntCodeAsync(
                 _program,
-                () => Task.FromResult(5L),
+                _ => Task.FromResult(5L),
                 value => output = value
                 );
 

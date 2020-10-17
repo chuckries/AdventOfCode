@@ -5,6 +5,7 @@ using System.Dynamic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace AdventOfCode._2019
@@ -186,7 +187,7 @@ namespace AdventOfCode._2019
 
     public class IntCodeAsync : IntCodeBase
     {
-        public delegate Task<long> InputReaderAsync();
+        public delegate Task<long> InputReaderAsync(CancellationToken cancellationToken);
         public InputReaderAsync Reader { get; set; }
 
         public IntCodeAsync(IEnumerable<long> program)
@@ -202,6 +203,11 @@ namespace AdventOfCode._2019
 
         public async Task RunAsync()
         {
+            await RunAsync(CancellationToken.None);
+        }
+
+        public async Task RunAsync(CancellationToken cancellationToken = default)
+        {
             Op op;
             Mode[] modes = new Mode[3];
             while (!IsHalt)
@@ -210,7 +216,7 @@ namespace AdventOfCode._2019
 
                 switch (op)
                 {
-                    case Op.In: WritePC(modes[0], await Reader()); break;
+                    case Op.In: WritePC(modes[0], await Reader(cancellationToken)); break;
                     default: StepCore(op, modes); break;
                 }
             }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace AdventOfCode.Common
@@ -33,7 +34,7 @@ namespace AdventOfCode.Common
             }
         }
 
-        public Task<T> Dequeue()
+        public Task<T> Dequeue(CancellationToken cancellationToken = default)
         {
             lock(_lock)
             {
