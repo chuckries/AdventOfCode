@@ -19,13 +19,13 @@ namespace AdventOfCode._2019
         public void Part1()
         {
             List<long> answer = new List<long>();
-            IntCodeAsync intCode = new IntCodeAsync(
+            IntCode intCode = new IntCode(
                 _program,
-                _ => Task.FromResult(1L),
+                () => 1L,
                 answer.Add
                 );
 
-            intCode.RunAsync().Wait();
+            intCode.Run();
 
             Assert.Collection(answer, item => Assert.Equal(2518058886, item));
         }
@@ -34,13 +34,13 @@ namespace AdventOfCode._2019
         public void Part2()
         {
             List<long> answer = new List<long>();
-            IntCodeAsync intCode = new IntCodeAsync(
+            IntCode intCode = new IntCode(
                 _program,
-                _ => Task.FromResult(2L),
+                () => 2L,
                 answer.Add
                 );
 
-            intCode.RunAsync().Wait();
+            intCode.Run();
 
             Assert.Collection(answer, item => Assert.Equal(44292, item));
         }

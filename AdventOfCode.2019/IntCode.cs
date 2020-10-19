@@ -79,7 +79,6 @@ namespace AdventOfCode._2019
             IsHalt = false;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected void StepCore(Op op, Mode[] modes)
         {
             switch (op)
@@ -113,7 +112,6 @@ namespace AdventOfCode._2019
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected void Decode(out Op op, Mode[] modes)
         {
             long instr = ReadPC();
@@ -128,27 +126,21 @@ namespace AdventOfCode._2019
             modes[2] = (Mode)(instr % 10);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected long ReadPC() => ReadPC(Mode.Imm);
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected long ReadPC(Mode mode) => ReadMemory(PC++, mode);
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected long ReadMemory(long address, Mode mode) => mode switch
         {
             Mode.Imm => ReadMemory(address),
             _ => ReadMemory(IndirectAddressTarget(address, mode))
         };
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected void WritePC(Mode mode, long value) => WriteMemory(PC++, mode, value);
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected void WriteMemory(long address, Mode mode, long value) =>
             WriteMemory(IndirectAddressTarget(address, mode), value);
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected long IndirectAddressTarget(long address, Mode mode) => mode switch
         {
             Mode.Pos => ReadMemory(address),
@@ -156,21 +148,18 @@ namespace AdventOfCode._2019
             _ => throw new InvalidOperationException("invalid address mode")
         };
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected long ReadMemory(long address)
         {
             EnsureMemory(address);
             return _memory[address];
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected void WriteMemory(long address, long value)
         {
             EnsureMemory(address);
             _memory[address] = value;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void EnsureMemory(long address)
         {
             if (address >= _memory.Length)

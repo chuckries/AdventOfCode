@@ -55,7 +55,7 @@ namespace AdventOfCode._2019
         }
 
         [Fact] 
-        void Part2()
+        public void Part2()
         {
             IntPoint2 origin = new IntPoint2(28, 29);
 

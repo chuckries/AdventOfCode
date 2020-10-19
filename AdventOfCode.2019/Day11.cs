@@ -69,12 +69,12 @@ namespace AdventOfCode._2019
             IntPoint2 heading = IntPoint2.UnitY;
             bool writeMode = false;
 
-            IntCodeAsync.InputReaderAsync reader = _ =>
+            IntCode.InputReader reader = () =>
             {
                 if (!canvas.TryGetValue(position, out bool value))
                     value = false;
 
-                return Task.FromResult<long>(value ? 1 : 0);
+                return value ? 1 : 0;
             };
 
             IntCodeBase.OutputWriter writer = value =>
@@ -97,8 +97,8 @@ namespace AdventOfCode._2019
                 writeMode = !writeMode;
             };
 
-            IntCodeAsync intCode = new IntCodeAsync(program, reader, writer);
-            intCode.RunAsync().Wait();
+            IntCode intCode = new IntCode(program, reader, writer);
+            intCode.Run();
         }
     }
 }

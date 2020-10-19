@@ -15,9 +15,9 @@ namespace AdventOfCode._2019
         {
             public Bot(long[] program)
             {
-                _bot = new IntCodeAsync(
+                _bot = new IntCode(
                     program,
-                    _ => Task.FromResult(_input.Dequeue()),
+                    _input.Dequeue,
                     value => _output = value);
             }
 
@@ -26,11 +26,11 @@ namespace AdventOfCode._2019
                 _input.Enqueue(x);
                 _input.Enqueue(y);
                 _bot.Reset();
-                _bot.RunAsync().Wait();
+                _bot.Run();
                 return _output;
             }
 
-            IntCodeAsync _bot;
+            IntCode _bot;
             Queue<long> _input = new Queue<long>();
             long _output = 0;
         }
@@ -56,6 +56,62 @@ namespace AdventOfCode._2019
             }
 
             Assert.Equal(112, total);
+        }
+
+        [Fact]
+        public void Part2()
+        {
+            int xStart;
+            int xEnd;
+            int y;
+
+            // find an initial range, try y = 40;
+            int xCurrent = 0;
+            y = 40;
+
+            while (_bot.Query(xCurrent, y) == 0)
+                xCurrent++;
+            xStart = xCurrent;
+
+            while (_bot.Query(xCurrent, y) != 0)
+                xCurrent++;
+            xEnd = xCurrent - 1;
+
+            const int BoxSize = 100;
+
+            (int x, int y) answerCoords;
+            while (true)
+            {
+                ExtendRange(ref xStart, ref xEnd, ref y);
+
+                if (xEnd - xStart + 1 >= BoxSize)
+                {
+                    int candiateX = xEnd - BoxSize + 1;
+                    if (_bot.Query(candiateX, y + BoxSize - 1) != 0)
+                    {
+                        answerCoords = (candiateX, y);
+                        break;
+                    }
+                }
+            }
+
+            int answer = answerCoords.x * 10_000 + answerCoords.y;
+            Assert.Equal(18261982, answer);
+        }
+
+        private void ExtendRange (ref int xStart, ref int xEnd, ref int y)
+        {
+            y++;
+
+            while (_bot.Query(xStart, y) == 0)
+            {
+                xStart++;
+            }
+
+            while (_bot.Query(xEnd + 1, y) != 0)
+            {
+                xEnd++;
+            }
         }
     }
 }

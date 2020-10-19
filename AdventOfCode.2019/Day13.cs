@@ -74,12 +74,11 @@ namespace AdventOfCode._2019
                 }
             };
 
-            IntCodeAsync.InputReaderAsync reader = _ => 
-                Task.FromResult<long>(Math.Sign(ballX - paddleX));
+            IntCode.InputReader reader = () => Math.Sign(ballX - paddleX);
 
-            IntCodeAsync arcade = new IntCodeAsync(_program, reader, writer);
+            IntCode arcade = new IntCode(_program, reader, writer);
             arcade[0] = 2;
-            arcade.RunAsync().Wait();
+            arcade.Run();
 
             Assert.Equal(8942, score);
         }

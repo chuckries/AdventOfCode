@@ -48,12 +48,12 @@ namespace AdventOfCode._2019
             foreach (int phaseSetting in phaseSettings)
             {
                 inputs.Push(phaseSetting);
-                IntCodeAsync amp = new IntCodeAsync(
+                IntCode amp = new IntCode(
                     code,
-                    _ => Task.FromResult(inputs.Pop()),
+                    inputs.Pop,
                     value => answer = value
                     );
-                amp.RunAsync().Wait();
+                amp.Run();
                 inputs.Push(answer);
             }
 
@@ -94,12 +94,8 @@ namespace AdventOfCode._2019
                 ports[0].Enqueue(value);
             };
 
-            Task[] tasks = new Task[amplifiers.Length];
-            for (i = 0; i < amplifiers.Length; i++)
-            {
-                tasks[i] = Task.Run(amplifiers[i].RunAsync);
-            }
 
+            Task[] tasks = amplifiers.Select(s => s.RunAsync()).ToArray();
             Task.WaitAll(tasks);
 
             return answer;
