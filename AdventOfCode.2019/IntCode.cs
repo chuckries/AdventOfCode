@@ -201,6 +201,7 @@ namespace AdventOfCode._2019
             Mode[] modes = new Mode[3];
             while (!IsHalt)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 Decode(out op, modes);
 
                 switch (op)

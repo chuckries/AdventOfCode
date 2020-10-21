@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using Xunit;
 
@@ -13,154 +14,94 @@ namespace AdventOfCode._2019
     {
         class Deck
         {
-            public long Current => _deck[_head];
+            public readonly long Size;
+            public long Offset { get; private set; }
+            public long Increment { get; private set; }
 
             public Deck(long size)
+                : this(0, 1, size)
             {
-                _size = size;
-                _deck = new long[_size];
-                for (long i = 0; i < _size; i++)
-                    _deck[i] = i;
-                _temp = new long[_size];
-                _head = 0;
-                _dir = 1;
             }
 
-            public IEnumerable<long> Cards()
+            public Deck(long offset, long increment, long size)
             {
-                long current = _head;
-                for (long i = 0; i < _size; i++)
-                {
-                    yield return _deck[current];
-                    current = Bounds(current + _dir);
-                }
+                Offset = offset;
+                Increment = increment;
+                Size = size;
+            }
+
+            public long Get(long n)
+            {
+                return Mod(Offset + n * Increment);
             }
 
             public void NewStack()
             {
-                _dir *= -1;
-                _head = Bounds(_head + _dir);
+                Increment = Mod(Increment * -1);
+                Offset = Mod(Offset + Increment);
             }
 
-            public void Cut(int amount)
+            public void Cut(long n)
             {
-                _head = Bounds(_head + amount * _dir);
+                Offset = Mod(Offset + Increment * n);
             }
 
-            public void Deal(long number)
+            public void Deal(long n)
             {
-                long index = 0;
-                foreach (long card in Cards())
-                {
-                    _temp[index] = card;
-                    index = Bounds(index + number);
-                }
-                var temp = _deck;
-                _deck = _temp;
-                _temp = temp;
-                _head = 0;
-                _dir = 1;
+                Increment = Mod(new BigInteger(Increment) * (long)BigInteger.ModPow(n, Size - 2, Size));
             }
 
-            private long Bounds(long current)
+            private long Mod(BigInteger n)
             {
-                if (current >= _size)
-                    return current %= _size;
-                else
-                {
-                    while (current < 0)
-                        current += _size;
-                    return current;
-                }
+                return (long)((n % Size + Size) % Size);
             }
-
-            long _size;
-            long[] _deck;
-            long[] _temp;
-            long _head;
-            long _dir;
         }
 
         [Fact]
         public void Part1()
         {
-            Deck deck = new Deck(10007);
+            const long Target = 2019;
+            Deck deck = new Deck(10_007);
             Parse(File.ReadAllText("Inputs/Day22.txt"), deck);
 
-            long i = 0;
-            foreach (long card in deck.Cards())
+            int pos = 0;
+            while (true)
             {
-                if (card == 2019)
+                if (deck.Get(pos) == Target)
                     break;
-                i++;
+
+                pos++;
             }
 
-            Assert.Equal(4096, i);
+            Assert.Equal(4096, pos);
         }
 
         [Fact]
-        public void DeckTest()
+        public void Part2()
         {
-            Deck deck = new Deck(10);
+            // I never figured this out, all credit goes to 
+            // https://www.reddit.com/r/adventofcode/comments/ee0rqi/2019_day_22_solutions/fbnkaju/?utm_source=reddit&utm_medium=web2x&context=3
+            // whose explanation was helpful but barely understood
+            // and whose code I essentially copied
 
-            deck.Cut(3);
-            Assert.Equal(3, deck.Current);
-            Assert.True(Enumerable.SequenceEqual(deck.Cards(), new long[] { 3, 4, 5, 6, 7, 8, 9, 0, 1, 2 }));
+            const long TargetPosition = 2020;
+            const long Iterations = 101_741_582_076_661;
+            const long Size = 119_315_717_514_047;
+            Deck deck = new Deck(Size);
+            Parse(File.ReadAllText("Inputs/Day22.txt"), deck);
 
-            deck.Cut(-4);
-            Assert.Equal(9, deck.Current);
-            Assert.True(Enumerable.SequenceEqual(deck.Cards(), new long[] { 9, 0, 1, 2, 3, 4, 5, 6, 7, 8 }));
+            long finalIncrement = (long)BigInteger.ModPow(deck.Increment, Iterations, Size);
+            BigInteger finalOffset =
+                new BigInteger(deck.Offset) *
+                new BigInteger(1 - finalIncrement) *
+                BigInteger.ModPow(((1 - deck.Increment) % Size + Size) % Size, Size - 2, Size);
+            finalOffset = (finalOffset % Size + Size) % Size;
 
-            deck.NewStack();
-            Assert.Equal(8, deck.Current);
-            Assert.True(Enumerable.SequenceEqual(deck.Cards(), new long[] { 8, 7, 6, 5, 4, 3, 2, 1, 0, 9 }));
+            deck = new Deck((long)finalOffset, finalIncrement, Size);
 
-            deck.Cut(1);
-            Assert.Equal(7, deck.Current);
-            Assert.True(Enumerable.SequenceEqual(deck.Cards(), new long[] { 7, 6, 5, 4, 3, 2, 1, 0, 9, 8 }));
+            long answer = deck.Get(TargetPosition);
 
-            deck.NewStack();
-            Assert.Equal(8, deck.Current);
-            Assert.True(Enumerable.SequenceEqual(deck.Cards(), new long[] { 8, 9, 0, 1, 2, 3, 4, 5, 6, 7 }));
-        }
-
-        [Fact]
-        public void Example()
-        {
-            string input = @"deal with increment 7
-deal into new stack
-deal into new stack";
-            Deck deck = new Deck(10);
-            Parse(input, deck);
-            Assert.True(Enumerable.SequenceEqual(deck.Cards(), new long[] { 0, 3, 6, 9, 2, 5, 8, 1, 4, 7 }));
-
-            input = @"cut 6
-deal with increment 7
-deal into new stack";
-            deck = new Deck(10);
-            Parse(input, deck);
-            Assert.True(Enumerable.SequenceEqual(deck.Cards(), new long[] { 3, 0, 7, 4, 1, 8, 5, 2, 9, 6 }));
-
-            input = @"deal with increment 7
-deal with increment 9
-cut -2";
-            deck = new Deck(10);
-            Parse(input, deck);
-            Assert.True(Enumerable.SequenceEqual(deck.Cards(), new long[] { 6, 3, 0, 7, 4, 1, 8, 5, 2, 9 }));
-
-            input = @"deal into new stack
-cut -2
-deal with increment 7
-cut 8
-cut -4
-deal with increment 7
-cut 3
-deal with increment 9
-deal with increment 3
-cut -1";
-            deck = new Deck(10);
-            Parse(input, deck);
-            Assert.True(Enumerable.SequenceEqual(deck.Cards(), new long[] { 9, 2, 5, 8, 1, 4, 7, 0, 3, 6 }));
+            Assert.Equal(78613970589919, answer);
         }
 
         private void Parse(string shuffle, Deck deck)

@@ -18,31 +18,31 @@ namespace AdventOfCode._2019
         [Fact]
         public void Part1()
         {
-            List<long> answer = new List<long>();
+            long answer = 0;
             IntCode intCode = new IntCode(
                 _program,
                 () => 1L,
-                answer.Add
+                val => answer = val
                 );
 
             intCode.Run();
 
-            Assert.Collection(answer, item => Assert.Equal(2518058886, item));
+            Assert.Equal(2518058886, answer);
         }
 
         [Fact]
         public void Part2()
         {
-            List<long> answer = new List<long>();
+            long answer = 0;
             IntCode intCode = new IntCode(
                 _program,
                 () => 2L,
-                answer.Add
-                );
+                val => answer = val
+                ); ;
 
             intCode.Run();
 
-            Assert.Collection(answer, item => Assert.Equal(44292, item));
+            Assert.Equal(44292, answer);
         }
     }
 }
