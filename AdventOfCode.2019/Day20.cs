@@ -121,11 +121,7 @@ namespace AdventOfCode._2019
                 PriorityQueue<(int index, int distance, int level)> queue = new PriorityQueue<(int index, int distance, int level)>(
                     Comparer<(int index, int distance, int level)>.Create((lhs, rhs) =>
                     {
-                        int val = lhs.level - rhs.level;
-                        if (val == 0)
-                            val = lhs.distance - rhs.distance;
-
-                        return val;
+                        return lhs.distance - rhs.distance;
                     }));
 
                 queue.Enqueue(current);

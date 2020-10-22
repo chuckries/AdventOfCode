@@ -87,26 +87,26 @@ namespace AdventOfCode._2019
                 case Op.Out: Writer(ReadPC(modes[0])); break;
                 case Op.Base: RelativeBase += ReadPC(modes[0]); break;
                 default:
-                    long val1 = ReadPC(modes[0]);
-                    long val2 = ReadPC(modes[1]);
+                    long arg1 = ReadPC(modes[0]);
+                    long arg2 = ReadPC(modes[1]);
 
                     if (op == Op.JumpTrue || op == Op.JumpFalse)
                     {
-                        if ((op == Op.JumpTrue && val1 != 0) || (op == Op.JumpFalse && val1 == 0))
-                            PC = val2;
+                        if ((op == Op.JumpTrue && arg1 != 0) || (op == Op.JumpFalse && arg1 == 0))
+                            PC = arg2;
                     }
                     else
                     {
-                        long val = op switch
+                        long result = op switch
                         {
-                            Op.Add => val1 + val2,
-                            Op.Mul => val1 * val2,
-                            Op.LessThan => val1 < val2 ? 1 : 0,
-                            Op.Equals => val1 == val2 ? 1 : 0,
+                            Op.Add => arg1 + arg2,
+                            Op.Mul => arg1 * arg2,
+                            Op.LessThan => arg1 < arg2 ? 1 : 0,
+                            Op.Equals => arg1 == arg2 ? 1 : 0,
                             _ => throw new InvalidOperationException("invalid op code")
                         };
 
-                        WritePC(modes[2], val);
+                        WritePC(modes[2], result);
                     }
                     break;
             }

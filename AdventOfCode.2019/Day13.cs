@@ -30,7 +30,7 @@ namespace AdventOfCode._2019
         {
             int countBlocks = 0;
             List<long> outputs = new List<long>(3);
-            IntCodeAsync arcade = new IntCodeAsync(
+            IntCode arcade = new IntCode(
                 _program,
                 null,
                 output =>
@@ -43,7 +43,7 @@ namespace AdventOfCode._2019
                         outputs.Clear();
                     }
                 });
-            arcade.RunAsync().Wait();
+            arcade.Run();
 
             Assert.Equal(173, countBlocks);
         }
