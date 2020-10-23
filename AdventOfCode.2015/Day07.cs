@@ -9,7 +9,7 @@ using Xunit;
 
 namespace AdventOfCode._2015
 {
-    public class Day7
+    public class Day07
     {
         private class DependencyGraph
         {
@@ -207,7 +207,7 @@ namespace AdventOfCode._2015
         [Fact]
         public void Part1()
         {
-            DependencyGraph graph = new DependencyGraph(File.ReadAllLines("Inputs/Day7.txt").ToArray());
+            DependencyGraph graph = new DependencyGraph(Parse().ToArray());
             ushort answer = graph.Resolve("a");
 
             Assert.Equal(16076, answer);
@@ -216,7 +216,7 @@ namespace AdventOfCode._2015
         [Fact]
         public void Part2()
         {
-            DependencyGraph graph = new DependencyGraph(File.ReadAllLines("Inputs/Day7.txt").Select(s =>
+            DependencyGraph graph = new DependencyGraph(Parse().Select(s =>
             {
                 if (s.EndsWith("-> b"))
                     s = "16076 -> b";
@@ -226,6 +226,11 @@ namespace AdventOfCode._2015
 
             ushort answer = graph.Resolve("a");
             Assert.Equal(2797, answer);
+        }
+
+        private IEnumerable<string> Parse()
+        {
+            return File.ReadAllLines("Inputs/Day07.txt");
         }
     }
 }

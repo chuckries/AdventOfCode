@@ -11,7 +11,7 @@ using Xunit;
 
 namespace AdventOfCode._2015
 {
-    public class Day2
+    public class Day02
     {
         [Fact]
         public void Part1()
@@ -53,7 +53,7 @@ namespace AdventOfCode._2015
 
         private IEnumerable<IntPoint3> Parse()
         {
-            return File.ReadAllLines("Inputs/Day2.txt").Select(Parse);
+            return File.ReadAllLines("Inputs/Day02.txt").Select(Parse);
         }
 
         private IntPoint3 Parse(string line)

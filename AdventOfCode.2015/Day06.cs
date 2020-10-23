@@ -10,7 +10,7 @@ using Xunit;
 
 namespace AdventOfCode._2015
 {
-    public class Day6
+    public class Day06
     {
         const int GridSize = 1000;
 
@@ -79,7 +79,7 @@ namespace AdventOfCode._2015
 
         private IEnumerable<(IntPoint2 p1, IntPoint2 p2, string op)> Parse()
         {
-            return File.ReadAllLines("Inputs/Day6.txt").Select(s =>
+            return File.ReadAllLines("Inputs/Day06.txt").Select(s =>
             {
                 Match match = s_Regex.Match(s);
 

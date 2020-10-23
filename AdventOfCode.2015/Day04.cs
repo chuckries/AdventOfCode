@@ -7,7 +7,7 @@ using Xunit;
 
 namespace AdventOfCode._2015
 {
-    public class Day4
+    public class Day04
     {
         const string Input = "bgvyzdsv";
 

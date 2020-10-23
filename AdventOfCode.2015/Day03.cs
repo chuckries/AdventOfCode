@@ -10,13 +10,13 @@ using System.Linq;
 
 namespace AdventOfCode._2015
 {
-    public class Day3
+    public class Day03
     {
         string _input;
 
-        public Day3()
+        public Day03()
         {
-            _input = File.ReadAllText("Inputs/Day3.txt");
+            _input = File.ReadAllText("Inputs/Day03.txt");
         }
 
         [Fact]

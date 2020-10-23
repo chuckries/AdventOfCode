@@ -6,14 +6,14 @@ using Xunit;
 
 namespace AdventOfCode._2015
 {
-    public class Day1
+    public class Day01
     {
 
         string _str;
 
-        public Day1()
+        public Day01()
         {
-            _str = File.ReadAllText("Inputs/Day1.txt");
+            _str = File.ReadAllText("Inputs/Day01.txt");
         }
 
         [Fact]

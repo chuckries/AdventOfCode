@@ -8,7 +8,7 @@ using Xunit;
 
 namespace AdventOfCode._2015
 {
-    public class Day5
+    public class Day05
     {
         [Fact]
         public void Part1()
@@ -89,7 +89,7 @@ namespace AdventOfCode._2015
 
         private IEnumerable<string> Parse()
         {
-            return File.ReadAllLines("Inputs/Day5.txt");
+            return File.ReadAllLines("Inputs/Day05.txt");
         }
     }
 }
