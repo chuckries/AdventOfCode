@@ -57,10 +57,7 @@ namespace AdventOfCode._2015
                     _lazyValue = new Lazy<ushort>(ResolveCore);
                 }
 
-                public ushort Resolve()
-                {
-                    return _lazyValue.Value;
-                }
+                public ushort Resolve() => _lazyValue.Value;
 
                 protected abstract ushort ResolveCore();
             }
@@ -76,10 +73,7 @@ namespace AdventOfCode._2015
                     _value = value;
                 }
 
-                protected override ushort ResolveCore()
-                {
-                    return _value;
-                }
+                protected override ushort ResolveCore() => _value;
             }
 
             [DebuggerDisplay("{_op.Method.Name,nq} {_dependency,nq} -> {Name,nq}")]
@@ -191,17 +185,14 @@ namespace AdventOfCode._2015
                 return GetNode(name).Resolve();
             }
 
-            private Node GetNode(string name)
-            {
-                return _nodes[name];
-            }
+            private Node GetNode(string name) => _nodes[name];
 
             private static ushort Nop(ushort val) => val;
             private static ushort And(ushort val1, ushort val2) => (ushort)(val1 & val2);
             private static ushort Or(ushort val1, ushort val2) => (ushort)(val1 | val2);
             private static ushort Not(ushort val) => (ushort)~val;
-            private static ushort LShift(ushort val, ushort amount) => (ushort)((val << amount) & 0xFFFF);
-            private static ushort RShift(ushort val, ushort amount) => (ushort)((val >> amount) & 0xFFFF);
+            private static ushort LShift(ushort val, ushort amount) => (ushort)(val << amount);
+            private static ushort RShift(ushort val, ushort amount) => (ushort)(val >> amount);
         }
 
         [Fact]

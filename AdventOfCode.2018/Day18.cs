@@ -29,7 +29,7 @@ namespace AdventOfCode._2018
             _next = (Cell[,])_current.Clone();
 
             int j = 0;
-            foreach (string s in File.ReadAllLines("Inputs/Day18.txt"))
+            foreach (string s in input)
             {
                 int i = 0;
                 foreach (char c in s)

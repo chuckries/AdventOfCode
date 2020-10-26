@@ -43,6 +43,18 @@ namespace AdventOfCode.Common
             if (Y + 1 < bounds.Y) yield return this + UnitY;
         }
 
+        public IEnumerable<IntPoint2> Surrounding()
+        {
+            yield return (X - 1, Y - 1);
+            yield return (X    , Y - 1);
+            yield return (X + 1, Y - 1);
+            yield return (X - 1, Y    );
+            yield return (X + 1, Y    );
+            yield return (X - 1, Y + 1);
+            yield return (X    , Y + 1);
+            yield return (X + 1, Y + 1);
+        }
+
         public IntPoint2 TurnRight() => new IntPoint2(Y * 1, X * -1);
         public IntPoint2 TurnLeft() => new IntPoint2(Y * -1, X * 1);
 

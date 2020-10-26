@@ -22,6 +22,13 @@
     <None Remove="Inputs\Day08.txt" />
     <None Remove="Inputs\Day09.txt" />
     <None Remove="Inputs\Day12.txt" />
+    <None Remove="Inputs\Day13.txt" />
+    <None Remove="Inputs\Day14.txt" />
+    <None Remove="Inputs\Day15.txt" />
+    <None Remove="Inputs\Day16.txt" />
+    <None Remove="Inputs\Day17.txt" />
+    <None Remove="Inputs\Day18.txt" />
+    <None Remove="Inputs\Day19.txt" />
   </ItemGroup>
 
   <ItemGroup>

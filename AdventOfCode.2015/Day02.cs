@@ -65,6 +65,6 @@ namespace AdventOfCode._2015
                 int.Parse(match.Groups["Z"].Value));
         }
 
-        static Regex s_Regex = new Regex(@"^(?'X'[0-9]+)x(?'Y'[0-9]+)x(?'Z'[0-9]+)$", RegexOptions.Compiled);
+        static Regex s_Regex = new Regex(@"^(?'X'\d+)x(?'Y'\d+)x(?'Z'\d+)$", RegexOptions.Compiled);
     }
 }

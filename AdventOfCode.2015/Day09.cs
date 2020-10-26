@@ -74,7 +74,7 @@ namespace AdventOfCode._2015
                         for (int i = 0; i < current.Set.Length; i++)
                         {
                             int dist;
-                            if (!current.Set[i] && (dist = _edges[current.Index][i]) != 1)
+                            if (!current.Set[i] && (dist = _edges[current.Index][i]) != -1)
                             {
                                 bool[] newSet = (bool[])current.Set.Clone();
                                 newSet[i] = true;
