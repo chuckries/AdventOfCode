@@ -117,11 +117,10 @@ namespace AdventOfCode._2019
                 (int index, int distance, int level) current = (source, 0, 0);
                 HashSet<(int index, int level)> visited = new HashSet<(int index, int level)>();
 
-
                 PriorityQueue<(int index, int distance, int level)> queue = new PriorityQueue<(int index, int distance, int level)>(
                     Comparer<(int index, int distance, int level)>.Create((lhs, rhs) =>
                     {
-                        return lhs.distance - rhs.distance;
+                        return (lhs.distance + lhs.level) - (rhs.distance + rhs.level);
                     }));
 
                 queue.Enqueue(current);

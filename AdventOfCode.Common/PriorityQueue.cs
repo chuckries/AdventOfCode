@@ -16,14 +16,34 @@ namespace AdventOfCode.Common
         public PriorityQueue(IComparer<T> comparer)
         {
             _comparer = comparer;
-            _heap = new T[1];
+            _heap = new T[4];
             _size = 0;
+        }
+
+        public PriorityQueue(IEnumerable<T> collection)
+            : this(collection, Comparer<T>.Default)
+        {
+        }
+
+        public PriorityQueue(IEnumerable<T> collection, IComparer<T> comparer)
+            :this(comparer)
+        {
+            foreach (var i in collection)
+            {
+                Enqueue(i);
+            }
         }
 
         public void Enqueue(T item)
         {
             Add(item);
             UpHeap(_size - 1);
+        }
+
+        public void EnqueueRange(IEnumerable<T> collection)
+        {
+            foreach (var item in collection)
+                Enqueue(item);
         }
 
         public T Dequeue()

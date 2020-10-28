@@ -190,7 +190,7 @@ namespace AdventOfCode._2015
             private static ushort Nop(ushort val) => val;
             private static ushort And(ushort val1, ushort val2) => (ushort)(val1 & val2);
             private static ushort Or(ushort val1, ushort val2) => (ushort)(val1 | val2);
-            private static ushort Not(ushort val) => (ushort)~val;
+            private static ushort Not(ushort val) => unchecked((ushort)~val);
             private static ushort LShift(ushort val, ushort amount) => (ushort)(val << amount);
             private static ushort RShift(ushort val, ushort amount) => (ushort)(val >> amount);
         }

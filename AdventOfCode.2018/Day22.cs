@@ -11,8 +11,10 @@ namespace AdventOfCode._2018
 {
     public class Day22
     {
-        const int DEPTH = 10689;
-        static readonly IntPoint2 TARGET = (11, 722);
+        const int Depth = 10689;
+        const int TargetX = 11;
+        const int TargetY = 722;
+        static readonly IntPoint2 TargetCoord = (TargetX, TargetY);
 
         enum Terrain : int
         {
@@ -31,7 +33,7 @@ namespace AdventOfCode._2018
         }
 
         [DebuggerDisplay("{Coord}, {Terrain}")]
-        struct Region : IEquatable<Region>
+        private readonly struct Region
         {
             public readonly IntPoint2 Coord;
             public readonly int Index;
@@ -45,25 +47,37 @@ namespace AdventOfCode._2018
                 Erosion = erosion;
                 Terrain = terrain;
             }
+        }
+
+        private readonly struct SearchCoord : IEquatable<SearchCoord>
+        {
+            public readonly IntPoint2 Coord;
+            public readonly Tool Tool;
+
+            public SearchCoord(IntPoint2 coord, Tool tool)
+            {
+                Coord = coord;
+                Tool = tool;
+            }
+
+            public bool Equals(SearchCoord other)
+            {
+                return Coord.Equals(other.Coord) && Tool == other.Tool;
+            }
 
             public override bool Equals(object obj)
             {
-                return obj is Region region && Equals(region);
-            }
-
-            public bool Equals(Region other)
-            {
-                return Coord.Equals(other.Coord);
+                return obj is SearchCoord other && Equals(other);
             }
 
             public override int GetHashCode()
             {
-                return HashCode.Combine(Coord);
+                return HashCode.Combine(Coord.X, Coord.Y, Tool);
             }
         }
 
         [DebuggerDisplay("{Tool}, {Region}, {Time}")]
-        struct Node : IEquatable<Node>
+        struct Node
         {
             public readonly Region Region;
             public readonly Tool Tool;
@@ -75,24 +89,10 @@ namespace AdventOfCode._2018
                 Region = region;
                 Tool = tool;
                 Time = time;
-                Distance = region.Coord.Distance(TARGET);
+                Distance = region.Coord.Distance(TargetCoord);
             }
 
-            public override bool Equals(object obj)
-            {
-                return obj is Node node && Equals(node);
-            }
-
-            public bool Equals(Node other)
-            {
-                return Region.Equals(other.Region) &&
-                       Tool == other.Tool;
-            }
-
-            public override int GetHashCode()
-            {
-                return HashCode.Combine(Region, Tool);
-            }
+            public SearchCoord SearchCoord => new SearchCoord(Region.Coord, Tool);
         }
 
         Dictionary<IntPoint2, Region> _regions = new Dictionary<IntPoint2, Region>();
@@ -101,9 +101,9 @@ namespace AdventOfCode._2018
         public void Part1()
         {
             int answer = 0;
-            for (int i = 0; i <= TARGET.X; i++)
+            for (int i = 0; i <= TargetCoord.X; i++)
             {
-                for (int j = 0; j <= TARGET.Y; j++)
+                for (int j = 0; j <= TargetCoord.Y; j++)
                 {
                     answer += (int)GetRegion(new IntPoint2(i, j)).Terrain;
                 }
@@ -114,6 +114,12 @@ namespace AdventOfCode._2018
 
         [Fact]
         public void Part2()
+        {
+            int answer = Search();
+            Assert.Equal(999, answer);
+        }
+
+        private int Search()
         {
             Tool[,] otherValidTool =
             {
@@ -151,53 +157,49 @@ namespace AdventOfCode._2018
                        (right.Time + right.Distance);
             });
 
+            Node current = new Node(GetRegion(IntPoint2.Zero), Tool.Torch, 0);
             PriorityQueue<Node> searchSet = new PriorityQueue<Node>(comparer);
-            Dictionary<Node, int> distances = new Dictionary<Node, int>();
+            Dictionary<SearchCoord, int> times = new Dictionary<SearchCoord, int>();
 
-            Node start = new Node(GetRegion(IntPoint2.Zero), Tool.Torch, 0);
-            searchSet.Enqueue(start);
-            distances.Add(start, 0);
+            searchSet.Enqueue(current);
+            times.Add(current.SearchCoord, 0);
 
-            int answer = 0;
             while (searchSet.Count > 0)
             {
-                Node current = searchSet.Dequeue();
-                if (current.Region.Coord.Equals(TARGET) && current.Tool == Tool.Torch)
+                current = searchSet.Dequeue();
+
+                if (current.Region.Coord.Equals(TargetCoord) && current.Tool == Tool.Torch)
                 {
-                    answer = current.Time;
-                    break;
+                    return current.Time;
                 }
-                else
+
+                foreach (Node adjacent in GetAdjacentNodes(current))
                 {
-                    foreach (Node adjacent in GetAdjacentNodes(current))
+                    if (!times.TryGetValue(adjacent.SearchCoord, out int existingTime) ||
+                        adjacent.Time < existingTime)
                     {
-                        if (!distances.TryGetValue(adjacent, out int time) || adjacent.Time < time)
-                        {
-                            distances[adjacent] = adjacent.Time;
-                            searchSet.Enqueue(adjacent);
-                        }
+                        times[adjacent.SearchCoord] = adjacent.Time;
+                        searchSet.Enqueue(adjacent);
                     }
                 }
             }
 
-            Assert.Equal(999, answer);
+            throw new InvalidOperationException();
         }
 
         private Region GetRegion(in IntPoint2 coord)
         {
             if (!_regions.TryGetValue(coord, out Region region))
             {
-                int index;
-                if (coord.Equals(IntPoint2.Zero) || coord.Equals(TARGET))
-                    index = 0;
-                else if (coord.X == 0)
-                    index = coord.Y * 48271;
-                else if (coord.Y == 0)
-                    index = coord.X * 16807;
-                else
-                    index = GetRegion(coord - IntPoint2.UnitX).Erosion * GetRegion(coord - IntPoint2.UnitY).Erosion;
+                int index = coord switch
+                { 
+                    IntPoint2 p when p.Equals(IntPoint2.Zero) || p.Equals(TargetCoord) => 0,
+                    (int X, 0) => X * 16807,
+                    (0, int Y) => Y * 48271,
+                    _ => GetRegion(coord - IntPoint2.UnitX).Erosion * GetRegion(coord - IntPoint2.UnitY).Erosion
+                };
 
-                int erosion = (index + DEPTH) % 20183;
+                int erosion = (index + Depth) % 20183;
                 Terrain terrain = (Terrain)(erosion % 3);
 
                 _regions.Add(coord, region = new Region(coord, index, erosion, terrain));

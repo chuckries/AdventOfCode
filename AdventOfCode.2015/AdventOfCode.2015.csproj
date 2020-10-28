@@ -6,6 +6,10 @@
 
     <IsPackable>false</IsPackable>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
+  </PropertyGroup>
     
   <ItemGroup>
     <Content Include="Inputs\*.txt">
@@ -29,6 +33,8 @@
     <None Remove="Inputs\Day17.txt" />
     <None Remove="Inputs\Day18.txt" />
     <None Remove="Inputs\Day19.txt" />
+    <None Remove="Inputs\Day23.txt" />
+    <None Remove="Inputs\Day24.txt" />
   </ItemGroup>
 
   <ItemGroup>
