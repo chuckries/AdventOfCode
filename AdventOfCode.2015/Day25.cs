@@ -17,7 +17,7 @@ namespace AdventOfCode._2015
         {
             int index = GetIndex(Col, Row);
             long code = 20151125;
-            for (int i = 0; i < index - 1; i++)
+            for (int i = 1; i < index; i++)
             {
                 code = (code * 252533) % 33554393;
             }

@@ -84,12 +84,12 @@ namespace AdventOfCode._2015
                 Match match = s_Regex.Match(s);
 
                 IntPoint2 p1 = (
-                    int.Parse(match.Groups["x1"].Value),
-                    int.Parse(match.Groups["y1"].Value));
+                    match.Groups["x1"].Value,
+                    match.Groups["y1"].Value);
 
                 IntPoint2 p2 = (
-                    int.Parse(match.Groups["x2"].Value),
-                    int.Parse(match.Groups["y2"].Value));
+                    match.Groups["x2"].Value,
+                    match.Groups["y2"].Value);
 
                 return (p1, p2, match.Groups["op"].Value);
             });

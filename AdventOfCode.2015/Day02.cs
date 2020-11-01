@@ -60,9 +60,9 @@ namespace AdventOfCode._2015
         {
             Match match = s_Regex.Match(line);
             return new IntPoint3(
-                int.Parse(match.Groups["X"].Value),
-                int.Parse(match.Groups["Y"].Value),
-                int.Parse(match.Groups["Z"].Value));
+                match.Groups["X"].Value,
+                match.Groups["Y"].Value,
+                match.Groups["Z"].Value);
         }
 
         static Regex s_Regex = new Regex(@"^(?'X'\d+)x(?'Y'\d+)x(?'Z'\d+)$", RegexOptions.Compiled);

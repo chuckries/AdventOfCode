@@ -21,6 +21,13 @@ namespace AdventOfCode.Common
             Z = z;
         }
 
+        public IntPoint3(string x, string y, string z)
+        {
+            X = int.Parse(x);
+            Y = int.Parse(y);
+            Z = int.Parse(z);
+        }
+
         public int Distance(in IntPoint3 other) =>
             Math.Abs(X - other.X) + Math.Abs(Y - other.Y) + Math.Abs(Z - other.Z);
 
@@ -90,6 +97,9 @@ namespace AdventOfCode.Common
 
 
         public static implicit operator IntPoint3(in (int x, int y, int z) point) =>
+            new IntPoint3(point.x, point.y, point.z);
+
+        public static implicit operator IntPoint3(in (string x, string y, string z) point) =>
             new IntPoint3(point.x, point.y, point.z);
 
         public static implicit operator (int, int, int)(in IntPoint3 point) =>

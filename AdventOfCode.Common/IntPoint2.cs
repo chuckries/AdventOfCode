@@ -22,6 +22,12 @@ namespace AdventOfCode.Common
             Y = y;
         }
 
+        public IntPoint2(string x, string y)
+        {
+            X = int.Parse(x);
+            Y = int.Parse(y);
+        }
+
         public int Distance(in IntPoint2 p)
         {
             return Math.Abs(X - p.X) + Math.Abs(Y - p.Y);
@@ -165,5 +171,6 @@ namespace AdventOfCode.Common
 
         public static implicit operator (int, int)(IntPoint2 pair) => (pair.X, pair.Y);
         public static implicit operator IntPoint2((int x, int y) pair) => new IntPoint2(pair.x, pair.y);
+        public static implicit operator IntPoint2((string x, string y) pair) => new IntPoint2(pair.x, pair.y);
     }
 }
