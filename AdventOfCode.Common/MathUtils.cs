@@ -89,5 +89,10 @@ namespace AdventOfCode.Common
                 return mask;
             }
         }
+
+        public static (IntPoint2 min, IntPoint2 max) MinMax(this IEnumerable<IntPoint2> collection)
+        {
+            return IntPoint2.MinMax(collection);
+        }
     }
 }
