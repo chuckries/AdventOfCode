@@ -32,12 +32,9 @@ namespace AdventOfCode._2020
 
         private delegate bool Validate(int low, int high, char letter, string word);
 
-        private int CountValidPasswords(Validate validate)
-        {
-            return File.ReadAllLines("Inputs/Day02.txt")
-                .Where(s => IsValidPassword(s, validate))
-                .Count();
-        }
+        private int CountValidPasswords(Validate validate) =>
+            File.ReadAllLines("Inputs/Day02.txt")
+                .Count(s => IsValidPassword(s, validate));
 
         private bool IsValidPassword(string password, Validate validate)
         {
@@ -56,10 +53,8 @@ namespace AdventOfCode._2020
             return count >= low && count <= high;
         }
 
-        private bool Validate2(int low, int high, char letter, string word)
-        {
-            return word[low - 1] == letter ^ word[high - 1] == letter;
-        }
+        private bool Validate2(int low, int high, char letter, string word) =>
+            word[low - 1] == letter ^ word[high - 1] == letter;
 
         Regex s_Regex = new Regex(@"^(?'low'\d+)-(?'high'\d+) (?'letter'[a-z]): (?'word'[a-z]+)$");
     }

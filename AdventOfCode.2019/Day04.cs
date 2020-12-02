@@ -9,10 +9,10 @@ namespace AdventOfCode._2019
 {
     public class Day04
     {
-        const int RANGE_START = 158126;
-        const int RANGE_END = 624574;
+        const int Start = 158126;
+        const int End = 624574;
 
-        IEnumerable<int> _range = Enumerable.Range(RANGE_START, RANGE_END - RANGE_START + 1);
+        IEnumerable<int> _range = Enumerable.Range(Start, End - Start + 1);
 
         [Fact]
         public void Part1()
