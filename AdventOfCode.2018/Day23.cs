@@ -23,7 +23,7 @@ namespace AdventOfCode._2018
 
             public Bot(int x, int y, int z, int r)
             {
-                P = new IntPoint3(x, y, z);
+                P = (x, y, z);
                 R = r;
             }
 
@@ -43,11 +43,11 @@ namespace AdventOfCode._2018
                     );
             }
 
-            static Regex _regex = new Regex(@"^pos=\<(?<X>-?\d+),(?<Y>-?\d+),(?<Z>-?\d+)\>, r=(?<R>\d+)$", RegexOptions.Compiled);
+            static Regex _regex = new Regex(@"^pos=<(?'X'-?\d+),(?'Y'-?\d+),(?'Z'-?\d+)>, r=(?'R'\d+)$", RegexOptions.Compiled);
         }
 
         [DebuggerDisplay("({Min}, {Max})")]
-        class BoundingBox
+        readonly struct BoundingBox
         {
             public readonly IntPoint3 Min;
             public readonly IntPoint3 Max;
@@ -84,21 +84,21 @@ namespace AdventOfCode._2018
                     bool splitY = Max.Y != Center.Y;
                     bool splitZ = Max.Z != Center.Z;
 
-                    yield return new BoundingBox(new IntPoint3(Min.X, Min.Y, Min.Z), new IntPoint3(Center.X, Center.Y, Center.Z));
+                    yield return new BoundingBox((Min.X, Min.Y, Min.Z), (Center.X, Center.Y, Center.Z));
                     if (splitX)
-                        yield return new BoundingBox(new IntPoint3(Center.X + 1, Min.Y, Min.Z), new IntPoint3(Max.X, Center.Y, Center.Z));
+                        yield return new BoundingBox((Center.X + 1, Min.Y, Min.Z), (Max.X, Center.Y, Center.Z));
                     if (splitY)
-                        yield return new BoundingBox(new IntPoint3(Min.X, Center.Y + 1, Min.Z), new IntPoint3(Center.X, Max.Y, Center.Z));
+                        yield return new BoundingBox((Min.X, Center.Y + 1, Min.Z), (Center.X, Max.Y, Center.Z));
                     if (splitZ)
-                        yield return new BoundingBox(new IntPoint3(Min.X, Min.Y, Center.Z + 1), new IntPoint3(Center.X, Center.Y, Max.Z));
+                        yield return new BoundingBox((Min.X, Min.Y, Center.Z + 1), (Center.X, Center.Y, Max.Z));
                     if (splitX && splitY)
-                        yield return new BoundingBox(new IntPoint3(Center.X + 1, Center.Y + 1, Min.Z), new IntPoint3(Max.X, Max.Y, Center.Z));
+                        yield return new BoundingBox((Center.X + 1, Center.Y + 1, Min.Z), (Max.X, Max.Y, Center.Z));
                     if (splitX && splitZ)
-                        yield return new BoundingBox(new IntPoint3(Center.X + 1, Min.Y, Center.Z + 1), new IntPoint3(Max.X, Center.Y, Max.Z));
+                        yield return new BoundingBox((Center.X + 1, Min.Y, Center.Z + 1), (Max.X, Center.Y, Max.Z));
                     if (splitY && splitZ)
-                        yield return new BoundingBox(new IntPoint3(Min.X, Center.Y + 1, Center.Z + 1), new IntPoint3(Center.X, Max.Y, Max.Z));
+                        yield return new BoundingBox((Min.X, Center.Y + 1, Center.Z + 1), (Center.X, Max.Y, Max.Z));
                     if (splitX && splitY && splitZ)
-                        yield return new BoundingBox(new IntPoint3(Center.X + 1, Center.Y + 1, Center.Z + 1), new IntPoint3(Max.X, Max.Y, Max.Z));
+                        yield return new BoundingBox((Center.X + 1, Center.Y + 1, Center.Z + 1), (Max.X, Max.Y, Max.Z));
                 }
             }
         }
@@ -165,10 +165,7 @@ namespace AdventOfCode._2018
                 {
                     foreach (BoundingBox subBox in current.SubBoxes())
                     {
-                        int botsInRange = 0;
-                        foreach (Bot bot in _bots)
-                            if (bot.InRange(subBox.Closest(bot.P)))
-                                botsInRange++;
+                        int botsInRange = _bots.Count(b => b.InRange(subBox.Closest(b.P)));
 
                         searchSet.Enqueue((subBox, botsInRange));
                     }
