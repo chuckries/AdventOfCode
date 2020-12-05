@@ -36,24 +36,16 @@ namespace AdventOfCode._2020
 
             int answer = 0;
             for (int i = 0; i < seats.Count - 1; i++)
-            {
                 if (seats[i] == seats[i + 1] - 2)
                 {
                     answer = seats[i] + 1;
                     break;
                 }
-            }
 
             Assert.Equal(607, answer);
         }
 
-        private int Calculate(string input)
-        {
-            int total = 0;
-            for (int i = input.Length - 1; i >= 0; i--)
-                total |= input[^(i + 1)] is 'B' or 'R' ? 1 << i : 0;
-
-            return total;
-        }
+        private int Calculate(string input) =>
+            input.Aggregate(0, (total, c) => (total << 1) | (c is 'B' or 'R' ? 1 : 0));
     }
 }
