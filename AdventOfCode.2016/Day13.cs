@@ -97,19 +97,10 @@ namespace AdventOfCode._2016
             {
                 long key = p.X * p.X + 3 * p.X + 2 * p.X * p.Y + p.Y + p.Y * p.Y;
                 key += Input;
-                int bitCount = BitCount(key);
-                isWall = bitCount % 2 == 1;
+                isWall = key.BitCount() % 2 == 1;
                 _cells[p] = isWall;
             }
             return isWall;
-        }
-
-        private static int BitCount(long i)
-        {
-            //https://stackoverflow.com/questions/2709430/count-number-of-bits-in-a-64-bit-long-big-integer
-            i = i - ((i >> 1) & 0x5555555555555555);
-            i = (i & 0x3333333333333333) + ((i >> 2) & 0x3333333333333333);
-            return (int)((((i + (i >> 4)) & 0xF0F0F0F0F0F0F0F) * 0x101010101010101) >> 56);
         }
     }
 }
