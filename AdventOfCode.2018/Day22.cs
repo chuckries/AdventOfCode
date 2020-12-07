@@ -193,7 +193,7 @@ namespace AdventOfCode._2018
             {
                 int index = coord switch
                 { 
-                    IntPoint2 p when p.Equals(IntPoint2.Zero) || p.Equals(TargetCoord) => 0,
+                    (0, 0) or (TargetX, TargetY) => 0,
                     (int X, 0) => X * 16807,
                     (0, int Y) => Y * 48271,
                     _ => GetRegion(coord - IntPoint2.UnitX).Erosion * GetRegion(coord - IntPoint2.UnitY).Erosion

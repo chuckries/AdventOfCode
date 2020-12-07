@@ -59,7 +59,7 @@ namespace AdventOfCode._2020
                 {
                     int index = c.Value.IndexOf(' ');
                     int num = int.Parse(c.Value.AsSpan(0, index));
-                    color = c.Value.AsSpan(index + 1).ToString();
+                    color = c.Value.Substring(index + 1);
 
                     parent.Children.Add(new Edge(num, GetNode(color)));
                 }
@@ -82,27 +82,11 @@ namespace AdventOfCode._2020
             Assert.Equal(10875, total);
         }
 
-        private bool HasPath(Node n)
-        {
-            if (n.Color == Target)
-                return true;
+        private bool HasPath(Node n) =>
+            n.Color == Target || n.Children.Any(e => HasPath(e.Node));
 
-            if (n.Children.Any(e => HasPath(e.Node)))
-                return true;
-
-            return false;
-        }
-
-        private int CountBags(int multi, Node source)
-        {
-            int total = multi;
-            foreach (Edge e in source.Children)
-            {
-                total += multi * CountBags(e.Count, e.Node);
-            }
-
-            return total;
-        }
+        private int CountBags(int multi, Node source) =>
+            source.Children.Aggregate(multi, (t, e) => t += multi * CountBags(e.Count, e.Node));
 
         private Node GetNode(string color)
         {
