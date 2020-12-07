@@ -77,11 +77,7 @@ namespace AdventOfCode._2020
         [Fact]
         public void Part2()
         {
-            int total = 0;
-            foreach (Edge e in GetNode(Target).Children)
-            {
-                total += CountBags(e.Count, e.Node);
-            }
+            int total = CountBags(1, GetNode(Target)) - 1;
 
             Assert.Equal(10875, total);
         }
