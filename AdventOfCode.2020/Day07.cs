@@ -14,11 +14,23 @@ namespace AdventOfCode._2020
 {
     public class Day07
     {
+        private class Edge
+        {
+            public readonly int Count;
+            public readonly Node Node;
+
+            public Edge(int count, Node node)
+            {
+                Count = count;
+                Node = node;
+            }
+        }
+
         private class Node
         {
             public readonly string Color;
 
-            public List<(int count, Node node)> Children { get; } = new();
+            public List<Edge> Children { get; } = new();
 
             public Node(string color)
             {
@@ -26,7 +38,8 @@ namespace AdventOfCode._2020
             }
         }
 
-        Dictionary<string, Node> _nodes;
+        private const string Target = "shiny gold";
+        private Dictionary<string, Node> _nodes;
 
         public Day07()
         {
@@ -39,16 +52,16 @@ namespace AdventOfCode._2020
                 if (!match.Success)
                     continue;
 
-                string left = match.Groups["left"].Value;
-                Node parent = GetNode(left);
+                string color = match.Groups["left"].Value;
+                Node parent = GetNode(color);
 
                 foreach (Capture c in match.Groups["right"].Captures)
                 {
                     int index = c.Value.IndexOf(' ');
                     int num = int.Parse(c.Value.AsSpan(0, index));
-                    string color = c.Value.AsSpan(index + 1).ToString();
+                    color = c.Value.AsSpan(index + 1).ToString();
 
-                    parent.Children.Add((num, GetNode(color)));
+                    parent.Children.Add(new Edge(num, GetNode(color)));
                 }
             }
         }
@@ -56,48 +69,30 @@ namespace AdventOfCode._2020
         [Fact]
         public void Part1()
         {
-            HashSet<string> colors = new();
-            foreach (Node n in _nodes.Values)
-            {
-                if (n.Color == "shiny gold")
-                    continue;
+            int answser = _nodes.Values.Count(HasPath) - 1;
 
-                if (HasPath(n))
-                    colors.Add(n.Color);
-            }
-
-            Assert.Equal(332, colors.Count);
+            Assert.Equal(332, answser);
         }
 
         [Fact]
         public void Part2()
         {
             int total = 0;
-            foreach ((int count, Node child) in GetNode("shiny gold").Children)
+            foreach (Edge e in GetNode(Target).Children)
             {
-                total += CountBags(count, child);
+                total += CountBags(e.Count, e.Node);
             }
 
             Assert.Equal(10875, total);
         }
 
-        private bool HasPath(Node source)
+        private bool HasPath(Node n)
         {
-            Queue<Node> queue = new();
-            queue.Enqueue(source);
+            if (n.Color == Target)
+                return true;
 
-            while (queue.Count > 0)
-            {
-                Node current = queue.Dequeue();
-
-                if (current.Color == "shiny gold")
-                    return true;
-
-                foreach ((int _, Node adj) in current.Children)
-                {
-                    queue.Enqueue(adj);
-                }
-            }
+            if (n.Children.Any(e => HasPath(e.Node)))
+                return true;
 
             return false;
         }
@@ -105,9 +100,9 @@ namespace AdventOfCode._2020
         private int CountBags(int multi, Node source)
         {
             int total = multi;
-            foreach ((int count, Node child) in source.Children)
+            foreach (Edge e in source.Children)
             {
-                total += multi * CountBags(count, child);
+                total += multi * CountBags(e.Count, e.Node);
             }
 
             return total;
