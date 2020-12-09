@@ -32,6 +32,10 @@ namespace AdventOfCode._2020
 
             public List<Edge> Children { get; } = new();
 
+            public List<Node> Parents { get; } = new();
+
+            public bool ContainsGold { get; set; }
+
             public Node(string color)
             {
                 Color = color;
@@ -61,7 +65,14 @@ namespace AdventOfCode._2020
                     int num = int.Parse(c.Value.AsSpan(0, index));
                     color = c.Value.Substring(index + 1);
 
-                    parent.Children.Add(new Edge(num, GetNode(color)));
+                    Node child = GetNode(color);
+                    parent.Children.Add(new Edge(num, child));
+                    child.Parents.Add(parent);
+
+                    if (color == Target || child.ContainsGold)
+                    {
+                        MarkGold(parent);
+                    }
                 }
             }
         }
@@ -69,9 +80,9 @@ namespace AdventOfCode._2020
         [Fact]
         public void Part1()
         {
-            int answser = _nodes.Values.Count(HasPath) - 1;
+            int answer = _nodes.Values.Count(n => n.ContainsGold);
 
-            Assert.Equal(332, answser);
+            Assert.Equal(332, answer);
         }
 
         [Fact]
@@ -82,8 +93,12 @@ namespace AdventOfCode._2020
             Assert.Equal(10875, total);
         }
 
-        private bool HasPath(Node n) =>
-            n.Color == Target || n.Children.Any(e => HasPath(e.Node));
+        private void MarkGold(Node n)
+        {
+            n.ContainsGold = true;
+            foreach (Node p in n.Parents)
+                MarkGold(p);
+        }
 
         private int CountBags(int multi, Node source) =>
             source.Children.Aggregate(multi, (t, e) => t += multi * CountBags(e.Count, e.Node));
@@ -99,7 +114,7 @@ namespace AdventOfCode._2020
         }
 
         Regex s_Regex = new Regex(
-            @"^(?'left'\w+ \w+) bags contain ((?'right'\d+ \w+ \w+) bags?(, )?)+\.$",
+            @"^(?'left'\w+ \w+) bags contain (?'right'\d+ \w+ \w+) bags?(, (?'right'\d+ \w+ \w+) bags?)*\.$",
             RegexOptions.Compiled);
     }
 }
