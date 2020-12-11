@@ -34,16 +34,8 @@ namespace AdventOfCode._2020
         {
             int answer = Settle(4, (in IntPoint2 current) =>
             {
-                int occupied = 0;
-                foreach ((int u, int v) in current.Surrounding())
-                {
-                    if (!InBounds((u, v)))
-                        continue;
-
-                    if (_current[u, v] == '#') 
-                        occupied++;
-                }
-                return occupied;
+                return current.Surrounding()
+                    .Count(p => InBounds(p) && _current[p.X, p.Y] == '#');
             });
 
             Assert.Equal(2222, answer);
@@ -64,9 +56,9 @@ namespace AdventOfCode._2020
                     inSights[x, y] = inSight;
                 }
 
-            int answer = Settle(5, (in IntPoint2 current) =>
+            int answer = Settle(5, (in IntPoint2 p) =>
             {
-                return inSights[current.X, current.Y].Count(adj => _current[adj.X, adj.Y] == '#');
+                return inSights[p.X, p.Y].Count(adj => _current[adj.X, adj.Y] == '#');
             });
 
             Assert.Equal(2032, answer);
