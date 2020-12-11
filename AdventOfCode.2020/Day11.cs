@@ -32,10 +32,10 @@ namespace AdventOfCode._2020
         [Fact]
         public void Part1()
         {
-            int answer = Settle(4, (in IntPoint2 current) =>
+            int answer = Settle(4, (in IntPoint2 p) =>
             {
-                return current.Surrounding()
-                    .Count(p => InBounds(p) && _current[p.X, p.Y] == '#');
+                return p.Surrounding()
+                    .Count(adj => InBounds(adj) && _current[adj.X, adj.Y] == '#');
             });
 
             Assert.Equal(2222, answer);
@@ -123,11 +123,8 @@ namespace AdventOfCode._2020
             {
                 IntPoint2 cand = seat + dir;
 
-                while (true)
+                while (InBounds(cand))
                 {
-                    if (!InBounds(cand))
-                        break;
-
                     if (_current[cand.X, cand.Y] != '.')
                     {
                         yield return cand;
