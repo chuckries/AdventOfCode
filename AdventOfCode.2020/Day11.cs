@@ -51,7 +51,7 @@ namespace AdventOfCode._2020
             for (int x = 0; x < _bounds.X; x++)
                 for (int y = 0; y < _bounds.Y; y++)
                 {
-                    if (_current[x, y] == '.')
+                    if (!IsSeat((x, y)))
                         continue;
 
                     List<IntPoint2> adjacent = new(8);
@@ -64,7 +64,7 @@ namespace AdventOfCode._2020
             int total = 0;
             for (int x = 0; x < _bounds.X; x++)
                 for (int y = 0; y < _bounds.Y; y++)
-                    if (_current[x, y] == '#')
+                    if (IsOccupied((x, y)))
                         total++;
 
             return total;
@@ -77,26 +77,25 @@ namespace AdventOfCode._2020
             for (int x = 0; x < _bounds.X; x++)
                 for (int y = 0; y < _bounds.Y; y++)
                 {
-                    char c = _current[x, y];
-                    if (c == '.')
+                    if (!IsSeat((x, y)))
                         continue;
 
-                    int occupied = adjacents[x, y].Count(adj => _current[adj.X, adj.Y] == '#');
+                    int occupied = adjacents[x, y].Count(IsOccupied);
 
-                    char next = c;
-                    switch (_current[x, y])
+                    char seat = _current[x, y];
+                    switch (seat)
                     {
                         case 'L' when occupied is 0:
-                            next = '#';
+                            seat = '#';
                             changed = true;
                             break;
                         case '#' when occupied >= occupiedThreshold:
-                            next = 'L';
+                            seat = 'L';
                             changed = true;
                             break;
                     }
 
-                    _next[x, y] = next;
+                    _next[x, y] = seat;
                 }
 
             var tmp = _current;
@@ -106,8 +105,8 @@ namespace AdventOfCode._2020
             return changed;
         }
 
-        private IEnumerable<IntPoint2> FindSeatsSurrouding(IntPoint2 seat) => 
-            seat.Surrounding().Where(adj => InBounds(adj) && _current[adj.X, adj.Y] != '.');
+        private IEnumerable<IntPoint2> FindSeatsSurrouding(IntPoint2 seat) =>
+            seat.Surrounding().Where(InBounds).Where(IsSeat);
 
         private IEnumerable<IntPoint2> FindSeatsInSight(IntPoint2 seat)
         {
@@ -117,7 +116,7 @@ namespace AdventOfCode._2020
 
                 while (InBounds(cand))
                 {
-                    if (_current[cand.X, cand.Y] != '.')
+                    if (IsSeat(cand))
                     {
                         yield return cand;
                         break;
@@ -127,6 +126,12 @@ namespace AdventOfCode._2020
                 }
             }
         }
+
+        private bool IsSeat(IntPoint2 p) =>
+            _current[p.X, p.Y] != '.';
+
+        private bool IsOccupied(IntPoint2 p) =>
+            _current[p.X, p.Y] == '#';
 
         private bool InBounds(IntPoint2 p)
         {
