@@ -32,11 +32,7 @@ namespace AdventOfCode._2020
         [Fact]
         public void Part1()
         {
-            int answer = Settle(4, (in IntPoint2 p) =>
-            {
-                return p.Surrounding()
-                    .Count(adj => InBounds(adj) && _current[adj.X, adj.Y] == '#');
-            });
+            int answer = Settle(4, FindSeatsSurrouding);
 
             Assert.Equal(2222, answer);
         }
@@ -44,31 +40,26 @@ namespace AdventOfCode._2020
         [Fact]
         public void Part2()
         {
-            List<IntPoint2>[,] inSights = new List<IntPoint2>[_bounds.X, _bounds.Y];
+            int answer = Settle(5, FindSeatsInSight);
+
+            Assert.Equal(2032, answer);
+        }
+
+        private int Settle(int occupiedThreshold, Func<IntPoint2, IEnumerable<IntPoint2>> findAdjacents)
+        {
+            List<IntPoint2>[,] adjacents = new List<IntPoint2>[_bounds.X, _bounds.Y];
             for (int x = 0; x < _bounds.X; x++)
                 for (int y = 0; y < _bounds.Y; y++)
                 {
                     if (_current[x, y] == '.')
                         continue;
 
-                    List<IntPoint2> inSight = new List<IntPoint2>(8);
-                    inSight.AddRange(FindSeatsInSight((x, y)));
-                    inSights[x, y] = inSight;
+                    List<IntPoint2> adjacent = new(8);
+                    adjacent.AddRange(findAdjacents((x, y)));
+                    adjacents[x, y] = adjacent;
                 }
 
-            int answer = Settle(5, (in IntPoint2 p) =>
-            {
-                return inSights[p.X, p.Y].Count(adj => _current[adj.X, adj.Y] == '#');
-            });
-
-            Assert.Equal(2032, answer);
-        }
-
-        private delegate int Kernel(in IntPoint2 current);
-
-        private int Settle(int occupiedThreshold, Kernel kernel)
-        {
-            while (Tick(occupiedThreshold, kernel)) { }
+            while (Tick(occupiedThreshold, adjacents)) { }
 
             int total = 0;
             for (int x = 0; x < _bounds.X; x++)
@@ -79,19 +70,18 @@ namespace AdventOfCode._2020
             return total;
         }
 
-        private bool Tick(int occupiedThreshold, Kernel kernel)
+        private bool Tick(int occupiedThreshold, List<IntPoint2>[,] adjacents)
         {
             bool changed = false;
 
             for (int x = 0; x < _bounds.X; x++)
-            {
                 for (int y = 0; y < _bounds.Y; y++)
                 {
                     char c = _current[x, y];
                     if (c == '.')
                         continue;
 
-                    int occupied = kernel((x, y));
+                    int occupied = adjacents[x, y].Count(adj => _current[adj.X, adj.Y] == '#');
 
                     char next = c;
                     switch (_current[x, y])
@@ -108,7 +98,6 @@ namespace AdventOfCode._2020
 
                     _next[x, y] = next;
                 }
-            }
 
             var tmp = _current;
             _current = _next;
@@ -116,6 +105,9 @@ namespace AdventOfCode._2020
 
             return changed;
         }
+
+        private IEnumerable<IntPoint2> FindSeatsSurrouding(IntPoint2 seat) => 
+            seat.Surrounding().Where(adj => InBounds(adj) && _current[adj.X, adj.Y] != '.');
 
         private IEnumerable<IntPoint2> FindSeatsInSight(IntPoint2 seat)
         {
@@ -136,7 +128,7 @@ namespace AdventOfCode._2020
             }
         }
 
-        private bool InBounds(in IntPoint2 p)
+        private bool InBounds(IntPoint2 p)
         {
             return p.X >= 0 && p.X < _bounds.X && p.Y >= 0 && p.Y < _bounds.Y;
         }
