@@ -15,37 +15,29 @@ namespace AdventOfCode._2020
     public class Day09
     {
         long[] _input;
-        Dictionary<long, long> _valueToIndexMap;
 
         public Day09()
         {
-            string[] input = File.ReadAllLines("Inputs/Day09.txt");
-
-            _input = new long[input.Length];
-            _valueToIndexMap = new Dictionary<long, long>(input.Length);
-            for (long i = 0; i < input.Length; i++)
-            {
-                _input[i] = long.Parse(input[i]);
-                _valueToIndexMap[_input[i]] = i;
-            }
+            _input = File.ReadAllLines("Inputs/Day09.txt").Select(long.Parse).ToArray();
         }
 
         [Fact]
         public void Part1()
         {
             const int window = 25;
-            long i = window;
+            HashSet<long> pool = new HashSet<long>(_input.Take(window));
+
             long answer = 0;
+
+            int i = window;
             while (i < _input.Length)
             {
-                long candidate = _input[i];
-                long start = i - window;
                 bool found = false;
 
-                for (long j = start; j < i; j++)
+                long current = _input[i];
+                foreach(long candidate in pool)
                 {
-                    if (_valueToIndexMap.TryGetValue(candidate - _input[j], out long other) 
-                        && other >= start && other < i)
+                    if (pool.TryGetValue(current - candidate, out long other) && other != candidate)
                     {
                         found = true;
                         break;
@@ -54,11 +46,12 @@ namespace AdventOfCode._2020
 
                 if (!found)
                 {
-                    answer = candidate;
+                    answer = current;
                     break;
                 }
 
-                i++;
+                pool.Remove(_input[i - window]);
+                pool.Add(_input[++i]);
             }
 
             Assert.Equal(530627549, answer);
