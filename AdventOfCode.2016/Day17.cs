@@ -33,8 +33,8 @@ namespace AdventOfCode._2016
 
         private IEnumerable<string> Search()
         {
-            (string Path, IntPoint2 pos) current = (string.Empty, IntPoint2.Zero);
-            Queue<(string path, IntPoint2 pos)> queue = new Queue<(string path, IntPoint2)>();
+            (string Path, IntVec2 pos) current = (string.Empty, IntVec2.Zero);
+            Queue<(string path, IntVec2 pos)> queue = new Queue<(string path, IntVec2)>();
             queue.Enqueue(current);
 
             while (queue.Count > 0)
@@ -49,7 +49,7 @@ namespace AdventOfCode._2016
                 {
                     foreach (var adj in Adjacent(current.Path))
                     {
-                        IntPoint2 next = current.pos + adj.delta;
+                        IntVec2 next = current.pos + adj.delta;
                         if (next.X >=0 && next.X < 4 && next.Y >= 0 && next.Y < 4)
                         {
                             queue.Enqueue((current.Path + adj.dir, next));
@@ -59,25 +59,25 @@ namespace AdventOfCode._2016
             }
         }
 
-        private IEnumerable<(char dir, IntPoint2 delta)> Adjacent(string path)
+        private IEnumerable<(char dir, IntVec2 delta)> Adjacent(string path)
         {
             byte[] hash = _md5.ComputeHash(Encoding.ASCII.GetBytes(Input + path));
 
             byte nibble = (byte)(hash[0] >> 4);
             if (IsValid(nibble))
-                yield return ('U', -IntPoint2.UnitY);
+                yield return ('U', -IntVec2.UnitY);
 
             nibble = (byte)(hash[0] & 0x0F);
             if (IsValid(nibble))
-                yield return ('D', IntPoint2.UnitY);
+                yield return ('D', IntVec2.UnitY);
 
             nibble = (byte)(hash[1] >> 4);
             if (IsValid(nibble))
-                yield return ('L', -IntPoint2.UnitX);
+                yield return ('L', -IntVec2.UnitX);
 
             nibble = (byte)(hash[1] & 0x0F);
             if (IsValid(nibble))
-                yield return ('R', IntPoint2.UnitX);
+                yield return ('R', IntVec2.UnitX);
 
 
             static bool IsValid(byte b) => b >= 11 && b <= 15;

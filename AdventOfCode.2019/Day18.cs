@@ -128,17 +128,17 @@ namespace AdventOfCode._2019
         }
 
         char[,] _map;
-        IntPoint2 _bounds;
-        IntPoint2[] _keys;
-        IntPoint2 _entry;
+        IntVec2 _bounds;
+        IntVec2[] _keys;
+        IntVec2 _entry;
         Graph _graph;
 
         public Day18()
         {
             string[] input = File.ReadAllLines("Inputs/Day18.txt");
-            List<IntPoint2> keys = new List<IntPoint2>(26);
+            List<IntVec2> keys = new List<IntVec2>(26);
             _map = new char[input[0].Length, input.Length];
-            _bounds = new IntPoint2(_map.GetLength(0), _map.GetLength(1));
+            _bounds = new IntVec2(_map.GetLength(0), _map.GetLength(1));
             for (int j = 0; j < _bounds.Y; j++)
             {
                 for (int i = 0; i < _bounds.X; i++)
@@ -147,12 +147,12 @@ namespace AdventOfCode._2019
                     if (IsKey(_map[i, j], out int keyIndex))
                     {
                         while (keys.Count <= keyIndex)
-                            keys.Add(IntPoint2.Zero);
-                        keys[keyIndex] = new IntPoint2(i, j);
+                            keys.Add(IntVec2.Zero);
+                        keys[keyIndex] = new IntVec2(i, j);
                     }
                     else if (_map[i, j] == '@')
                     {
-                        _entry = new IntPoint2(i, j);
+                        _entry = new IntVec2(i, j);
                     }
                 }
             }
@@ -184,16 +184,16 @@ namespace AdventOfCode._2019
 
             for (int i = 0; i < _keys.Length; i++)
                 BfsKeys(_keys[i], i);
-            BfsKeys(_entry + new IntPoint2(1, 1), _keys.Length);
-            BfsKeys(_entry + new IntPoint2(1, -1), _keys.Length + 1);
-            BfsKeys(_entry + new IntPoint2(-1, 1), _keys.Length + 2);
-            BfsKeys(_entry + new IntPoint2(-1, -1), _keys.Length + 3);
+            BfsKeys(_entry + new IntVec2(1, 1), _keys.Length);
+            BfsKeys(_entry + new IntVec2(1, -1), _keys.Length + 1);
+            BfsKeys(_entry + new IntVec2(-1, 1), _keys.Length + 2);
+            BfsKeys(_entry + new IntVec2(-1, -1), _keys.Length + 3);
 
             int answer = _graph.MinDistance4();
             Assert.Equal(1738, answer);
         }
 
-        private void BfsKeys(IntPoint2 origin, int originIndex)
+        private void BfsKeys(IntVec2 origin, int originIndex)
         {
             (int distance, List<int> keysNeeded)[] distances = new (int distance, List<int> keysNeeded)[_bounds.X * _bounds.Y];
             for (int i = 0; i < distances.Length; i++)
@@ -213,7 +213,7 @@ namespace AdventOfCode._2019
                     continue;
                 visited[currentIndex] = true;
 
-                IntPoint2 current = IntPoint2.FromIndex(currentIndex, _bounds);
+                IntVec2 current = IntVec2.FromIndex(currentIndex, _bounds);
                 int distance = distances[currentIndex].distance;
                 int newDistance = distance + 1;
                 List<int> newKeys = distances[currentIndex].keysNeeded;
@@ -229,7 +229,7 @@ namespace AdventOfCode._2019
                     _graph.AddEdge(originIndex, keyIndex, distance, newKeys.ToArray());
                 }
 
-                foreach (IntPoint2 adjacent in current.Adjacent())
+                foreach (IntVec2 adjacent in current.Adjacent())
                 {
                     int adjacentIndex = adjacent.ToIndex(_bounds);
                     if (visited[adjacentIndex])

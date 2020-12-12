@@ -19,7 +19,7 @@ namespace AdventOfCode._2019
         [Fact]
         public void Part1()
         {
-            Dictionary<IntPoint2, bool> canvas = new Dictionary<IntPoint2, bool>();
+            Dictionary<IntVec2, bool> canvas = new Dictionary<IntVec2, bool>();
             Run(_program, canvas);
             int answer = canvas.Count;
             Assert.Equal(2018, answer);
@@ -28,11 +28,11 @@ namespace AdventOfCode._2019
         [Fact]
         public void Part2()
         {
-            Dictionary<IntPoint2, bool> canvas = new Dictionary<IntPoint2, bool>
-            { { IntPoint2.Zero, true } };
+            Dictionary<IntVec2, bool> canvas = new Dictionary<IntVec2, bool>
+            { { IntVec2.Zero, true } };
             Run(_program, canvas);
 
-            (IntPoint2 min, IntPoint2 max) = IntPoint2.MinMax(canvas.Keys);
+            (IntVec2 min, IntVec2 max) = IntVec2.MinMax(canvas.Keys);
 
             StringBuilder sb = new StringBuilder();
             sb.AppendLine();
@@ -63,10 +63,10 @@ namespace AdventOfCode._2019
             Assert.Equal(expected, answer);
         }
 
-        private void Run(long[] program, Dictionary<IntPoint2, bool> canvas)
+        private void Run(long[] program, Dictionary<IntVec2, bool> canvas)
         {
-            IntPoint2 position = IntPoint2.Zero;
-            IntPoint2 heading = IntPoint2.UnitY;
+            IntVec2 position = IntVec2.Zero;
+            IntVec2 heading = IntVec2.UnitY;
             bool writeMode = false;
 
             IntCode.InputReader reader = () =>
@@ -86,9 +86,9 @@ namespace AdventOfCode._2019
                 else
                 {
                     if (value == 0)
-                        heading = heading.TurnLeft();
+                        heading = heading.RotateLeft();
                     else if (value == 1)
-                        heading = heading.TurnRight();
+                        heading = heading.RotateRight();
                     else
                         throw new InvalidOperationException();
 

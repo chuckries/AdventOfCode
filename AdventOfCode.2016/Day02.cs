@@ -50,7 +50,7 @@ namespace AdventOfCode._2016
                 (0, 2),
                 (pos, delta) =>
                 {
-                    IntPoint2 candidate = pos + delta;
+                    IntVec2 candidate = pos + delta;
 
                     if (candidate.X < 0 || candidate.X > 4 || candidate.Y < 0 || candidate.Y > 4)
                         return pos;
@@ -84,21 +84,21 @@ namespace AdventOfCode._2016
             Assert.Equal("516DD", answer);
         }
 
-        private string GetCode(IntPoint2 initialPosition, Func<IntPoint2, IntPoint2, IntPoint2> addDeltaAndBound, Func<IntPoint2, char> getPositionCode)
+        private string GetCode(IntVec2 initialPosition, Func<IntVec2, IntVec2, IntVec2> addDeltaAndBound, Func<IntVec2, char> getPositionCode)
         {
-            IntPoint2 position = initialPosition;
+            IntVec2 position = initialPosition;
             StringBuilder sb = new StringBuilder();
 
             foreach (string input in _input)
             {
                 foreach (char c in input)
                 {
-                    IntPoint2 delta = c switch
+                    IntVec2 delta = c switch
                     {
-                        'U' => -IntPoint2.UnitY,
-                        'D' => IntPoint2.UnitY,
-                        'L' => -IntPoint2.UnitX,
-                        'R' => IntPoint2.UnitX,
+                        'U' => -IntVec2.UnitY,
+                        'D' => IntVec2.UnitY,
+                        'L' => -IntVec2.UnitX,
+                        'R' => IntVec2.UnitX,
                         _ => throw new InvalidOperationException()
                     };
 

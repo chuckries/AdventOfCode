@@ -91,8 +91,8 @@ namespace AdventOfCode._2019
         {
             List<string> parts = new List<string>();
 
-            IntPoint2 current = GetStart();
-            IntPoint2 dir = -IntPoint2.UnitY;
+            IntVec2 current = GetStart();
+            IntVec2 dir = -IntVec2.UnitY;
 
             while (true)
             {
@@ -108,7 +108,7 @@ namespace AdventOfCode._2019
             return string.Join(',', parts);
         }
 
-        private IntPoint2 GetStart()
+        private IntVec2 GetStart()
         {
             for (int j = 0; j < _map.Length; j++)
             {
@@ -122,7 +122,7 @@ namespace AdventOfCode._2019
             throw new InvalidOperationException();
         }
 
-        private int MoveForward(ref IntPoint2 current, IntPoint2 direction)
+        private int MoveForward(ref IntVec2 current, IntVec2 direction)
         {
             int count = 0;
 
@@ -136,26 +136,26 @@ namespace AdventOfCode._2019
             return count;
         }
 
-        private char? GetTurn(IntPoint2 current, ref IntPoint2 direction)
+        private char? GetTurn(IntVec2 current, ref IntVec2 direction)
         {
-            IntPoint2 leftPoint = current + -direction.TurnLeft();
-            IntPoint2 rightPoint = current + -direction.TurnRight();
+            IntVec2 leftPoint = current + -direction.RotateLeft();
+            IntVec2 rightPoint = current + -direction.RotateRight();
 
             if (InBounds(leftPoint) && _map[leftPoint.Y][leftPoint.X] == '#')
             {
-                direction = -direction.TurnLeft();
+                direction = -direction.RotateLeft();
                 return 'L';
             }
             else if (InBounds(rightPoint) && _map[rightPoint.Y][rightPoint.X] == '#')
             {
-                direction = -direction.TurnRight();
+                direction = -direction.RotateRight();
                 return 'R';
             }
 
             return null;
         }
 
-        private bool InBounds(IntPoint2 point)
+        private bool InBounds(IntVec2 point)
         {
             return point.X >= 0 && point.X < _map[0].Length &&
                    point.Y >= 0 && point.Y < _map.Length;

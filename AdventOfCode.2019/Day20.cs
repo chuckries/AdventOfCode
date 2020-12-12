@@ -26,10 +26,10 @@ namespace AdventOfCode._2019
             {
                 public readonly string Name;
                 public readonly Orientation Orientation;
-                public readonly IntPoint2 Coord;
-                public readonly IntPoint2 LabelCoord;
+                public readonly IntVec2 Coord;
+                public readonly IntVec2 LabelCoord;
 
-                public Node(string name, Orientation orientation, IntPoint2 coord, IntPoint2 labelCoord)
+                public Node(string name, Orientation orientation, IntVec2 coord, IntVec2 labelCoord)
                 {
                     Name = name;
                     Orientation = orientation;
@@ -55,7 +55,7 @@ namespace AdventOfCode._2019
             }
 
             char[,] _map;
-            IntPoint2 _bounds;
+            IntVec2 _bounds;
             Dictionary<Node, int> _nodes;
             (int distance, int levelDelta)[,] _graph;
 
@@ -180,9 +180,9 @@ namespace AdventOfCode._2019
             private void Bfs(in Node n)
             {
                 int source = GetNodeIndex(n);
-                (IntPoint2 p, int dist) current = (n.Coord, 0);
-                HashSet<IntPoint2> visited = new HashSet<IntPoint2>();
-                Queue<(IntPoint2, int)> toVisit = new Queue<(IntPoint2 p, int dist)>();
+                (IntVec2 p, int dist) current = (n.Coord, 0);
+                HashSet<IntVec2> visited = new HashSet<IntVec2>();
+                Queue<(IntVec2, int)> toVisit = new Queue<(IntVec2 p, int dist)>();
 
                 toVisit.Enqueue(current);
 
@@ -233,7 +233,7 @@ namespace AdventOfCode._2019
                 return _nodes.Keys.Where(n => n.Name == name && n.Orientation == orientation).Single();
             }
 
-            private Node GetNode(IntPoint2 p)
+            private Node GetNode(IntVec2 p)
             {
                 return _nodes.Keys.Where(n => n.Coord.Equals(p)).Single();
             }
@@ -252,7 +252,7 @@ namespace AdventOfCode._2019
                 }
             }
 
-            private bool TryDiscoverNode(IntPoint2 p, out Node node)
+            private bool TryDiscoverNode(IntVec2 p, out Node node)
             {
                 node = default;
 
@@ -262,7 +262,7 @@ namespace AdventOfCode._2019
 
                 char second;
 
-                IntPoint2 down = p + IntPoint2.UnitY;
+                IntVec2 down = p + IntVec2.UnitY;
                 if (Bounds(down))
                 {
                     second = _map[down.X, down.Y];
@@ -273,18 +273,18 @@ namespace AdventOfCode._2019
                             Orientation.Outside :
                             Orientation.Inside;
 
-                        IntPoint2 coord;
-                        IntPoint2 labelCoord;
-                        if (Bounds(p - IntPoint2.UnitY) &&
+                        IntVec2 coord;
+                        IntVec2 labelCoord;
+                        if (Bounds(p - IntVec2.UnitY) &&
                             _map[p.X, p.Y - 1] == '.')
                         {
-                            coord = p - IntPoint2.UnitY;
+                            coord = p - IntVec2.UnitY;
                             labelCoord = p;
                         }
-                        else if (Bounds(down + IntPoint2.UnitY) &&
+                        else if (Bounds(down + IntVec2.UnitY) &&
                             _map[down.X, down.Y + 1] == '.')
                         {
-                            coord = down + IntPoint2.UnitY;
+                            coord = down + IntVec2.UnitY;
                             labelCoord = down;
                         }
                         else
@@ -295,7 +295,7 @@ namespace AdventOfCode._2019
                     }
                 }
 
-                IntPoint2 right = p + IntPoint2.UnitX;
+                IntVec2 right = p + IntVec2.UnitX;
                 if (Bounds(right))
                 {
                     second = _map[right.X, right.Y];
@@ -306,18 +306,18 @@ namespace AdventOfCode._2019
                             Orientation.Outside :
                             Orientation.Inside;
 
-                        IntPoint2 coord;
-                        IntPoint2 labelCoord;
-                        if (Bounds(p - IntPoint2.UnitX) &&
+                        IntVec2 coord;
+                        IntVec2 labelCoord;
+                        if (Bounds(p - IntVec2.UnitX) &&
                             _map[p.X - 1, p.Y] == '.')
                         {
-                            coord = p - IntPoint2.UnitX;
+                            coord = p - IntVec2.UnitX;
                             labelCoord = p;
                         }
-                        else if (Bounds(right + IntPoint2.UnitX) &&
+                        else if (Bounds(right + IntVec2.UnitX) &&
                             _map[right.X + 1, p.Y] == '.')
                         {
-                            coord = right + IntPoint2.UnitX;
+                            coord = right + IntVec2.UnitX;
                             labelCoord = right;
                         }
                         else
@@ -331,7 +331,7 @@ namespace AdventOfCode._2019
                 return false;
             }
 
-            private bool Bounds(in IntPoint2 p)
+            private bool Bounds(in IntVec2 p)
             {
                 return p.X >= 0 && p.X < _bounds.X &&
                        p.Y >= 0 && p.Y < _bounds.Y;

@@ -12,10 +12,10 @@ namespace AdventOfCode._2019
     {
         struct Step
         {
-            public readonly IntPoint2 Delta;
+            public readonly IntVec2 Delta;
             public readonly int Count;
 
-            public Step(IntPoint2 delta, int count)
+            public Step(IntVec2 delta, int count)
             {
                 Delta = delta;
                 Count = count;
@@ -23,12 +23,12 @@ namespace AdventOfCode._2019
 
             public static Step Parse(string str)
             {
-                IntPoint2 delta = str[0] switch
+                IntVec2 delta = str[0] switch
                 {
-                    'U' => IntPoint2.UnitY,
-                    'D' => -IntPoint2.UnitY,
-                    'L' => -IntPoint2.UnitX,
-                    'R' => IntPoint2.UnitX,
+                    'U' => IntVec2.UnitY,
+                    'D' => -IntVec2.UnitY,
+                    'L' => -IntVec2.UnitX,
+                    'R' => IntVec2.UnitX,
                     _ => throw new InvalidOperationException("invalid direction")
                 };
 
@@ -38,7 +38,7 @@ namespace AdventOfCode._2019
             }
         }
 
-        private Dictionary<IntPoint2, (int mask, int totalSteps)> _map;
+        private Dictionary<IntVec2, (int mask, int totalSteps)> _map;
 
         public Day03()
         {
@@ -48,7 +48,7 @@ namespace AdventOfCode._2019
                     .ToArray())
                 .ToArray();
 
-            _map = new Dictionary<IntPoint2, (int, int)>();
+            _map = new Dictionary<IntVec2, (int, int)>();
 
             for (int i = 0; i < steps.Length; i++)
             {
@@ -60,7 +60,7 @@ namespace AdventOfCode._2019
         public void Part1()
         {
             int answer = _map.Where(kvp => kvp.Value.mask == 3)
-                .Min(kvp => kvp.Key.Manhattan);
+                .Min(kvp => kvp.Key.Distance);
 
             Assert.Equal(248, answer);
         }
@@ -74,9 +74,9 @@ namespace AdventOfCode._2019
             Assert.Equal(28580, answer);
         }
 
-        private void DoSteps(Dictionary<IntPoint2, (int mask, int totalSteps)> map, Step[] steps, int id)
+        private void DoSteps(Dictionary<IntVec2, (int mask, int totalSteps)> map, Step[] steps, int id)
         {
-            IntPoint2 current = new IntPoint2(0, 0);
+            IntVec2 current = new IntVec2(0, 0);
             int totalSteps = 0;
             foreach (Step step in steps)
             {

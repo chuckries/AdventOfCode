@@ -21,20 +21,20 @@ namespace AdventOfCode._2016
         [Fact]
         public void Part1()
         {
-            int answer = EnumPositions().Last().Manhattan;
+            int answer = EnumPositions().Last().Distance;
             Assert.Equal(226, answer);
         }
 
         [Fact]
         public void Part2()
         {
-            HashSet<IntPoint2> visited = new HashSet<IntPoint2>();
+            HashSet<IntVec2> visited = new HashSet<IntVec2>();
             int answer = 0;
-            foreach (IntPoint2 pos in EnumPositions())
+            foreach (IntVec2 pos in EnumPositions())
             {
                 if (!visited.Add(pos))
                 {
-                    answer = pos.Manhattan;
+                    answer = pos.Distance;
                     break;
                 }
             }
@@ -42,17 +42,17 @@ namespace AdventOfCode._2016
             Assert.Equal(79, answer);
         }
 
-        private IEnumerable<IntPoint2> EnumPositions()
+        private IEnumerable<IntVec2> EnumPositions()
         {
-            IntPoint2 position = IntPoint2.Zero;
-            IntPoint2 heading = IntPoint2.UnitY;
+            IntVec2 position = IntVec2.Zero;
+            IntVec2 heading = IntVec2.UnitY;
 
             foreach (string s in _input)
             {
                 heading = s[0] switch
                 {
-                    'R' => heading.TurnRight(),
-                    'L' => heading.TurnLeft(),
+                    'R' => heading.RotateRight(),
+                    'L' => heading.RotateLeft(),
                     _ => throw new InvalidOperationException()
                 };
 

@@ -16,7 +16,7 @@ namespace AdventOfCode._2016
         const int TargetY = 39;
         const int Input = 1364;
 
-        private Dictionary<IntPoint2, bool> _cells = new Dictionary<IntPoint2, bool>();
+        private Dictionary<IntVec2, bool> _cells = new Dictionary<IntVec2, bool>();
 
         [Fact]
         public void Part1()
@@ -32,11 +32,11 @@ namespace AdventOfCode._2016
             Assert.Equal(127, answer);
         }
 
-        private int MinSteps(in IntPoint2 initial, in IntPoint2 target)
+        private int MinSteps(in IntVec2 initial, in IntVec2 target)
         {
-            (IntPoint2 p, int distance) current = (initial, 0);
-            HashSet<IntPoint2> visited = new HashSet<IntPoint2>();
-            Queue<(IntPoint2, int)> queue = new Queue<(IntPoint2, int)>();
+            (IntVec2 p, int distance) current = (initial, 0);
+            HashSet<IntVec2> visited = new HashSet<IntVec2>();
+            Queue<(IntVec2, int)> queue = new Queue<(IntVec2, int)>();
             queue.Enqueue(current);
 
             while (queue.Count > 0)
@@ -51,7 +51,7 @@ namespace AdventOfCode._2016
                     return current.distance;
                 else
                 {
-                    foreach (IntPoint2 adj in AdjacentSpaces(current.p).Where(p => !visited.Contains(p)))
+                    foreach (IntVec2 adj in AdjacentSpaces(current.p).Where(p => !visited.Contains(p)))
                     {
                         queue.Enqueue((adj, current.distance + 1));
                     }
@@ -61,11 +61,11 @@ namespace AdventOfCode._2016
             throw new InvalidOperationException();
         }
 
-        private int MaxSpaces(in IntPoint2 initial, int maxSteps)
+        private int MaxSpaces(in IntVec2 initial, int maxSteps)
         {
-            (IntPoint2 p, int distance) current = (initial, 0);
-            HashSet<IntPoint2> visited = new HashSet<IntPoint2>();
-            Queue<(IntPoint2, int)> queue = new Queue<(IntPoint2, int)>();
+            (IntVec2 p, int distance) current = (initial, 0);
+            HashSet<IntVec2> visited = new HashSet<IntVec2>();
+            Queue<(IntVec2, int)> queue = new Queue<(IntVec2, int)>();
             queue.Enqueue(current);
 
             while (queue.Count > 0)
@@ -79,7 +79,7 @@ namespace AdventOfCode._2016
                 if (current.distance == maxSteps)
                     continue;
 
-                foreach (IntPoint2 adj in AdjacentSpaces(current.p).Where(p => !visited.Contains(p)))
+                foreach (IntVec2 adj in AdjacentSpaces(current.p).Where(p => !visited.Contains(p)))
                 {
                     queue.Enqueue((adj, current.distance + 1));
                 }
@@ -88,10 +88,10 @@ namespace AdventOfCode._2016
             return visited.Count;
         }
 
-        private IEnumerable<IntPoint2> AdjacentSpaces(in IntPoint2 pos) =>
+        private IEnumerable<IntVec2> AdjacentSpaces(in IntVec2 pos) =>
             pos.Adjacent().Where(p => p.X >= 0 && p.Y >= 0 && !IsWall(p));
 
-        private bool IsWall(in IntPoint2 p)
+        private bool IsWall(in IntVec2 p)
         {
             if (!_cells.TryGetValue(p, out bool isWall))
             {

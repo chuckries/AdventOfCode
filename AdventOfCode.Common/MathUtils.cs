@@ -90,9 +90,9 @@ namespace AdventOfCode.Common
             }
         }
 
-        public static (IntPoint2 min, IntPoint2 max) MinMax(this IEnumerable<IntPoint2> collection)
+        public static (IntVec2 min, IntVec2 max) MinMax(this IEnumerable<IntVec2> collection)
         {
-            return IntPoint2.MinMax(collection);
+            return IntVec2.MinMax(collection);
         }
 
         public static int BitCount(this int i)

@@ -14,7 +14,7 @@ namespace AdventOfCode._2018
         const int Depth = 10689;
         const int TargetX = 11;
         const int TargetY = 722;
-        static readonly IntPoint2 TargetCoord = (TargetX, TargetY);
+        static readonly IntVec2 TargetCoord = (TargetX, TargetY);
 
         enum Terrain : int
         {
@@ -35,12 +35,12 @@ namespace AdventOfCode._2018
         [DebuggerDisplay("{Coord}, {Terrain}")]
         private readonly struct Region
         {
-            public readonly IntPoint2 Coord;
+            public readonly IntVec2 Coord;
             public readonly int Index;
             public readonly int Erosion;
             public readonly Terrain Terrain;
 
-            public Region(IntPoint2 coord, int index, int erosion, Terrain terrain)
+            public Region(IntVec2 coord, int index, int erosion, Terrain terrain)
             {
                 Coord = coord;
                 Index = index;
@@ -51,10 +51,10 @@ namespace AdventOfCode._2018
 
         private readonly struct SearchCoord : IEquatable<SearchCoord>
         {
-            public readonly IntPoint2 Coord;
+            public readonly IntVec2 Coord;
             public readonly Tool Tool;
 
-            public SearchCoord(IntPoint2 coord, Tool tool)
+            public SearchCoord(IntVec2 coord, Tool tool)
             {
                 Coord = coord;
                 Tool = tool;
@@ -89,13 +89,13 @@ namespace AdventOfCode._2018
                 Region = region;
                 Tool = tool;
                 Time = time;
-                Distance = region.Coord.Distance(TargetCoord);
+                Distance = region.Coord.DistanceFrom(TargetCoord);
             }
 
             public SearchCoord SearchCoord => new SearchCoord(Region.Coord, Tool);
         }
 
-        Dictionary<IntPoint2, Region> _regions = new Dictionary<IntPoint2, Region>();
+        Dictionary<IntVec2, Region> _regions = new Dictionary<IntVec2, Region>();
 
         [Fact]
         public void Part1()
@@ -105,7 +105,7 @@ namespace AdventOfCode._2018
             {
                 for (int j = 0; j <= TargetCoord.Y; j++)
                 {
-                    answer += (int)GetRegion(new IntPoint2(i, j)).Terrain;
+                    answer += (int)GetRegion(new IntVec2(i, j)).Terrain;
                 }
             }
 
@@ -140,7 +140,7 @@ namespace AdventOfCode._2018
                 Tool newTool = otherValidTool[(int)current.Region.Terrain, (int)current.Tool];
                 yield return new Node(current.Region, newTool, current.Time + 7);
 
-                foreach (IntPoint2 adjacent in current.Region.Coord.Adjacent())
+                foreach (IntVec2 adjacent in current.Region.Coord.Adjacent())
                 {
                     if (adjacent.X >= 0 && adjacent.Y >= 0)
                     {
@@ -157,7 +157,7 @@ namespace AdventOfCode._2018
                        (right.Time + right.Distance);
             });
 
-            Node current = new Node(GetRegion(IntPoint2.Zero), Tool.Torch, 0);
+            Node current = new Node(GetRegion(IntVec2.Zero), Tool.Torch, 0);
             PriorityQueue<Node> searchSet = new PriorityQueue<Node>(comparer);
             Dictionary<SearchCoord, int> times = new Dictionary<SearchCoord, int>();
 
@@ -187,7 +187,7 @@ namespace AdventOfCode._2018
             throw new InvalidOperationException();
         }
 
-        private Region GetRegion(in IntPoint2 coord)
+        private Region GetRegion(in IntVec2 coord)
         {
             if (!_regions.TryGetValue(coord, out Region region))
             {
@@ -196,7 +196,7 @@ namespace AdventOfCode._2018
                     (0, 0) or (TargetX, TargetY) => 0,
                     (int X, 0) => X * 16807,
                     (0, int Y) => Y * 48271,
-                    _ => GetRegion(coord - IntPoint2.UnitX).Erosion * GetRegion(coord - IntPoint2.UnitY).Erosion
+                    _ => GetRegion(coord - IntVec2.UnitX).Erosion * GetRegion(coord - IntVec2.UnitY).Erosion
                 };
 
                 int erosion = (index + Depth) % 20183;

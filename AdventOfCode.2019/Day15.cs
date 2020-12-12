@@ -34,8 +34,8 @@ namespace AdventOfCode._2019
             .Select(long.Parse)
             .ToArray();
 
-        Dictionary<IntPoint2, Status> _map = new Dictionary<IntPoint2, Status>();
-        IntPoint2 _oxygen = IntPoint2.Zero;
+        Dictionary<IntVec2, Status> _map = new Dictionary<IntVec2, Status>();
+        IntVec2 _oxygen = IntVec2.Zero;
 
         public Day15()
         {
@@ -50,11 +50,11 @@ namespace AdventOfCode._2019
                 return programOutputs.Dequeue();
             }
 
-            async Task backtrackHelper(IntPoint2 position)
+            async Task backtrackHelper(IntVec2 position)
             {
                 foreach (Direction d in s_directions)
                 {
-                    IntPoint2 candidatePosition = position + s_deltas[(int)d];
+                    IntVec2 candidatePosition = position + s_deltas[(int)d];
                     if (!_map.ContainsKey(candidatePosition))
                     {
                         Status status = (Status)await sendCommand(d);
@@ -71,20 +71,20 @@ namespace AdventOfCode._2019
                 }
             }
 
-            Task.Run(() => backtrackHelper(IntPoint2.Zero)).Wait();
+            Task.Run(() => backtrackHelper(IntVec2.Zero)).Wait();
         }
 
         [Fact]
         public void Part1()
         {
-            PriorityQueue<(IntPoint2 position, int distance)> toExplore = 
-                new PriorityQueue<(IntPoint2, int)>(Comparer<(IntPoint2 position, int distance)>.Create((left, right) =>
+            PriorityQueue<(IntVec2 position, int distance)> toExplore = 
+                new PriorityQueue<(IntVec2, int)>(Comparer<(IntVec2 position, int distance)>.Create((left, right) =>
                 {
-                    return (left.position.Distance(_oxygen) + left.distance) - 
-                           (right.position.Distance(_oxygen) + right.distance);
+                    return (left.position.DistanceFrom(_oxygen) + left.distance) - 
+                           (right.position.DistanceFrom(_oxygen) + right.distance);
                 }));
-            HashSet<IntPoint2> visisted = new HashSet<IntPoint2>(_map.Count);
-            toExplore.Enqueue((IntPoint2.Zero, 0));
+            HashSet<IntVec2> visisted = new HashSet<IntVec2>(_map.Count);
+            toExplore.Enqueue((IntVec2.Zero, 0));
 
             int answer = 0;
             do
@@ -98,7 +98,7 @@ namespace AdventOfCode._2019
                 }
 
                 int newDistance = current.distance + 1;
-                foreach (IntPoint2 adjacent in current.position.Adjacent())
+                foreach (IntVec2 adjacent in current.position.Adjacent())
                 {
                     if (_map.TryGetValue(adjacent, out Status status) && status != Status.Wall && !visisted.Contains(adjacent))
                     {
@@ -115,22 +115,22 @@ namespace AdventOfCode._2019
         [Fact]
         public void Part2()
         {
-            HashSet<IntPoint2> filled = new HashSet<IntPoint2>();
-            List<IntPoint2> toFill = new List<IntPoint2>() { _oxygen };
+            HashSet<IntVec2> filled = new HashSet<IntVec2>();
+            List<IntVec2> toFill = new List<IntVec2>() { _oxygen };
 
             int iterations = -1;
             do
             {
                 iterations++;
-                IntPoint2[] currentNodes = toFill.ToArray();
+                IntVec2[] currentNodes = toFill.ToArray();
                 toFill.Clear();
 
-                foreach (IntPoint2 current in currentNodes)
+                foreach (IntVec2 current in currentNodes)
                     filled.Add(current);
 
-                foreach (IntPoint2 current in currentNodes)
+                foreach (IntVec2 current in currentNodes)
                 {
-                    foreach (IntPoint2 adjacent in current.Adjacent())
+                    foreach (IntVec2 adjacent in current.Adjacent())
                     {
                         if (_map.TryGetValue(adjacent, out Status status) && status != Status.Wall && !filled.Contains(adjacent))
                         {
@@ -145,6 +145,6 @@ namespace AdventOfCode._2019
 
         static Direction[] s_directions = new[] { Direction.N, Direction.S, Direction.W, Direction.E };
         static Direction[] s_opposites = new[] { Direction.S, Direction.N, Direction.E, Direction.W };
-        static IntPoint2[] s_deltas = new[] { IntPoint2.UnitY, -IntPoint2.UnitY, -IntPoint2.UnitX, IntPoint2.UnitX };
+        static IntVec2[] s_deltas = new[] { IntVec2.UnitY, -IntVec2.UnitY, -IntVec2.UnitX, IntVec2.UnitX };
     }
 }

@@ -16,7 +16,7 @@ namespace AdventOfCode._2016
         private class Graph
         {
             string[] _map;
-            IntPoint2[] _nodes;
+            IntVec2[] _nodes;
             int[,] _edges;
 
             public Graph(string[] map)
@@ -91,9 +91,9 @@ namespace AdventOfCode._2016
 
             private void Bfs(int index)
             {
-                (IntPoint2 p, int distance) current = (_nodes[index], 0);
-                HashSet<IntPoint2> visited = new();
-                Queue<(IntPoint2, int distance)> queue = new();
+                (IntVec2 p, int distance) current = (_nodes[index], 0);
+                HashSet<IntVec2> visited = new();
+                Queue<(IntVec2, int distance)> queue = new();
                 queue.Enqueue(current);
 
                 while (queue.Count > 0)
@@ -111,7 +111,7 @@ namespace AdventOfCode._2016
                             _edges[index, sinkIndex] = current.distance;
                     }
 
-                    foreach (IntPoint2 adj in current.p.Adjacent())
+                    foreach (IntVec2 adj in current.p.Adjacent())
                     {
                         if (adj.Y < 0 || adj.Y >= _map.Length || adj.X < 0 || adj.X >= _map[adj.Y].Length)
                             continue;
@@ -129,7 +129,7 @@ namespace AdventOfCode._2016
 
             private void DiscoverNodes()
             {
-                List<(int index, IntPoint2 pos)> nodes = new();
+                List<(int index, IntVec2 pos)> nodes = new();
                 for (int j = 0; j < _map.Length; j++)
                     for (int i = 0; i < _map[j].Length; i++)
                     {

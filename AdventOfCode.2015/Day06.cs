@@ -77,17 +77,17 @@ namespace AdventOfCode._2015
         }
 
 
-        private IEnumerable<(IntPoint2 p1, IntPoint2 p2, string op)> Parse()
+        private IEnumerable<(IntVec2 p1, IntVec2 p2, string op)> Parse()
         {
             return File.ReadAllLines("Inputs/Day06.txt").Select(s =>
             {
                 Match match = s_Regex.Match(s);
 
-                IntPoint2 p1 = (
+                IntVec2 p1 = (
                     match.Groups["x1"].Value,
                     match.Groups["y1"].Value);
 
-                IntPoint2 p2 = (
+                IntVec2 p2 = (
                     match.Groups["x2"].Value,
                     match.Groups["y2"].Value);
 

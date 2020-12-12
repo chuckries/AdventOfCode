@@ -89,17 +89,17 @@ namespace AdventOfCode._2018
         {
             RegexMap regex = new RegexMap(File.ReadAllText("Inputs/Day20.txt"));
             int nextIndex = 0;
-            Dictionary<IntPoint2, int> nodes = new Dictionary<IntPoint2, int>();
+            Dictionary<IntVec2, int> nodes = new Dictionary<IntVec2, int>();
             List<HashSet<int>> graph = new List<HashSet<int>>();
 
-            int GetNodeIndex(IntPoint2 p)
+            int GetNodeIndex(IntVec2 p)
             {
                 if (!nodes.TryGetValue(p, out int index))
                     nodes.Add(p, index = nextIndex++);
                 return index;
             }
 
-            void AddEdge(IntPoint2 source, IntPoint2 sink)
+            void AddEdge(IntVec2 source, IntVec2 sink)
             {
                 int sourceIndex = GetNodeIndex(source);
                 int sinkIndex = GetNodeIndex(sink);
@@ -112,17 +112,17 @@ namespace AdventOfCode._2018
                 graph[sinkIndex].Add(sourceIndex);
             }
 
-            IntPoint2 origin = IntPoint2.Zero;
+            IntVec2 origin = IntVec2.Zero;
             regex.Traverse(origin, (current, directions) =>
             {
                 foreach (char c in directions)
                 {
-                    IntPoint2 newCoord = current + c switch
+                    IntVec2 newCoord = current + c switch
                     {
-                        'N' => IntPoint2.UnitY,
-                        'S' => -IntPoint2.UnitY,
-                        'W' => -IntPoint2.UnitX,
-                        'E' => IntPoint2.UnitX,
+                        'N' => IntVec2.UnitY,
+                        'S' => -IntVec2.UnitY,
+                        'W' => -IntVec2.UnitX,
+                        'E' => IntVec2.UnitX,
                         _ => throw new InvalidOperationException()
                     };
 

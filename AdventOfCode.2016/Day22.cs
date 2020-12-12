@@ -18,12 +18,12 @@ namespace AdventOfCode._2016
         {
             public class Node
             {
-                public readonly IntPoint2 Coord;
+                public readonly IntVec2 Coord;
                 public readonly int Size;
                 public int Used { get; private set; }
                 public int Avail { get; private set; }
 
-                public Node(in IntPoint2 coord, int size, int used, int avail)
+                public Node(in IntVec2 coord, int size, int used, int avail)
                 {
                     Coord = coord;
                     Size = size;
@@ -34,12 +34,12 @@ namespace AdventOfCode._2016
 
             private readonly struct SearchNode
             {
-                public readonly IntPoint2 Data;
-                public readonly IntPoint2 Empty;
-                public readonly IntPoint2 EmptyTarget;
+                public readonly IntVec2 Data;
+                public readonly IntVec2 Empty;
+                public readonly IntVec2 EmptyTarget;
                 public readonly int Steps;
 
-                public SearchNode(IntPoint2 data, IntPoint2 empty, IntPoint2 emptyTarget, int steps)
+                public SearchNode(IntVec2 data, IntVec2 empty, IntVec2 emptyTarget, int steps)
                 {
                     Data = data;
                     Empty = empty;
@@ -48,11 +48,11 @@ namespace AdventOfCode._2016
                 }
             }
 
-            private Dictionary<IntPoint2, Node> _nodes;
-            private HashSet<IntPoint2> _graph;
-            private IntPoint2 _bounds;
-            private IntPoint2 _initialEmpty;
-            private IntPoint2 _goalData;
+            private Dictionary<IntVec2, Node> _nodes;
+            private HashSet<IntVec2> _graph;
+            private IntVec2 _bounds;
+            private IntVec2 _initialEmpty;
+            private IntVec2 _goalData;
 
             public IReadOnlyCollection<Node> Nodes => _nodes.Values;
 
@@ -65,7 +65,7 @@ namespace AdventOfCode._2016
                     if (match.Success)
                     {
                         Node n = new Node(
-                            new IntPoint2(match.Groups["x"].Value, match.Groups["y"].Value),
+                            new IntVec2(match.Groups["x"].Value, match.Groups["y"].Value),
                             int.Parse(match.Groups["size"].Value),
                             int.Parse(match.Groups["used"].Value),
                             int.Parse(match.Groups["avail"].Value));
@@ -79,7 +79,7 @@ namespace AdventOfCode._2016
                 _initialEmpty = _nodes.Values.Single(n => n.Used == 0).Coord;
                 int maxCapacity = _nodes[_initialEmpty].Size;
 
-                _graph = new HashSet<IntPoint2>(_nodes.Count);
+                _graph = new HashSet<IntVec2>(_nodes.Count);
                 foreach (Node n in _nodes.Values)
                 {
                     if (n.Used <= maxCapacity)
@@ -89,9 +89,9 @@ namespace AdventOfCode._2016
 
             public int MinSteps()
             {
-                HashSet<(IntPoint2 goal, IntPoint2 empty, IntPoint2 emptyTarget)> visited = new();
+                HashSet<(IntVec2 goal, IntVec2 empty, IntVec2 emptyTarget)> visited = new();
                 PriorityQueue<SearchNode> queue = new PriorityQueue<SearchNode>(Comparer<SearchNode>.Create(SearchComparsion));
-                foreach (IntPoint2 adj in Adjacent(_goalData))
+                foreach (IntVec2 adj in Adjacent(_goalData))
                 {
                     queue.Enqueue(new SearchNode(
                         _goalData,
@@ -108,12 +108,12 @@ namespace AdventOfCode._2016
                         continue;
                     visited.Add((current.Data, current.Empty, current.EmptyTarget));
 
-                    if (current.Data.Equals(IntPoint2.Zero))
+                    if (current.Data.Equals(IntVec2.Zero))
                         return current.Steps;
 
                     if (current.Empty.Equals(current.EmptyTarget))
                     {
-                        foreach (IntPoint2 adj in Adjacent(current.Empty))
+                        foreach (IntVec2 adj in Adjacent(current.Empty))
                         {
                             if (!visited.Contains((current.Empty, current.Data, adj)))
                             {
@@ -130,7 +130,7 @@ namespace AdventOfCode._2016
                     }
                     else
                     {
-                        foreach (IntPoint2 adj in Adjacent(current.Empty))
+                        foreach (IntVec2 adj in Adjacent(current.Empty))
                         {
                             if (!adj.Equals(current.Data) && !visited.Contains((current.Data, adj, current.EmptyTarget)))
                             {
@@ -147,9 +147,9 @@ namespace AdventOfCode._2016
                 throw new InvalidOperationException();
             }
 
-            private IEnumerable<IntPoint2> Adjacent(IntPoint2 p)
+            private IEnumerable<IntVec2> Adjacent(IntVec2 p)
             {
-                foreach (IntPoint2 adj in p.Adjacent())
+                foreach (IntVec2 adj in p.Adjacent())
                 {
                     if (adj.X < 0 || adj.X > _bounds.X || adj.Y < 0 || adj.Y > _bounds.Y)
                         continue;
@@ -167,7 +167,7 @@ namespace AdventOfCode._2016
 
                 static int WeightedDistance(in SearchNode n)
                 {
-                    return n.Steps + n.Data.Manhattan + n.EmptyTarget.Manhattan + n.Empty.Distance(n.EmptyTarget);
+                    return n.Steps + n.Data.Distance + n.EmptyTarget.Distance + n.Empty.DistanceFrom(n.EmptyTarget);
                 }
             }
 

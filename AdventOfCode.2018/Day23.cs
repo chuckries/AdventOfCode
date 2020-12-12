@@ -16,7 +16,7 @@ namespace AdventOfCode._2018
     {
         class Bot
         {
-            public readonly IntPoint3 P;
+            public readonly IntVec3 P;
             public readonly int R;
 
             public int Manhattan => Abs(P.X) + Abs(P.Y) + Abs(P.Z);
@@ -27,7 +27,7 @@ namespace AdventOfCode._2018
                 R = r;
             }
 
-            public bool InRange(IntPoint3 p)
+            public bool InRange(IntVec3 p)
             {
                 return P.Distance(p) <= R;
             }
@@ -49,13 +49,13 @@ namespace AdventOfCode._2018
         [DebuggerDisplay("({Min}, {Max})")]
         readonly struct BoundingBox
         {
-            public readonly IntPoint3 Min;
-            public readonly IntPoint3 Max;
-            public readonly IntPoint3 Center;
+            public readonly IntVec3 Min;
+            public readonly IntVec3 Max;
+            public readonly IntVec3 Center;
             public readonly bool IsPoint;
             public readonly long Volume;
 
-            public BoundingBox(in IntPoint3 min, in IntPoint3 max)
+            public BoundingBox(in IntVec3 min, in IntVec3 max)
             {
                 if (min.X > max.X || min.Y > max.Y || min.Z > max.Z)
                     throw new InvalidOperationException("min is greater than max");
@@ -67,13 +67,13 @@ namespace AdventOfCode._2018
                 IsPoint = Volume == 1;
             }
 
-            public IntPoint3 Closest(in IntPoint3 point)
+            public IntVec3 Closest(in IntVec3 point)
             {
                 int x = Clamp(point.X, Min.X, Max.X);
                 int y = Clamp(point.Y, Min.Y, Max.Y);
                 int z = Clamp(point.Z, Min.Z, Max.Z);
 
-                return new IntPoint3(x, y, z);
+                return new IntVec3(x, y, z);
             }
 
             public IEnumerable<BoundingBox> SubBoxes()
@@ -130,7 +130,7 @@ namespace AdventOfCode._2018
         [Fact]
         public void Part2()
         {
-            (IntPoint3 min, IntPoint3 max) = IntPoint3.MinMax(_bots.Select(b => b.P));
+            (IntVec3 min, IntVec3 max) = IntVec3.MinMax(_bots.Select(b => b.P));
             BoundingBox initialBox = new BoundingBox(min, max);
 
             var comparer = Comparer<(BoundingBox box, int botsInRange)>.Create((left, right) =>
@@ -151,7 +151,7 @@ namespace AdventOfCode._2018
             var searchSet = new PriorityQueue<(BoundingBox, int botsInRange)>(comparer);
             searchSet.Enqueue((initialBox, _bots.Length));
 
-            IntPoint3 answer = IntPoint3.Zero;
+            IntVec3 answer = IntVec3.Zero;
             while (searchSet.Count > 0)
             {
                 (BoundingBox current, _) = searchSet.Dequeue();

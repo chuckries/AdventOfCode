@@ -14,7 +14,7 @@ namespace AdventOfCode._2020
 {
     public class Day11
     {
-        IntPoint2 _bounds;
+        IntVec2 _bounds;
         char[,] _current;
         char[,] _next;
 
@@ -45,16 +45,16 @@ namespace AdventOfCode._2020
             Assert.Equal(2032, answer);
         }
 
-        private int Settle(int occupiedThreshold, Func<IntPoint2, IEnumerable<IntPoint2>> findAdjacents)
+        private int Settle(int occupiedThreshold, Func<IntVec2, IEnumerable<IntVec2>> findAdjacents)
         {
-            List<IntPoint2>[,] adjacents = new List<IntPoint2>[_bounds.X, _bounds.Y];
+            List<IntVec2>[,] adjacents = new List<IntVec2>[_bounds.X, _bounds.Y];
             for (int x = 0; x < _bounds.X; x++)
                 for (int y = 0; y < _bounds.Y; y++)
                 {
                     if (!IsSeat((x, y)))
                         continue;
 
-                    List<IntPoint2> adjacent = new(8);
+                    List<IntVec2> adjacent = new(8);
                     adjacent.AddRange(findAdjacents((x, y)));
                     adjacents[x, y] = adjacent;
                 }
@@ -70,7 +70,7 @@ namespace AdventOfCode._2020
             return total;
         }
 
-        private bool Tick(int occupiedThreshold, List<IntPoint2>[,] adjacents)
+        private bool Tick(int occupiedThreshold, List<IntVec2>[,] adjacents)
         {
             bool changed = false;
 
@@ -105,14 +105,14 @@ namespace AdventOfCode._2020
             return changed;
         }
 
-        private IEnumerable<IntPoint2> FindSeatsSurrouding(IntPoint2 seat) =>
+        private IEnumerable<IntVec2> FindSeatsSurrouding(IntVec2 seat) =>
             seat.Surrounding().Where(InBounds).Where(IsSeat);
 
-        private IEnumerable<IntPoint2> FindSeatsInSight(IntPoint2 seat)
+        private IEnumerable<IntVec2> FindSeatsInSight(IntVec2 seat)
         {
-            foreach (IntPoint2 dir in IntPoint2.Zero.Surrounding())
+            foreach (IntVec2 dir in IntVec2.Zero.Surrounding())
             {
-                IntPoint2 cand = seat + dir;
+                IntVec2 cand = seat + dir;
 
                 while (InBounds(cand))
                 {
@@ -127,13 +127,13 @@ namespace AdventOfCode._2020
             }
         }
 
-        private bool IsSeat(IntPoint2 p) =>
+        private bool IsSeat(IntVec2 p) =>
             _current[p.X, p.Y] != '.';
 
-        private bool IsOccupied(IntPoint2 p) =>
+        private bool IsOccupied(IntVec2 p) =>
             _current[p.X, p.Y] == '#';
 
-        private bool InBounds(IntPoint2 p)
+        private bool InBounds(IntVec2 p)
         {
             return p.X >= 0 && p.X < _bounds.X && p.Y >= 0 && p.Y < _bounds.Y;
         }

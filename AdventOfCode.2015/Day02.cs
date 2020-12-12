@@ -51,15 +51,15 @@ namespace AdventOfCode._2015
             Assert.Equal(3783758, answer);
         }
 
-        private IEnumerable<IntPoint3> Parse()
+        private IEnumerable<IntVec3> Parse()
         {
             return File.ReadAllLines("Inputs/Day02.txt").Select(Parse);
         }
 
-        private IntPoint3 Parse(string line)
+        private IntVec3 Parse(string line)
         {
             Match match = s_Regex.Match(line);
-            return new IntPoint3(
+            return new IntVec3(
                 match.Groups["X"].Value,
                 match.Groups["Y"].Value,
                 match.Groups["Z"].Value);

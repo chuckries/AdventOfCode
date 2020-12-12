@@ -14,13 +14,13 @@ namespace AdventOfCode._2016
 {
     public class Day03
     {
-        IntPoint3[] _input;
+        IntVec3[] _input;
 
         public Day03()
         {
             _input = s_Regex
                 .Matches(File.ReadAllText("Inputs/Day03.txt"))
-                .Select(m => new IntPoint3(
+                .Select(m => new IntVec3(
                     m.Groups["x"].Value,
                     m.Groups["y"].Value,
                     m.Groups["z"].Value))
@@ -40,9 +40,9 @@ namespace AdventOfCode._2016
             int count = 0;
             for (int i = 0; i < _input.Length; i += 3)
             {
-                IntPoint3 r0 = _input[i];
-                IntPoint3 r1 = _input[i + 1];
-                IntPoint3 r2 = _input[i + 2];
+                IntVec3 r0 = _input[i];
+                IntVec3 r1 = _input[i + 1];
+                IntVec3 r2 = _input[i + 2];
 
                 if (IsValidTriangle((r0.X, r1.X, r2.X))) count++;
                 if (IsValidTriangle((r0.Y, r1.Y, r2.Y))) count++;
@@ -52,7 +52,7 @@ namespace AdventOfCode._2016
             Assert.Equal(1826, count);
         }
 
-        private static bool IsValidTriangle(IntPoint3 tri) =>
+        private static bool IsValidTriangle(IntVec3 tri) =>
             tri.X + tri.Y > tri.Z &&
             tri.X + tri.Z > tri.Y &&
             tri.Y + tri.Z > tri.X;

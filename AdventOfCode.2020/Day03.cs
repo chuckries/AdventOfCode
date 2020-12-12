@@ -31,7 +31,7 @@ namespace AdventOfCode._2020
         [Fact]
         public void Part2()
         {
-            int answer = new IntPoint2[]
+            int answer = new IntVec2[]
             {
                 (1, 1),
                 (3, 1),
@@ -45,9 +45,9 @@ namespace AdventOfCode._2020
             Assert.Equal(1574890240, answer);
         }
 
-        private int CountTrees(IntPoint2 slope)
+        private int CountTrees(IntVec2 slope)
         {
-            IntPoint2 pos = IntPoint2.Zero;
+            IntVec2 pos = IntVec2.Zero;
 
             int trees = 0;
             while (pos.Y < _map.Length)

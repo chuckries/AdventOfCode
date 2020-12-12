@@ -14,13 +14,13 @@ namespace AdventOfCode._2019
     {
         class Moon
         {
-            public IntPoint3 P { get; set; }
-            public IntPoint3 V { get; set; }
+            public IntVec3 P { get; set; }
+            public IntVec3 V { get; set; }
 
-            public Moon(IntPoint3 position)
+            public Moon(IntVec3 position)
             {
                 P = position;
-                V = IntPoint3.Zero;
+                V = IntVec3.Zero;
             }
         }
 
@@ -32,7 +32,7 @@ namespace AdventOfCode._2019
             foreach (string line in File.ReadAllLines("Inputs/Day12.txt"))
             {
                 Match match = s_Regex.Match(line);
-                moons.Add(new Moon(new IntPoint3(
+                moons.Add(new Moon(new IntVec3(
                     int.Parse(match.Groups["X"].Value),
                     int.Parse(match.Groups["Y"].Value),
                     int.Parse(match.Groups["Z"].Value))));
@@ -54,7 +54,7 @@ namespace AdventOfCode._2019
         [Fact]
         public void Part2()
         {
-            IntPoint3[] initialPositions = _moons.Select(m => m.P).ToArray();
+            IntVec3[] initialPositions = _moons.Select(m => m.P).ToArray();
 
             long xPeriod = 0;
             long yPeriod = 0;
@@ -104,7 +104,7 @@ namespace AdventOfCode._2019
         {
             foreach ((Moon left, Moon right) in _moons.UniquePairs())
             {
-                IntPoint3 delta = new IntPoint3(
+                IntVec3 delta = new IntVec3(
                     Math.Sign(right.P.X - left.P.X),
                     Math.Sign(right.P.Y - left.P.Y),
                     Math.Sign(right.P.Z - left.P.Z)

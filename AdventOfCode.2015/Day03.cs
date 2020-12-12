@@ -22,8 +22,8 @@ namespace AdventOfCode._2015
         [Fact]
         public void Part1()
         {
-            IntPoint2 current = default;
-            HashSet<IntPoint2> positions = new HashSet<IntPoint2>();
+            IntVec2 current = default;
+            HashSet<IntVec2> positions = new HashSet<IntVec2>();
             positions.Add(current);
 
             for (int i = 0; i < _input.Length; i++)
@@ -39,13 +39,13 @@ namespace AdventOfCode._2015
         [Fact]
         public void Part2()
         {
-            IntPoint2 current1 = default;
-            IntPoint2 current2 = default;
-            HashSet<IntPoint2> positions = new HashSet<IntPoint2>();
+            IntVec2 current1 = default;
+            IntVec2 current2 = default;
+            HashSet<IntVec2> positions = new HashSet<IntVec2>();
             positions.Add(current1);
 
-            ref IntPoint2 current = ref current1;
-            ref IntPoint2 next = ref current2;
+            ref IntVec2 current = ref current1;
+            ref IntVec2 next = ref current2;
 
             for (int i = 0; i < _input.Length; i++)
             {
@@ -53,7 +53,7 @@ namespace AdventOfCode._2015
 
                 positions.Add(current);
 
-                ref IntPoint2 tmp = ref current;
+                ref IntVec2 tmp = ref current;
                 current = ref next;
                 next = ref tmp;
             }
@@ -61,14 +61,14 @@ namespace AdventOfCode._2015
             Assert.Equal(2360, positions.Count);
         }
 
-        private void Move(char c, ref IntPoint2 position)
+        private void Move(char c, ref IntVec2 position)
         {
             position += c switch
             {
-                '^' => IntPoint2.UnitY,
-                'v' => -IntPoint2.UnitY,
-                '>' => IntPoint2.UnitX,
-                '<' => -IntPoint2.UnitX,
+                '^' => IntVec2.UnitY,
+                'v' => -IntVec2.UnitY,
+                '>' => IntVec2.UnitX,
+                '<' => -IntVec2.UnitX,
                 _ => throw new InvalidOperationException()
             };
         }

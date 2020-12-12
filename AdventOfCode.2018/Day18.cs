@@ -17,14 +17,14 @@ namespace AdventOfCode._2018
             Lumber = '#'
         }
 
-        IntPoint2 _bounds;
+        IntVec2 _bounds;
         Cell[,] _current;
         Cell[,] _next;
 
         public Day18()
         {
             string[] input = File.ReadAllLines("Inputs/Day18.txt").ToArray();
-            _bounds = new IntPoint2(input[0].Length, input.Length);
+            _bounds = new IntVec2(input[0].Length, input.Length);
             _current = new Cell[_bounds.X, _bounds.Y];
             _next = (Cell[,])_current.Clone();
 

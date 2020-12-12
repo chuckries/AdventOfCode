@@ -11,7 +11,7 @@ namespace AdventOfCode._2015
 {
     public class Day18
     {
-        IntPoint2 _bounds;
+        IntVec2 _bounds;
         char[,] _current;
         char[,] _next;
 
@@ -79,7 +79,7 @@ namespace AdventOfCode._2015
                 for (int j = 0; j < _bounds.Y; j++)
                 {
                     int Ons = 0;
-                    foreach ((int u, int v) in (new IntPoint2(i, j)).Surrounding())
+                    foreach ((int u, int v) in (new IntVec2(i, j)).Surrounding())
                     {
                         if (u < 0 || u >= _bounds.X || v < 0 || v >= _bounds.Y)
                             continue;

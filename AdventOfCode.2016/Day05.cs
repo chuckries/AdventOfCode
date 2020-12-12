@@ -32,7 +32,7 @@ namespace AdventOfCode._2016
             int count = 0;
             char?[] password = new char?[8];
 
-            foreach (IntPoint2 p in EnumPasswords())
+            foreach (IntVec2 p in EnumPasswords())
             {
                 if (p.X < 8 && !password[p.X].HasValue)
                 {
@@ -48,7 +48,7 @@ namespace AdventOfCode._2016
             Assert.Equal("424a0197", answer);
         }
 
-        private IEnumerable<IntPoint2> EnumPasswords()
+        private IEnumerable<IntVec2> EnumPasswords()
         {
             int i = 0;
             while (true)
