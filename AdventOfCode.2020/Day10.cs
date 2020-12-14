@@ -53,34 +53,5 @@ namespace AdventOfCode._2020
 
             Assert.Equal(347250213298688, answer);
         }
-
-        [Fact]
-        public void Part2_Extended()
-        {
-            Dictionary<int, long>[] paths = new Dictionary<int, long>[_input.Length];
-            paths[0] = new Dictionary<int, long> { { 1, 1 } };
-
-            for (int i = 0; i < paths.Length - 1; i++)
-            {
-                for (int j = i + 1; j < paths.Length && _input[j] - _input[i] <= 3; j++)
-                {
-                    ref var dict = ref paths[j];
-                    if (dict is null) dict = new();
-
-                    foreach(var kvp in paths[i])
-                    {
-                        int nextKey = kvp.Key + 1;
-                        if (dict.ContainsKey(nextKey))
-                            dict[nextKey] += kvp.Value;
-                        else
-                            dict[nextKey] = kvp.Value;
-                    }
-                }
-            }
-
-            //long answer = paths[^1];
-
-            //Assert.Equal(347250213298688, answer);
-        }
     }
 }
