@@ -69,27 +69,31 @@ namespace AdventOfCode._2020
 
             private IEnumerable<string> EnumerateAddresses(string address)
             {
-                List<string> addresses = new((int)Math.Pow(2, address.Count('X'.Equals)));
-                Recurse(0, new char[address.Length], address, addresses);
-                return addresses;
+                Stack<int> indices = new();
+                char[] next = new char[address.Length];
+                int index = 0;
 
-                static void Recurse(int index, char[] current, string template, List<string> addresses)
+                while (true)
                 {
-                    if (index == template.Length)
-                        addresses.Add(new string(current));
-                    else if (template[index] == 'X')
+                    if (index == address.Length)
                     {
-                        current[index] = '0';
-                        Recurse(index + 1, current, template, addresses);
-                        current[index] = '1';
-                        Recurse(index + 1, current, template, addresses);
-                        current[index] = 'X';
+                        yield return new string(next);
+                        if (indices.Count == 0)
+                            break;
+
+                        index = indices.Pop();
+                        next[index] = '1';
+                    }
+                    else if (address[index] == 'X')
+                    {
+                        indices.Push(index);
+                        next[index] = '0';
                     }
                     else
                     {
-                        current[index] = template[index];
-                        Recurse(index + 1, current, template, addresses);
+                        next[index] = address[index];
                     }
+                    index++;
                 }
             }
 

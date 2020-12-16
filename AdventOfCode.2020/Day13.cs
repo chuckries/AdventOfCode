@@ -53,7 +53,7 @@ namespace AdventOfCode._2020
         }
 
         [Fact]
-        public void Part2()
+        public void Part2_ChineseRemainderTheorem()
         {
             BigInteger M = 1;
             foreach ((long id, _) in _busses)
@@ -71,37 +71,23 @@ namespace AdventOfCode._2020
             }
 
             answer %= M;
+
             Assert.Equal(new BigInteger(538703333547789), answer);
         }
 
         [Fact]
-        public void Part2_Different()
+        public void Part2_Iterative()
         {
             long inc = _busses[0].id;
             long answer = inc;
 
-            LinkedList<(long id, int index)> available = new(_busses[1..]);
-
-            while (available.Count > 0)
+            for (int i = 1; i < _busses.Length; i++)
             {
-                LinkedListNode<(long id, int index)> n = available.First;
-                do
-                {
-                    if ((answer + n.Value.index) % n.Value.id == 0)
-                        break;
-                    n = n.Next;
-                } while (n != null);
-
-                if (n != null)
-                {
-                    inc *= n.Value.id;
-                    available.Remove(n);
-                }
-                else
-                {
+                while ((answer + _busses[i].index) % _busses[i].id != 0)
                     answer += inc;
-                }
+                inc *= _busses[i].id;
             }
+
             Assert.Equal(538703333547789, answer);
         }
     }
