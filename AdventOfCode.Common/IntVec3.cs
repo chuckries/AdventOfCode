@@ -28,6 +28,39 @@ namespace AdventOfCode.Common
             Z = int.Parse(z);
         }
 
+        public IEnumerable<IntVec3> Surrounding()
+        {
+            yield return new IntVec3(X - 1, Y - 1, Z - 1);
+            yield return new IntVec3(X - 1, Y - 1, Z    );
+            yield return new IntVec3(X - 1, Y - 1, Z + 1);
+            yield return new IntVec3(X - 1, Y    , Z - 1);
+            yield return new IntVec3(X - 1, Y    , Z    );
+            yield return new IntVec3(X - 1, Y    , Z + 1);
+            yield return new IntVec3(X - 1, Y + 1, Z - 1);
+            yield return new IntVec3(X - 1, Y + 1, Z    );
+            yield return new IntVec3(X - 1, Y + 1, Z + 1);
+
+            yield return new IntVec3(X    , Y - 1, Z - 1);
+            yield return new IntVec3(X    , Y - 1, Z    );
+            yield return new IntVec3(X    , Y - 1, Z + 1);
+            yield return new IntVec3(X    , Y    , Z - 1);
+
+            yield return new IntVec3(X    , Y    , Z + 1);
+            yield return new IntVec3(X    , Y + 1, Z - 1);
+            yield return new IntVec3(X    , Y + 1, Z    );
+            yield return new IntVec3(X    , Y + 1, Z + 1);
+
+            yield return new IntVec3(X + 1, Y - 1, Z - 1);
+            yield return new IntVec3(X + 1, Y - 1, Z    );
+            yield return new IntVec3(X + 1, Y - 1, Z + 1);
+            yield return new IntVec3(X + 1, Y    , Z - 1);
+            yield return new IntVec3(X + 1, Y    , Z    );
+            yield return new IntVec3(X + 1, Y    , Z + 1);
+            yield return new IntVec3(X + 1, Y + 1, Z - 1);
+            yield return new IntVec3(X + 1, Y + 1, Z    );
+            yield return new IntVec3(X + 1, Y + 1, Z + 1);
+        }
+
         public int Distance(in IntVec3 other) =>
             Math.Abs(X - other.X) + Math.Abs(Y - other.Y) + Math.Abs(Z - other.Z);
 
