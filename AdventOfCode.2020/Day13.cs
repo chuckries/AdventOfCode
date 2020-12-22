@@ -52,7 +52,7 @@ namespace AdventOfCode._2020
             Assert.Equal(5257, answer);
         }
 
-        [Fact]
+        [Fact(Skip = "slower")]
         public void Part2_ChineseRemainderTheorem()
         {
             BigInteger M = 1;

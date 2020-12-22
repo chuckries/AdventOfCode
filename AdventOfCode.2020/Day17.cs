@@ -133,14 +133,14 @@ namespace AdventOfCode._2020
             Assert.Equal(2012, answer);
         }
 
-        [Fact]
+        [Fact(Skip = "alt")]
         public void Part1_Different()
         {
             int answer = Solve(3);
             Assert.Equal(384, answer);
         }
 
-        [Fact]
+        [Fact(Skip = "alt")]
         public void Part2_Different()
         {
             int answer = Solve(4);

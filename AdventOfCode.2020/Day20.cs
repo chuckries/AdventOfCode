@@ -68,56 +68,52 @@ namespace AdventOfCode._2020
 
         private readonly struct OrientedTile : IEquatable<OrientedTile>
         {
+            public readonly int Width;
+            public readonly int Height;
             public readonly Tile Tile;
             public readonly Orientation Orientation;
-
-            public int Width => Orientation switch
-            {
-                Orientation.One     => Tile.Width,
-                Orientation.Two     => Tile.Width,
-                Orientation.Three   => Tile.Width,
-                Orientation.Four    => Tile.Width,
-                Orientation.Five    => Tile.Height,
-                Orientation.Six     => Tile.Height,
-                Orientation.Seven   => Tile.Height,
-                Orientation.Eight   => Tile.Height,
-                _ => throw new InvalidOperationException()
-            };
-
-            public int Height => Orientation switch
-            {
-                Orientation.One     => Tile.Height,
-                Orientation.Two     => Tile.Height,
-                Orientation.Three   => Tile.Height,
-                Orientation.Four    => Tile.Height,
-                Orientation.Five    => Tile.Width,
-                Orientation.Six     => Tile.Width,
-                Orientation.Seven   => Tile.Width,
-                Orientation.Eight   => Tile.Width,
-                _ => throw new InvalidOperationException()
-            };
-
 
             public OrientedTile(Tile tile, Orientation orientation)
             {
                 Tile = tile;
                 Orientation = orientation;
+
+                Width = orientation switch
+                {
+                    Orientation.One     => tile.Width,
+                    Orientation.Two     => tile.Width,
+                    Orientation.Three   => tile.Width,
+                    Orientation.Four    => tile.Width,
+                    Orientation.Five    => tile.Height,
+                    Orientation.Six     => tile.Height,
+                    Orientation.Seven   => tile.Height,
+                    Orientation.Eight   => tile.Height,
+                    _ => throw new InvalidOperationException()
+                };
+
+                Height = orientation switch
+                {
+                    Orientation.One     => tile.Height,
+                    Orientation.Two     => tile.Height,
+                    Orientation.Three   => tile.Height,
+                    Orientation.Four    => tile.Height,
+                    Orientation.Five    => tile.Width,
+                    Orientation.Six     => tile.Width,
+                    Orientation.Seven   => tile.Width,
+                    Orientation.Eight   => tile.Width,
+                    _ => throw new InvalidOperationException()
+                };
             }
 
-            public bool Get(int x, int y) =>
-                Tile.Get(x, y, Orientation);
+            public bool Get(int x, int y) => Tile.Get(x, y, Orientation);
 
-            public bool Top(int i) =>
-                Get(i, 0);
+            public bool Top(int i) => Get(i, 0);
 
-            public bool Bottom(int i) =>
-                Get(i, Height - 1);
+            public bool Bottom(int i) => Get(i, Height - 1);
 
-            public bool Left(int i) =>
-                Get(0, i);
+            public bool Left(int i) => Get(0, i);
 
-            public bool Right(int i) =>
-                Get(Width - 1, i);
+            public bool Right(int i) => Get(Width - 1, i);
 
             public bool Equals(OrientedTile other)
             {
@@ -200,36 +196,26 @@ namespace AdventOfCode._2020
                 if (placed.Count == _tiles.Count)
                     return true;
 
-                if (placed.Count == 0)
-                {
-                    foreach (var cand in candidateTiles.ToList())
-                        foreach (Orientation orientation in AllOrientations())
-                        {
-                            placed.Add(cand.Orient(orientation));
-                            candidateTiles.Remove(cand);
-                            if (SolveInternal(placed, candidateTiles))
-                                return true;
-                            candidateTiles.Add(cand);
-                            placed.RemoveAt(placed.Count - 1);
-                        }
-                }
-                else
-                {
-                    foreach (var cand in candidateTiles.ToList())
-                        foreach (Orientation orientation in AllOrientations())
-                        {
-                            OrientedTile orientedCandidate = cand.Orient(orientation);
-                            if (!TestCandidate(placed, orientedCandidate))
-                                continue;
+                foreach (var cand in candidateTiles.ToList())
+                    foreach (Orientation orientation in AllOrientations())
+                    {
+                        OrientedTile orientedCandidate = cand.Orient(orientation);
+                        if (!TestCandidate(placed, orientedCandidate))
+                            continue;
 
-                            placed.Add(orientedCandidate);
-                            candidateTiles.Remove(cand);
-                            if (SolveInternal(placed, candidateTiles))
-                                return true;
+                        placed.Add(orientedCandidate);
+                        candidateTiles.Remove(cand);
+                        if (SolveInternal(placed, candidateTiles))
+                            return true;
+                        else
+                        {
                             candidateTiles.Add(cand);
                             placed.RemoveAt(placed.Count - 1);
+
+                            if (placed.Count > 0)
+                                return false;
                         }
-                }
+                    }
 
                 return false;
             }
@@ -245,8 +231,7 @@ namespace AdventOfCode._2020
                         if (placed[leftIndex].Right(i) != candidate.Left(i))
                             return false;
                 }
-
-                if (y > 0)
+                else if (y > 0)
                 {
                     int upIndex = MapSize * (y - 1) + x;
                     for (int i = 0; i < TileSize; i++)
