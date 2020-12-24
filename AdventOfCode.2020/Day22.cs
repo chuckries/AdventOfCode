@@ -111,10 +111,10 @@ namespace AdventOfCode._2020
             private static int GetId(Queue<int> deck0, Queue<int> deck1)
             {
                 HashCode hashCode = new HashCode();
-                hashCode.Add(7);
+                hashCode.Add("1:");
                 foreach (int i in deck0)
                     hashCode.Add(i);
-                hashCode.Add(13);
+                hashCode.Add("2:");
                 foreach (int i in deck1)
                     hashCode.Add(i);
                 return hashCode.ToHashCode();

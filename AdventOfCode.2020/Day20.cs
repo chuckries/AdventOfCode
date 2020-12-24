@@ -17,6 +17,18 @@ namespace AdventOfCode._2020
         private const int TileSize = 10;
         private const int MapSize = 12;
 
+        private enum EdgeType
+        {
+            Top,
+            RTop,
+            Bottom,
+            RBottom,
+            Left,
+            RLeft,
+            Right,
+            RRight
+        };
+
         [Flags]
         private enum Orientation : int
         {
@@ -38,6 +50,15 @@ namespace AdventOfCode._2020
             public readonly int Id;
             public readonly int Index;
 
+            public readonly int Top;
+            public readonly int RTop;
+            public readonly int Bottom;
+            public readonly int RBottom;
+            public readonly int Left;
+            public readonly int RLeft;
+            public readonly int Right;
+            public readonly int RRight;
+
             private readonly bool[,] _tile;
 
             public Tile(int width, int height, int id, int index, bool[,] tile)
@@ -47,10 +68,37 @@ namespace AdventOfCode._2020
                 Id = id;
                 Index = index;
                 _tile = tile;
+
+                int top, rtop, bottom, rbottom, left, rleft, right, rright;
+                top = rtop = bottom = rbottom = left = rleft = right = rright = 0;
+
+                for (int i = 0; i < Width; i++)
+                {
+                    top     |= (_tile[            i,          0] ? 1 : 0) << i;
+                    rtop    |= (_tile[Width - 1 - i,          0] ? 1 : 0) << i;
+                    bottom  |= (_tile[            i, Height - 1] ? 1 : 0) << i;
+                    rbottom |= (_tile[Width - 1 - i, Height - 1] ? 1 : 0) << i;
+                }
+
+                for (int i = 0; i < Height; i++)
+                {
+                    left    |= (_tile[        0,              i] ? 1 : 0) << i;
+                    rleft   |= (_tile[        0, Height - 1 - i] ? 1 : 0) << i;
+                    right   |= (_tile[Width - 1,              i] ? 1 : 0) << i;
+                    rright  |= (_tile[Width - 1, Height - 1 - i] ? 1 : 0) << i;
+                }
+
+                Top = top;
+                RTop = rtop;
+                Bottom = bottom;
+                RBottom = rbottom;
+                Left = left;
+                RLeft = rleft;
+                Right = right;
+                RRight = rright;
             }
 
-            public OrientedTile Orient(Orientation orientation) =>
-                new OrientedTile(this, orientation);
+            public OrientedTile Orient(Orientation orientation) => new OrientedTile(this, orientation);
 
             public bool Get(int x, int y, Orientation orientation) => orientation switch
             {
@@ -66,12 +114,18 @@ namespace AdventOfCode._2020
             };
         }
 
-        private readonly struct OrientedTile : IEquatable<OrientedTile>
+        private class OrientedTile
         {
             public readonly int Width;
             public readonly int Height;
             public readonly Tile Tile;
             public readonly Orientation Orientation;
+            public readonly int Top;
+            public readonly int Bottom;
+            public readonly int Left;
+            public readonly int Right;
+
+            public bool this[int x, int y] => Tile.Get(x, y, Orientation);
 
             public OrientedTile(Tile tile, Orientation orientation)
             {
@@ -103,60 +157,103 @@ namespace AdventOfCode._2020
                     Orientation.Eight   => tile.Width,
                     _ => throw new InvalidOperationException()
                 };
-            }
 
-            public bool Get(int x, int y) => Tile.Get(x, y, Orientation);
+                Top = orientation switch
+                {
+                    Orientation.One     => tile.Top,
+                    Orientation.Two     => tile.RTop,
+                    Orientation.Three   => tile.Bottom,
+                    Orientation.Four    => tile.RBottom,
+                    Orientation.Five    => tile.Left,
+                    Orientation.Six     => tile.Right,
+                    Orientation.Seven   => tile.RLeft,
+                    Orientation.Eight   => tile.RRight,
+                    _ => throw new InvalidOperationException()
+                };
 
-            public bool Top(int i) => Get(i, 0);
+                Bottom = orientation switch
+                {
+                    Orientation.One     => tile.Bottom,
+                    Orientation.Two     => tile.RBottom,
+                    Orientation.Three   => tile.Top,
+                    Orientation.Four    => tile.RTop,
+                    Orientation.Five    => tile.Right,
+                    Orientation.Six     => tile.Left,
+                    Orientation.Seven   => tile.RRight,
+                    Orientation.Eight   => tile.RLeft,
+                    _ => throw new InvalidOperationException()
+                };
 
-            public bool Bottom(int i) => Get(i, Height - 1);
+                Left = orientation switch
+                {
+                    Orientation.One     => tile.Left,
+                    Orientation.Two     => tile.Right,
+                    Orientation.Three   => tile.RLeft,
+                    Orientation.Four    => tile.RRight,
+                    Orientation.Five    => tile.Top,
+                    Orientation.Six     => tile.RTop,
+                    Orientation.Seven   => tile.Bottom,
+                    Orientation.Eight   => tile.RBottom,
+                    _ => throw new InvalidOperationException()
+                };
 
-            public bool Left(int i) => Get(0, i);
-
-            public bool Right(int i) => Get(Width - 1, i);
-
-            public bool Equals(OrientedTile other)
-            {
-                return Tile.Equals(other.Tile) && Orientation.Equals(other.Orientation);
-            }
-
-            public override bool Equals(object other)
-            {
-                return other is OrientedTile otherTile && Equals(otherTile);
-            }
-
-            public override int GetHashCode()
-            {
-                return HashCode.Combine(Tile.GetHashCode(), Orientation);
+                Right = orientation switch
+                {
+                    Orientation.One     => tile.Right,
+                    Orientation.Two     => tile.Left,
+                    Orientation.Three   => tile.RRight,
+                    Orientation.Four    => tile.RLeft,
+                    Orientation.Five    => tile.Bottom,
+                    Orientation.Six     => tile.RBottom,
+                    Orientation.Seven   => tile.Top,
+                    Orientation.Eight   => tile.RTop,
+                    _ => throw new InvalidOperationException()
+                };
             }
         }
 
         private class TileSet
         {
+            private readonly struct EdgeId
+            {
+                public readonly EdgeType Type;
+                public readonly Tile Tile;
+
+                public EdgeId(EdgeType type, Tile tile)
+                {
+                    Type = type;
+                    Tile = tile;
+                }
+            }
+
             private List<Tile> _tiles = new(MapSize * MapSize);
+            private Dictionary<int, List<EdgeId>> _edgeLookup = new(MapSize * MapSize * 8); // cap too big, oh well
 
-            public void AddTile(int id, bool[,] tile)
+            public void AddTile(int id, bool[,] tileBuffer)
             {
-                _tiles.Add(new Tile(TileSize, TileSize, id, _tiles.Count, tile));
+                Tile tile = new Tile(TileSize, TileSize, id, _tiles.Count, tileBuffer);
+                _tiles.Add(tile);
+
+                AddEdge(tile.Top,       EdgeType.Top,       tile);
+                AddEdge(tile.RTop,      EdgeType.RTop,      tile);
+                AddEdge(tile.Bottom,    EdgeType.Bottom,    tile);
+                AddEdge(tile.RBottom,   EdgeType.RBottom,   tile);
+                AddEdge(tile.Left,      EdgeType.Left,      tile);
+                AddEdge(tile.RLeft,     EdgeType.RLeft,     tile);
+                AddEdge(tile.Right,     EdgeType.Right,     tile);
+                AddEdge(tile.RRight,    EdgeType.RRight,    tile);
+
+                void AddEdge(int edge, EdgeType type, Tile tile)
+                {
+                    if (!_edgeLookup.TryGetValue(edge, out List<EdgeId> edges))
+                        _edgeLookup.Add(edge, new List<EdgeId> { new EdgeId(type, tile) });
+                    else
+                        edges.Add(new EdgeId(type, tile));
+                }
             }
 
-            public long Solve()
-            {
-                List<OrientedTile> solution = GetSolution();
-
-                int topLeft = 0;
-                int topRight = MapSize - 1;
-                int bottomLeft = MapSize * (MapSize - 1);
-                int bottomRight = MapSize * MapSize - 1;
-
-                long answer = 1;
-                answer *= solution[topLeft].Tile.Id;
-                answer *= solution[topRight].Tile.Id;
-                answer *= solution[bottomLeft].Tile.Id;
-                answer *= solution[bottomRight].Tile.Id;
-
-                return answer;
-            }
+            public long GetMultipliedCornerIds() =>
+                GetCorners().Aggregate(1L, (total, corner) => total * corner.Id);
 
             public bool[,] GetImage()
             {
@@ -174,72 +271,117 @@ namespace AdventOfCode._2020
 
                     for (int i = 0; i < TileSize - 2; i++)
                         for (int j = 0; j < TileSize - 2; j++)
-                            image[imageBase.X + i, imageBase.Y + j] = tile.Get(tileBase.X + i, tileBase.Y + j);
+                            image[imageBase.X + i, imageBase.Y + j] = tile[tileBase.X + i, tileBase.Y + j];
                 }
 
                 return image;
             }
 
+            private IEnumerable<Tile> GetCorners()
+            {
+                int cornersFound = 0;
+                foreach (Tile tile in _tiles)
+                {
+                    if ((_edgeLookup[tile.Top].Count == 1 || _edgeLookup[tile.Bottom].Count == 1) &&
+                        (_edgeLookup[tile.Left].Count == 1 || _edgeLookup[tile.Right].Count == 1))
+                    {
+                        yield return tile;
+                        cornersFound++;
+                    }
+
+                    if (cornersFound == 4)
+                        break;
+                }
+            }
+
             private List<OrientedTile> GetSolution()
             {
                 List<OrientedTile> solution = new(_tiles.Count);
-                HashSet<Tile> candidates = new(_tiles);
-                if (!SolveInternal(solution, candidates))
+
+                OrientedTile previous = GetFirstOrientedCorner();
+                solution.Add(previous);
+
+                for (int i = 1; i < _tiles.Count; i++)
                 {
-                    throw new InvalidOperationException();
+                    int edgeId;
+                    EdgeType edgeType;
+                    if (i % MapSize > 0)
+                    {
+                        edgeId = previous.Right;
+                        edgeType = EdgeType.Right;
+                    }
+                    else
+                    {
+                        previous = solution[i - MapSize];
+                        edgeId = previous.Bottom;
+                        edgeType = EdgeType.Bottom;
+                    }
+
+                    previous = GetNextOrientedTile(edgeId, edgeType, previous.Tile);
+                    solution.Add(previous);
                 }
+
                 return solution;
             }
 
-            private bool SolveInternal(List<OrientedTile> placed, HashSet<Tile> candidateTiles)
+            private OrientedTile GetNextOrientedTile(int edgeId, EdgeType edgeType, Tile previousTile)
             {
-                if (placed.Count == _tiles.Count)
-                    return true;
+                List<EdgeId> matches = _edgeLookup[edgeId];
+                EdgeId correct = matches[0].Tile == previousTile ? matches[1] : matches[0];
 
-                foreach (var cand in candidateTiles.ToList())
-                    foreach (Orientation orientation in AllOrientations())
+                Orientation orientation = edgeType switch
+                {
+                    EdgeType.Bottom => correct.Type switch
                     {
-                        OrientedTile orientedCandidate = cand.Orient(orientation);
-                        if (!TestCandidate(placed, orientedCandidate))
-                            continue;
+                        EdgeType.Top        => Orientation.One,
+                        EdgeType.RTop       => Orientation.Two,
+                        EdgeType.Bottom     => Orientation.Three,
+                        EdgeType.RBottom    => Orientation.Four,
+                        EdgeType.Left       => Orientation.Five,
+                        EdgeType.RLeft      => Orientation.Seven,
+                        EdgeType.Right      => Orientation.Six,
+                        EdgeType.RRight     => Orientation.Eight,
+                        _ => throw new InvalidOperationException(),
+                    },
+                    EdgeType.Right => correct.Type switch
+                    {
+                        EdgeType.Top        => Orientation.Five,
+                        EdgeType.RTop       => Orientation.Six,
+                        EdgeType.Bottom     => Orientation.Seven,
+                        EdgeType.RBottom    => Orientation.Eight,
+                        EdgeType.Left       => Orientation.One,
+                        EdgeType.RLeft      => Orientation.Three,
+                        EdgeType.Right      => Orientation.Two,
+                        EdgeType.RRight     => Orientation.Four,
+                        _ => throw new InvalidOperationException(),
+                    },
+                    _ => throw new InvalidOperationException()
+                };
 
-                        placed.Add(orientedCandidate);
-                        candidateTiles.Remove(cand);
-                        if (SolveInternal(placed, candidateTiles))
-                            return true;
-                        else
-                        {
-                            candidateTiles.Add(cand);
-                            placed.RemoveAt(placed.Count - 1);
-
-                            if (placed.Count > 0)
-                                return false;
-                        }
-                    }
-
-                return false;
+                return correct.Tile.Orient(orientation);
             }
 
-            private bool TestCandidate(List<OrientedTile> placed, OrientedTile candidate)
+            private OrientedTile GetFirstOrientedCorner()
             {
-                (int x, int y) = (placed.Count % MapSize, placed.Count / MapSize);
-
-                if (x > 0)
+                foreach (Tile tile in _tiles)
                 {
-                    int leftIndex = MapSize * y + (x - 1);
-                    for (int i = 0; i < TileSize; i++)
-                        if (placed[leftIndex].Right(i) != candidate.Left(i))
-                            return false;
-                }
-                else if (y > 0)
-                {
-                    int upIndex = MapSize * (y - 1) + x;
-                    for (int i = 0; i < TileSize; i++)
-                        if (placed[upIndex].Bottom(i) != candidate.Top(i))
-                            return false;
+                    if (_edgeLookup[tile.Top].Count == 1)
+                    {
+                        if (_edgeLookup[tile.Left].Count == 1)
+                            return tile.Orient(Orientation.One);
+                        else if (_edgeLookup[tile.Right].Count == 1)
+                            return tile.Orient(Orientation.Two);
+                    }
+                    else if (_edgeLookup[tile.Bottom].Count == 1)
+                    {
+                        if (_edgeLookup[tile.Left].Count == 1)
+                            return tile.Orient(Orientation.Three);
+                        else if (_edgeLookup[tile.Right].Count == 1)
+                            return tile.Orient(Orientation.Four);
+                    }
                 }
 
-                return true;
+                throw new InvalidOperationException();
             }
         }
 
@@ -259,20 +401,20 @@ namespace AdventOfCode._2020
                 int id = int.Parse(idLine.AsSpan(spaceIndex + 1, idLine.Length - spaceIndex - 2));
 
                 // cheat, size is 10
-                bool[,] tile = new bool[10, 10];
-                for (int i = 0; i < 10; i++)
-                    for (int j = 0; j < 10; j++)
+                bool[,] tile = new bool[TileSize, TileSize];
+                for (int i = 0; i < TileSize; i++)
+                    for (int j = 0; j < TileSize; j++)
                         tile[i, j] = input[j + index][i] == '#';
                 _tileSet.AddTile(id, tile);
 
-                index += 11;
+                index += TileSize + 1;
             }
         }
 
         [Fact]
         public void Part1()
         {
-            long answer = _tileSet.Solve();
+            long answer = _tileSet.GetMultipliedCornerIds();
             Assert.Equal(104831106565027, answer);
         }
 
@@ -297,7 +439,7 @@ namespace AdventOfCode._2020
             Tile searchTile = new Tile(searchSize.X, searchSize.Y, 0, 0, searchArray);
 
             HashSet<IntVec2> monsterCoords = new();
-            foreach(Orientation orientation in AllOrientations())
+            foreach (Orientation orientation in s_Orientations)
             {
                 OrientedTile orientedTile = searchTile.Orient(orientation);
                 SearchImage(image, orientedTile, monsterCoords);
@@ -322,28 +464,29 @@ namespace AdventOfCode._2020
                 {
                     for (int u = 0; u < tile.Width; u++)
                         for (int v = 0; v < tile.Height; v++)
-                            if (tile.Get(u, v) && !image[i + u, j + v])
+                            if (tile[u, v] && !image[i + u, j + v])
                                 goto NoMatch;
 
                     for (int u = 0; u < tile.Width; u++)
                         for (int v = 0; v < tile.Height; v++)
-                            if (tile.Get(u, v))
+                            if (tile[u, v])
                                 monsterCoords.Add((i + u, j + v));
-                    NoMatch:;
+                           
+                            NoMatch:;
                 }
 
         }
 
-        private static IEnumerable<Orientation> AllOrientations()
+        private static Orientation[] s_Orientations = new[]
         {
-            yield return Orientation.One;
-            yield return Orientation.Two;
-            yield return Orientation.Three;
-            yield return Orientation.Four;
-            yield return Orientation.Five;
-            yield return Orientation.Six;
-            yield return Orientation.Seven;
-            yield return Orientation.Eight;
-        }
+            Orientation.One,
+            Orientation.Two,
+            Orientation.Three,
+            Orientation.Four,
+            Orientation.Five,
+            Orientation.Six,
+            Orientation.Seven,
+            Orientation.Eight,
+        };
     }
 }
