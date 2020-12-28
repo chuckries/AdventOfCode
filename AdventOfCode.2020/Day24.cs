@@ -80,29 +80,38 @@ namespace AdventOfCode._2020
         [Fact]
         public void Part2()
         {
-            Dictionary<IntVec2, bool> current = _tiles;
-            Dictionary<IntVec2, bool> next = new(current.Count);
+            Dictionary<IntVec2, (bool isBlack, bool isSurrounded)> current = new(_tiles.Count * 2);
+            foreach ((IntVec2 coord, bool isBlack) in _tiles)
+                current.Add(coord, (isBlack, true));
+            foreach (IntVec2 coord in current.Keys.ToList())
+                foreach (IntVec2 adj in Adjacent(coord))
+                    current.TryAdd(adj, (false, false));
+
+            Dictionary<IntVec2, (bool isBlack, bool isSurrounded)> next = new(current.Count);
+            List<IntVec2> toAdd = new(current.Count);
 
             for (int i = 0; i < 100; i++)
             {
-                // ensure all adjacent tiles alreayd exist
-                foreach (IntVec2 coord in current.Keys.ToList())
-                    if (current[coord])
-                        foreach (IntVec2 adj in Adjacent(coord))
-                            current.TryAdd(adj, false);
-
-                foreach ((IntVec2 coord, bool isBlack) in current)
+                foreach ((IntVec2 coord, (bool isBlack, bool isSurrounded)) in current)
                 {
-                    int adjBlack = Adjacent(coord).Count(adj => current.TryGetValue(adj, out bool isAdjBlack) && isAdjBlack);
-                    next[coord] = isBlack ? !(adjBlack is 0 or > 2) : adjBlack is 2;
+                    int adjBlack = Adjacent(coord).Count(adj => current.TryGetValue(adj, out (bool isBlack, bool isSurrouned) adjState) && adjState.isBlack);
+                    bool isNextBlack = isBlack ? !(adjBlack is 0 or > 2) : adjBlack is 2;
+                    next[coord] = (isNextBlack, isNextBlack || isSurrounded);
+                    if (isNextBlack && !isSurrounded)
+                        toAdd.Add(coord);
                 }
+
+                foreach (IntVec2 coord in toAdd)
+                    foreach (IntVec2 adj in Adjacent(coord))
+                        next.TryAdd(adj, (false, false));
+                toAdd.Clear();
 
                 var tmp = current;
                 current = next;
                 next = tmp;
             }
 
-            int answer = _tiles.Values.Count(t => t);
+            int answer = current.Values.Count(t => t.isBlack);
             Assert.Equal(3887, answer);
         }
 
