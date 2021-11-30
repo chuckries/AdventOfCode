@@ -132,6 +132,16 @@ namespace AdventOfCode.Common
                    Y == other.Y;
         }
 
+        public static bool operator ==(IntVec2 a, IntVec2 b)
+        {
+            return a.X == b.X && a.Y == b.Y;
+        }
+
+        public static bool operator !=(IntVec2 a, IntVec2 b)
+        {
+            return !(a == b);
+        }
+
         public override int GetHashCode()
         {
             return HashCode.Combine(X, Y);
