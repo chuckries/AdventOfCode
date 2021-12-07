@@ -17,6 +17,7 @@ namespace AdventOfCode._2016
 
             int expected = 0;
 
+#pragma warning disable CS0164 // This label has not been referenced
         _0: d = a;
         _1: c = 15;
         _2: b = 170;
@@ -51,6 +52,7 @@ namespace AdventOfCode._2016
             
         _28: if (a != 0) goto _9;
             _29: goto _8;
+#pragma warning restore CS0164 // This label has not been referenced
 
             throw new InvalidOperationException();
 
