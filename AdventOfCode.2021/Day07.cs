@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Xunit;
-
-namespace AdventOfCode._2021
+﻿namespace AdventOfCode._2021
 {
     public class Day07
     {
@@ -43,7 +35,7 @@ namespace AdventOfCode._2021
                 int fuel = 0;
                 for (int j = 0; j < _input.Length; j++)
                 {
-                    fuel += Math.Abs(i - _input[j]);
+                    fuel += Abs(i - _input[j]);
                 }
                 if (fuel < minFuel)
                     minFuel = fuel;
@@ -62,7 +54,7 @@ namespace AdventOfCode._2021
                 int fuel = 0;
                 for (int j = 0; j < _input.Length; j++)
                 {
-                    for (int k = Math.Abs(i - _input[j]); k > 0; k--)
+                    for (int k = Abs(i - _input[j]); k > 0; k--)
                         fuel += k;
                 }
                 if (fuel < minFuel)

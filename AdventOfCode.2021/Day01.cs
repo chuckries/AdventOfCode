@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Xunit;
-
-namespace AdventOfCode._2021
+﻿namespace AdventOfCode._2021
 {
     public class Day01
     {
@@ -21,32 +13,18 @@ namespace AdventOfCode._2021
         [Fact]
         public void Part1()
         {
-            int count = 0;
-            for (int i = 1; i < _input.Length; i++)
-            {
-                if (_input[i] > _input[i - 1])
-                    count++;
-            }
-
-            count = _input.Skip(1).Zip(_input).Count(pair => pair.First > pair.Second);
-
-            Assert.Equal(1342, count);
+            int answer = Counter(1);
+            Assert.Equal(1342, answer);
         }
 
         [Fact]
         public void Part2()
         {
-            int count = 0;
-            for (int i = 3; i < _input.Length; i++)
-            {
-                if (_input[i] > _input[i - 3])
-                    count++;
-            }
-
-            count = _input.Skip(3).Zip(_input).Count(pair => pair.First > pair.Second);
-
-            Assert.Equal(1378, count);
+            int answer = Counter(3);
+            Assert.Equal(1378, answer);
         }
+
+        private int Counter(int count) => _input.Skip(count).Zip(_input).Count(pair => pair.First > pair.Second);
 
     }
 }
