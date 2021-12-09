@@ -34,9 +34,7 @@
             {
                 int fuel = 0;
                 for (int j = 0; j < _input.Length; j++)
-                {
                     fuel += Abs(i - _input[j]);
-                }
                 if (fuel < minFuel)
                     minFuel = fuel;
             }
@@ -54,8 +52,8 @@
                 int fuel = 0;
                 for (int j = 0; j < _input.Length; j++)
                 {
-                    for (int k = Abs(i - _input[j]); k > 0; k--)
-                        fuel += k;
+                    int dist = Abs(i - _input[j]);
+                    fuel += dist * (dist + 1) / 2;
                 }
                 if (fuel < minFuel)
                     minFuel = fuel;

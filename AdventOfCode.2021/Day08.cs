@@ -88,7 +88,6 @@
             _lines = File.ReadAllLines("Inputs/Day08.txt").Select(Line.Parse).ToArray();
         }
 
-
         [Fact]
         public void Part1()
         {
