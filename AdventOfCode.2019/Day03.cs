@@ -60,7 +60,7 @@ namespace AdventOfCode._2019
         public void Part1()
         {
             int answer = _map.Where(kvp => kvp.Value.mask == 3)
-                .Min(kvp => kvp.Key.Distance);
+                .Min(kvp => kvp.Key.Manhattan);
 
             Assert.Equal(248, answer);
         }

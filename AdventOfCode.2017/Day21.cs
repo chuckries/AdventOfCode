@@ -140,33 +140,7 @@ namespace AdventOfCode._2017
 
         class RuleMap
         {
-            struct RuleKey : IEquatable<RuleKey>
-            {
-                public readonly int Size;
-                public readonly uint Id;
-
-                public RuleKey(int size, uint id)
-                {
-                    Size = size;
-                    Id = id;
-                }
-
-                public bool Equals(RuleKey other)
-                {
-                    return Size == other.Size &&
-                        Id == other.Id;
-                }
-
-                public override bool Equals(object obj)
-                {
-                    return Equals((RuleKey) obj);
-                }
-
-                public override int GetHashCode()
-                {
-                    return HashCode.Combine(Size, Id);
-                }
-            }
+            readonly record struct RuleKey(int Size, uint Id);
 
             Dictionary<RuleKey, Tile> _rules;
 
@@ -192,10 +166,8 @@ namespace AdventOfCode._2017
                     _rules.Add(new RuleKey(ruleTile.Size, id), matchTile);
             }
 
-            public bool TryGetMatchedTile(int size, uint id, out Tile matched)
-            {
-                return _rules.TryGetValue(new RuleKey(size, id), out matched);
-            }
+            public bool TryGetMatchedTile(int size, uint id, out Tile matched) => 
+                _rules.TryGetValue(new RuleKey(size, id), out matched);
 
             private Tile ParseTile(string[] parts)
             {
@@ -237,13 +209,13 @@ namespace AdventOfCode._2017
 
             public Pattern ApplyRules(RuleMap rules)
             {
-                GetTileSizeAndCount(out int tileSize, out int tileCount);
+                (int tileSize, int tileCount) = GetTileSizeAndCount();
                 int nextTileSize = GetNextTileSize(tileSize);
                 int nextSize = nextTileSize * tileCount;
 
                 Pattern nextPattern = new Pattern(nextSize);
 
-                foreach ((Tile currentTile, Tile nextTile) in Enumerable.Zip(GetTiles(tileSize), nextPattern.GetTiles(nextTileSize)))
+                foreach ((Tile currentTile, Tile nextTile) in GetTiles(tileSize).Zip(nextPattern.GetTiles(nextTileSize)))
                 {
                     if (!rules.TryGetMatchedTile(currentTile.Size, currentTile.GetPrimaryId(), out Tile matchedTile))
                         throw new InvalidOperationException();
@@ -272,33 +244,29 @@ namespace AdventOfCode._2017
                         yield return new Tile(tileSize, _array, (i, j));
             }
 
-            private void GetTileSizeAndCount(out int tileSize, out int tileCount)
+            private (int size, int count) GetTileSizeAndCount()
             {
                 int remainder;
-                tileCount = Math.DivRem(_size, 2, out remainder);
+                int count = Math.DivRem(_size, 2, out remainder);
                 if (remainder == 0)
                 {
-                    tileSize = 2;
-                    return;
+                    return (2, count);
                 }
 
-                tileCount = Math.DivRem(_size, 3, out remainder);
+                count = Math.DivRem(_size, 3, out remainder);
                 if (remainder == 0)
                 {
-                    tileSize = 3;
-                    return;
+                    return (3, count);
                 }
 
                 throw new InvalidOperationException();
             }
 
-            private int GetNextTileSize(int currentTileSize)
-            {
-                return currentTileSize == 2 ? 3 : currentTileSize == 3 ? 4 : throw new InvalidOperationException();
-            }
+            private int GetNextTileSize(int currentTileSize) =>
+                currentTileSize == 2 ? 3 : currentTileSize == 3 ? 4 : throw new InvalidOperationException();
         }
 
-        RuleMap _ruleMap;
+        private readonly RuleMap _ruleMap;
 
         public Day21()
         {

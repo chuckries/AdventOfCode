@@ -21,7 +21,7 @@ namespace AdventOfCode._2016
         [Fact]
         public void Part1()
         {
-            int answer = EnumPositions().Last().Distance;
+            int answer = EnumPositions().Last().Manhattan;
             Assert.Equal(226, answer);
         }
 
@@ -34,7 +34,7 @@ namespace AdventOfCode._2016
             {
                 if (!visited.Add(pos))
                 {
-                    answer = pos.Distance;
+                    answer = pos.Manhattan;
                     break;
                 }
             }

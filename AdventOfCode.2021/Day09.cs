@@ -41,7 +41,7 @@
         private int GetBasinSize(IntVec2 start)
         {
             Queue<IntVec2> toSearch = new();
-            HashSet<IntVec2> visited = new();
+            bool[,] visited = new bool[_bounds.X, _bounds.Y];
             int count = 0;
 
             toSearch.Enqueue(start);
@@ -49,15 +49,14 @@
             {
                 IntVec2 current = toSearch.Dequeue();
 
-                if (visited.Contains(current))
+                if (visited[current.X, current.Y])
                     continue;
 
-                visited.Add(current);
+                visited[current.X, current.Y] = true;
                 count++;
 
-                foreach (IntVec2 next in current.Adjacent(_bounds).Where(adj => _map[adj.X, adj.Y] != 9))
-                    if (!visited.Contains(next))
-                        toSearch.Enqueue(next);
+                foreach (IntVec2 next in current.Adjacent(_bounds).Where(adj => !visited[adj.X, adj.Y] && _map[adj.X, adj.Y] != 9))
+                    toSearch.Enqueue(next);
             }
 
             return count;

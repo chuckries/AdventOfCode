@@ -33,48 +33,15 @@ namespace AdventOfCode._2018
         }
 
         [DebuggerDisplay("{Coord}, {Terrain}")]
-        private readonly struct Region
-        {
-            public readonly IntVec2 Coord;
-            public readonly int Index;
-            public readonly int Erosion;
-            public readonly Terrain Terrain;
+        private readonly record struct Region(
+            IntVec2 Coord,
+            int Index,
+            int Erosion,
+            Terrain Terrain);
 
-            public Region(IntVec2 coord, int index, int erosion, Terrain terrain)
-            {
-                Coord = coord;
-                Index = index;
-                Erosion = erosion;
-                Terrain = terrain;
-            }
-        }
-
-        private readonly struct SearchCoord : IEquatable<SearchCoord>
-        {
-            public readonly IntVec2 Coord;
-            public readonly Tool Tool;
-
-            public SearchCoord(IntVec2 coord, Tool tool)
-            {
-                Coord = coord;
-                Tool = tool;
-            }
-
-            public bool Equals(SearchCoord other)
-            {
-                return Coord.Equals(other.Coord) && Tool == other.Tool;
-            }
-
-            public override bool Equals(object obj)
-            {
-                return obj is SearchCoord other && Equals(other);
-            }
-
-            public override int GetHashCode()
-            {
-                return HashCode.Combine(Coord.X, Coord.Y, Tool);
-            }
-        }
+        private readonly record struct SearchCoord(
+            IntVec2 Coord,
+            Tool Tool);
 
         [DebuggerDisplay("{Tool}, {Region}, {Time}")]
         struct Node
@@ -89,7 +56,7 @@ namespace AdventOfCode._2018
                 Region = region;
                 Tool = tool;
                 Time = time;
-                Distance = region.Coord.DistanceFrom(TargetCoord);
+                Distance = region.Coord.ManhattanDistanceFrom(TargetCoord);
             }
 
             public SearchCoord SearchCoord => new SearchCoord(Region.Coord, Tool);

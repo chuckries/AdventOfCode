@@ -72,7 +72,7 @@ namespace AdventOfCode._2019
                 {
                     slopeSearch.Add(minSlope, vector);
                 }
-                else if (vector.Distance < minVector.Distance)
+                else if (vector.Manhattan < minVector.Manhattan)
                 {
                     slopeSearch[minSlope] = vector;
                 }

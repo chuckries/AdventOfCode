@@ -80,8 +80,8 @@ namespace AdventOfCode._2019
             PriorityQueue<(IntVec2 position, int distance)> toExplore = 
                 new PriorityQueue<(IntVec2, int)>(Comparer<(IntVec2 position, int distance)>.Create((left, right) =>
                 {
-                    return (left.position.DistanceFrom(_oxygen) + left.distance) - 
-                           (right.position.DistanceFrom(_oxygen) + right.distance);
+                    return (left.position.ManhattanDistanceFrom(_oxygen) + left.distance) - 
+                           (right.position.ManhattanDistanceFrom(_oxygen) + right.distance);
                 }));
             HashSet<IntVec2> visisted = new HashSet<IntVec2>(_map.Count);
             toExplore.Enqueue((IntVec2.Zero, 0));

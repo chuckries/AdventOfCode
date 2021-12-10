@@ -167,7 +167,7 @@ namespace AdventOfCode._2016
 
                 static int WeightedDistance(in SearchNode n)
                 {
-                    return n.Steps + n.Data.Distance + n.EmptyTarget.Distance + n.Empty.DistanceFrom(n.EmptyTarget);
+                    return n.Steps + n.Data.Manhattan + n.EmptyTarget.Manhattan + n.Empty.ManhattanDistanceFrom(n.EmptyTarget);
                 }
             }
 

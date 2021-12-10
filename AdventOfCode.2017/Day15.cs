@@ -57,20 +57,8 @@ namespace AdventOfCode._2017
         [Fact]
         public void Part1()
         {
-            //int count = 0;
-            //for (int i = 0; i < 40_000_000; i++)
-            //{
-            //    _genA.Tick();
-            //    _genB.Tick();
-
-            //    if (_genA.Checksum == _genB.Checksum)
-            //        count++;
-            //}
-
-            int count = Enumerable.Zip(
-                Generator.Generate(16807, 722),
-                Generator.Generate(48271, 354)
-                )
+            int count = Generator.Generate(16807, 722)
+                .Zip(Generator.Generate(48271, 354))
                 .Take(40_000_000)
                 .Count(pair => pair.First == pair.Second);
 

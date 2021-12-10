@@ -20,18 +20,20 @@ namespace AdventOfCode.Common
 
         public void Enqueue(T item)
         {
+            TaskCompletionSource<T> outstandingRequest = null;
             lock(_lock)
             {
                 if (_outstandingRequests.Count > 0)
                 {
-                    var request = _outstandingRequests.Dequeue();
-                    request.SetResult(item);
+                    outstandingRequest = _outstandingRequests.Dequeue();
                 }
                 else
                 {
                     _items.Enqueue(item);
                 }
             }
+
+            outstandingRequest?.SetResult(item);
         }
 
         public Task<T> Dequeue(CancellationToken cancellationToken = default)
@@ -42,7 +44,7 @@ namespace AdventOfCode.Common
                     return Task.FromResult(_items.Dequeue());
                 else
                 {
-                    TaskCompletionSource<T> request = new TaskCompletionSource<T>(TaskCreationOptions.RunContinuationsAsynchronously);
+                    TaskCompletionSource<T> request = new TaskCompletionSource<T>();
                     _outstandingRequests.Enqueue(request);
                     return request.Task;
                 }

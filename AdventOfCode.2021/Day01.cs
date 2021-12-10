@@ -25,6 +25,5 @@
         }
 
         private int Counter(int count) => _input.Skip(count).Zip(_input).Count(pair => pair.First > pair.Second);
-
     }
 }

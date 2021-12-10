@@ -11,7 +11,7 @@ namespace AdventOfCode.Common
         public readonly int X;
         public readonly int Y;
 
-        public int Distance => Math.Abs(X) + Math.Abs(Y);
+        public int Manhattan => Math.Abs(X) + Math.Abs(Y);
 
         public IntVec2(int x, int y)
         {
@@ -25,7 +25,7 @@ namespace AdventOfCode.Common
             Y = int.Parse(y);
         }
 
-        public int DistanceFrom(in IntVec2 p)
+        public int ManhattanDistanceFrom(in IntVec2 p)
         {
             return Math.Abs(X - p.X) + Math.Abs(Y - p.Y);
         }

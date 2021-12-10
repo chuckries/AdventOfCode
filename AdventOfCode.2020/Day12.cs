@@ -54,7 +54,7 @@ namespace AdventOfCode._2020
                 }
             }
 
-            int answer = pos.Distance;
+            int answer = pos.Manhattan;
             Assert.Equal(1441, answer);
         }
 
@@ -97,7 +97,7 @@ namespace AdventOfCode._2020
                 }
             }
 
-            int answer = pos.Distance;
+            int answer = pos.Manhattan;
             Assert.Equal(61616, answer);
         }
     }

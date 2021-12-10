@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <RootNamespace>AdventOfCode._2017</RootNamespace>
 
     <IsPackable>false</IsPackable>
@@ -31,7 +31,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Remove="Inputs\Day10.txt" />
-      <None Remove="Inputs\Day16.txt" />
+      <None Remove="Inputs\Day11.txt" />
+      <None Remove="Inputs\Day12.txt" />
+      <None Remove="Inputs\Day13.txt" />
     </ItemGroup>
 </Project>
