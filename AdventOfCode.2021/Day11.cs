@@ -27,14 +27,13 @@
         public void Part2()
         {
             int target = _bounds.X * _bounds.Y;
-
-            var enumerator = Run().GetEnumerator();
             int iteration = 0;
-            do
+            foreach (int flashers in Run())
             {
                 iteration++;
-                enumerator.MoveNext();
-            } while (enumerator.Current != target);
+                if (flashers == target)
+                    break;
+            }
 
             Assert.Equal(314, iteration);
         }
