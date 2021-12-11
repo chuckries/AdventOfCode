@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Principal;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace AdventOfCode._2021
+﻿namespace AdventOfCode._2021
 {
     public class Day10
     {
@@ -81,15 +74,10 @@ namespace AdventOfCode._2021
             {
                 if (c is '(' or '[' or '{' or '<')
                     stack.Push(c);
-                else
+                else if (c != s_Pairs[stack.Pop()])
                 {
-                    if (c == s_Pairs[stack.Peek()])
-                        stack.Pop();
-                    else
-                    {
-                        corrupted?.Invoke(c);
-                        return false;
-                    }
+                    corrupted?.Invoke(c);
+                    return false;
                 }
             }
             incomplete?.Invoke(stack);

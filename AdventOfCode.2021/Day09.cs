@@ -26,7 +26,7 @@
         [Fact]
         public void Part2()
         {
-            int answer = GetLowPoints().Select(GetBasinSize).OrderByDescending(c => c).Take(3).Aggregate(1, (total, count) => total * count);
+            int answer = GetLowPoints().Select(GetBasinSize).OrderByDescending(c => c).Take(3).Aggregate((total, count) => total * count);
             Assert.Equal(1059300, answer);
         }
 

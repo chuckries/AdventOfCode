@@ -23,8 +23,7 @@ namespace AdventOfCode._2018
 
                 return Metadata
                     .Where(m => m <= Children.Count)
-                    .Select(m => Children[m - 1].GetValue())
-                    .Sum();
+                    .Sum(m => Children[m - 1].GetValue());
             }
         }
 
@@ -60,7 +59,7 @@ namespace AdventOfCode._2018
             Assert.Equal(43825, answer);
 
             static long Recurse(Node n) =>
-                n.Children.Select(Recurse).Sum() + n.Metadata.Sum();
+                n.Children.Sum(Recurse) + n.Metadata.Sum();
         }
 
         [Fact]

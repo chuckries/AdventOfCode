@@ -32,30 +32,42 @@ namespace AdventOfCode.Common
 
         public IEnumerable<IntVec2> Adjacent()
         {
-            yield return this + UnitX;
-            yield return this + UnitY;
-            yield return this - UnitX;
-            yield return this - UnitY;
+            yield return new IntVec2(X + 1, Y    );
+            yield return new IntVec2(X    , Y + 1);
+            yield return new IntVec2(X - 1, Y    );
+            yield return new IntVec2(X    , Y - 1);
         }
 
         public IEnumerable<IntVec2> Adjacent(IntVec2 bounds)
         {
-            if (X - 1 >= 0) yield return this - UnitX;
-            if (X + 1 < bounds.X) yield return this + UnitX;
-            if (Y - 1 >= 0) yield return this - UnitY;
-            if (Y + 1 < bounds.Y) yield return this + UnitY;
+            if (X > 0)              yield return new IntVec2(X -1, Y);
+            if (X < bounds.X - 1)   yield return new IntVec2(X + 1, Y);
+            if (Y > 0)              yield return new IntVec2(X, Y - 1);
+            if (Y < bounds.Y - 1)   yield return new IntVec2(X, Y + 1);
         }
 
         public IEnumerable<IntVec2> Surrounding()
         {
-            yield return (X - 1, Y - 1);
-            yield return (X    , Y - 1);
-            yield return (X + 1, Y - 1);
-            yield return (X - 1, Y    );
-            yield return (X + 1, Y    );
-            yield return (X - 1, Y + 1);
-            yield return (X    , Y + 1);
-            yield return (X + 1, Y + 1);
+            yield return new IntVec2(X - 1, Y - 1);
+            yield return new IntVec2(X    , Y - 1);
+            yield return new IntVec2(X + 1, Y - 1);
+            yield return new IntVec2(X - 1, Y    );
+            yield return new IntVec2(X + 1, Y    );
+            yield return new IntVec2(X - 1, Y + 1);
+            yield return new IntVec2(X    , Y + 1);
+            yield return new IntVec2(X + 1, Y + 1);
+        }
+
+        public IEnumerable<IntVec2> Surrounding(IntVec2 bounds)
+        {
+            if (X > 0 && Y > 0)                         yield return new IntVec2(X - 1, Y - 1);
+            if (Y > 0)                                  yield return new IntVec2(X    , Y - 1);
+            if (X < bounds.X - 1 && Y > 0)              yield return new IntVec2(X + 1, Y - 1);
+            if (X > 0)                                  yield return new IntVec2(X - 1, Y    );
+            if (X < bounds.X - 1)                       yield return new IntVec2(X + 1, Y    );
+            if (X > 0 && Y < bounds.Y - 1)              yield return new IntVec2(X - 1, Y + 1);
+            if (Y < bounds.Y - 1)                       yield return new IntVec2(X    , Y + 1);
+            if (X < bounds.X - 1 && Y < bounds.Y - 1)   yield return new IntVec2(X + 1, Y + 1);
         }
 
         public IntVec2 RotateRight() => new IntVec2(Y * 1, X * -1);

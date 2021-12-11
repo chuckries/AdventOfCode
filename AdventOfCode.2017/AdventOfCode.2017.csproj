@@ -31,8 +31,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Remove="Inputs\Day11.txt" />
-      <None Remove="Inputs\Day12.txt" />
-      <None Remove="Inputs\Day13.txt" />
+      <None Remove="Inputs\Day09.txt" />
     </ItemGroup>
 </Project>

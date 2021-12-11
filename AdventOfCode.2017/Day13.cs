@@ -49,8 +49,17 @@ namespace AdventOfCode._2017
         public void Part2()
         {
             int time = 0;
-            while (!_scanners.All(s => s.PositionAtInitialTime(time) != 0))
+            while (true)
+            {
+                for (int i = 0; i < _scanners.Length; i++)
+                    if (_scanners[i].PositionAtInitialTime(time) == 0)
+                        goto increment;
+
+                break;
+
+            increment:
                 time++;
+            }
 
             Assert.Equal(3970918, time);
         }

@@ -140,9 +140,9 @@ namespace AdventOfCode._2017
 
         class RuleMap
         {
-            readonly record struct RuleKey(int Size, uint Id);
+            private readonly record struct RuleKey(int Size, uint Id);
 
-            Dictionary<RuleKey, Tile> _rules;
+            private Dictionary<RuleKey, Tile> _rules;
 
             public RuleMap(string[] rules)
             {
@@ -153,9 +153,9 @@ namespace AdventOfCode._2017
 
             public void AddRule(string rule)
             {
-                string[] parts = rule.Split();
+                string[] parts = rule.Split("=>", StringSplitOptions.TrimEntries);
                 string[] ruleParts = parts[0].Split('/');
-                string[] matchParts = parts[2].Split('/');
+                string[] matchParts = parts[1].Split('/');
 
                 Tile ruleTile = ParseTile(ruleParts);
                 Tile matchTile = ParseTile(matchParts);
