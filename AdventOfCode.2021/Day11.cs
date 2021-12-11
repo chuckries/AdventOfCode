@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace AdventOfCode._2021
+﻿namespace AdventOfCode._2021
 {
     public class Day11
     {
@@ -25,84 +19,48 @@ namespace AdventOfCode._2021
         [Fact]
         public void Part1()
         {
-            Queue<IntVec2> toFlash = new();
-            List<IntVec2> flashed = new();
-            int flashes = 0;
-
-            for (int iterations = 0; iterations < 100; iterations++)
-            {
-                for (int i = 0; i < _bounds.X; i++)
-                    for (int j = 0; j < _bounds.Y; j++)
-                    {
-                        _map[i, j]++;
-                        if (_map[i, j] == 10)
-                            toFlash.Enqueue(new IntVec2(i, j));
-                    }
-
-                while (toFlash.Count > 0)
-                {
-                    IntVec2 current = toFlash.Dequeue();
-                    flashed.Add(current);
-
-                    foreach (IntVec2 adj in current.Surrounding(_bounds))
-                    {
-                        _map[adj.X, adj.Y]++;
-                        if (_map[adj.X, adj.Y] == 10)
-                            toFlash.Enqueue(adj);
-                    }
-                }
-
-                flashes += flashed.Count;
-                foreach (IntVec2 toZero in flashed)
-                    _map[toZero.X, toZero.Y] = 0;
-
-                flashed.Clear();
-            }
-
-            Assert.Equal(1591, flashes);
+            int answer = Run().Take(100).Sum();
+            Assert.Equal(1591, answer);
         }
 
         [Fact]
         public void Part2()
         {
-            Queue<IntVec2> toFlash = new();
-            List<IntVec2> flashed = new();
+            int target = _bounds.X * _bounds.Y;
 
+            var enumerator = Run().GetEnumerator();
             int iteration = 0;
-            while (true)
+            do
             {
                 iteration++;
+                enumerator.MoveNext();
+            } while (enumerator.Current != target);
+
+            Assert.Equal(314, iteration);
+        }
+
+        private IEnumerable<int> Run()
+        {
+            List<IntVec2> flashers = new(_bounds.X * _bounds.Y);
+            while (true)
+            {
                 for (int i = 0; i < _bounds.X; i++)
                     for (int j = 0; j < _bounds.Y; j++)
-                    {
-                        _map[i, j]++;
-                        if (_map[i, j] == 10)
-                            toFlash.Enqueue(new IntVec2(i, j));
-                    }
+                        if (++_map[i, j] == 10)
+                            flashers.Add(new IntVec2(i, j));
 
-                while (toFlash.Count > 0)
-                {
-                    IntVec2 current = toFlash.Dequeue();
-                    flashed.Add(current);
+                for (int i = 0; i < flashers.Count; i++)
+                    foreach (IntVec2 adj in flashers[i].Surrounding(_bounds))
+                        if (++_map[adj.X, adj.Y] == 10)
+                            flashers.Add(adj);
 
-                    foreach (IntVec2 adj in current.Surrounding(_bounds))
-                    {
-                        _map[adj.X, adj.Y]++;
-                        if (_map[adj.X, adj.Y] == 10)
-                            toFlash.Enqueue(adj);
-                    }
-                }
+                yield return flashers.Count;
 
-                if (flashed.Count == _bounds.X * _bounds.Y)
-                    break;
-
-                foreach (IntVec2 toZero in flashed)
+                foreach (IntVec2 toZero in flashers)
                     _map[toZero.X, toZero.Y] = 0;
 
-                flashed.Clear();
+                flashers.Clear();
             }
-
-            Assert.Equal(0, iteration);
         }
     }
 }
