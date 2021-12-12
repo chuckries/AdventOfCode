@@ -19,13 +19,15 @@ namespace AdventOfCode._2021
 
             _graph = new(lines.Length * 2);
             Dictionary<string, int> nodes = new(lines.Length * 2);
+
             Func<string, int> getNodeIndex = name =>
             {
                 if (!nodes.TryGetValue(name, out int index))
                     index = nodes[name] = nodes.Count;
                 return index;
             };
-            Func<int, List<int>> GetDestList = index =>
+
+            Func<int, List<int>> getDestList = index =>
             {
                 while (index >= _graph.Count)
                     _graph.Add(new());
@@ -39,8 +41,8 @@ namespace AdventOfCode._2021
                 int index0 = getNodeIndex(tok[0]);
                 int index1 = getNodeIndex(tok[1]);
 
-                GetDestList(index0).Add(index1);
-                GetDestList(index1).Add(index0);
+                getDestList(index0).Add(index1);
+                getDestList(index1).Add(index0);
             }
 
             _nodes = new bool[nodes.Count];
@@ -84,34 +86,21 @@ namespace AdventOfCode._2021
                         count++;
                     else
                     {
-                        if (_nodes[cand])
+                        bool isLower = _nodes[cand];
+                        bool hasVisited = visited[cand];
+                        bool shouldBacktrack = !isLower || !hasVisited || allowDouble;
+
+                        if (shouldBacktrack)
                         {
-                            if (!allowDouble)
-                            {
-                                if (!visited[cand])
-                                {
-                                    visited[cand] = true;
-                                    Backtrack(cand, false, visited, ref count);
-                                    visited[cand] = false;
-                                }
-                            }
-                            else
-                            {
-                                if (visited[cand])
-                                {
-                                    Backtrack(cand, false, visited, ref count);
-                                }
-                                else
-                                {
-                                    visited[cand] = true;
-                                    Backtrack(cand, true, visited, ref count);
-                                    visited[cand] = false;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            Backtrack(cand, allowDouble, visited, ref count);
+                            bool toggleVisited = isLower && !hasVisited;
+
+                            if (toggleVisited)
+                                visited[cand] = true;
+
+                            Backtrack(cand, allowDouble && !hasVisited, visited, ref count);
+
+                            if (toggleVisited)
+                                visited[cand] = false;
                         }
                     }
                 }
