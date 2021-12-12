@@ -8,112 +8,110 @@ namespace AdventOfCode._2021
 {
     public class Day12
     {
-        private Dictionary<string, List<string>> _graph;
+        private bool[] _nodes;
+        private List<List<int>> _graph;
+        private readonly int _start;
+        private readonly int _end;
 
         public Day12()
         {
             string[] lines = File.ReadAllLines("Inputs/Day12.txt");
 
             _graph = new(lines.Length * 2);
+            Dictionary<string, int> nodes = new(lines.Length * 2);
+            Func<string, int> getNodeIndex = name =>
+            {
+                if (!nodes.TryGetValue(name, out int index))
+                    index = nodes[name] = nodes.Count;
+                return index;
+            };
+            Func<int, List<int>> GetDestList = index =>
+            {
+                while (index >= _graph.Count)
+                    _graph.Add(new());
+
+                return _graph[index];
+            };
+
             foreach (string line in lines)
             {
                 string[] tok = line.Split('-');
-                if (!_graph.TryGetValue(tok[0], out var list))
-                    list = _graph[tok[0]] = new();
-                list.Add(tok[1]);
-                if (!_graph.TryGetValue(tok[1], out list))
-                    list = _graph[tok[1]] = new();
-                list.Add(tok[0]);
+                int index0 = getNodeIndex(tok[0]);
+                int index1 = getNodeIndex(tok[1]);
+
+                GetDestList(index0).Add(index1);
+                GetDestList(index1).Add(index0);
+            }
+
+            _nodes = new bool[nodes.Count];
+            foreach (var kvp in nodes)
+            {
+                _nodes[kvp.Value] = char.IsLower(kvp.Key[0]);
+                if (kvp.Key == "start")
+                    _start = kvp.Value;
+                else if (kvp.Key == "end")
+                    _end = kvp.Value;
             }
         }
 
         [Fact]
         public void Part1()
         {
-            int answer = 0;
-            Backtrack("start", new() { "start" }, ref answer);
+            int answer = CountPaths(false);
             Assert.Equal(3292, answer);
-
-            void Backtrack(string current, HashSet<string> visited, ref int count)
-            {
-                if (current == "end")
-                {
-                    count++;
-                }
-                else
-                {
-                    foreach (string next in _graph[current])
-                    {
-                        if (char.IsLower(next[0]))
-                        {
-                            if (!visited.Contains(next))
-                            {
-                                visited.Add(next);
-                                Backtrack(next, visited, ref count);
-                                visited.Remove(next);
-                            }
-                        }
-                        else
-                        {
-                            Backtrack(next, visited, ref count);
-                        }
-                    }
-                }
-            }
         }
 
         [Fact]
         public void Part2()
         {
-            int answer = 0;
-            Backtrack("start", new() { { "start", 2 } }, ref answer);
+            int answer = CountPaths(true);
             Assert.Equal(89592, answer);
+        }
 
-            void Backtrack(string current, Dictionary<string, int> visited, ref int count)
+        private int CountPaths(bool allowDouble)
+        {
+            int count = 0;
+            Backtrack(_start, allowDouble, new bool[_nodes.Length], ref count);
+            return count;
+
+            void Backtrack(int current, bool allowDouble, bool[] visited, ref int count)
             {
-                if (current == "end")
+                foreach (int cand in _graph[current])
                 {
-                    count++;
-                }
-                else
-                {
-                    bool hasDouble = visited.Any(kvp => kvp.Key != "start" && kvp.Value == 2);
-
-                    foreach (string cand in _graph[current])
+                    if (cand == _start)
+                        continue;
+                    else if (cand == _end)
+                        count++;
+                    else
                     {
-                        if (cand == "start")
-                            continue;
-
-                        if (char.IsLower(cand[0]))
+                        if (_nodes[cand])
                         {
-                            if (hasDouble)
+                            if (!allowDouble)
                             {
-                                if (!visited.ContainsKey(cand))
+                                if (!visited[cand])
                                 {
-                                    visited[cand] = 1;
-                                    Backtrack(cand, visited, ref count);
-                                    visited.Remove(cand);
+                                    visited[cand] = true;
+                                    Backtrack(cand, false, visited, ref count);
+                                    visited[cand] = false;
                                 }
                             }
                             else
                             {
-                                if (visited.ContainsKey(cand))
+                                if (visited[cand])
                                 {
-                                    visited[cand]++;
-                                    Backtrack(cand, visited, ref count);
-                                    visited[cand]--;
+                                    Backtrack(cand, false, visited, ref count);
                                 }
                                 else
                                 {
-                                    visited[cand] = 1;
-                                    Backtrack(cand, visited, ref count);
-                                    visited.Remove(cand);
+                                    visited[cand] = true;
+                                    Backtrack(cand, true, visited, ref count);
+                                    visited[cand] = false;
                                 }
                             }
                         }
                         else
                         {
-                            Backtrack(cand, visited, ref count);
+                            Backtrack(cand, allowDouble, visited, ref count);
                         }
                     }
                 }
