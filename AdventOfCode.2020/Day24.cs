@@ -106,9 +106,7 @@ namespace AdventOfCode._2020
                         next.TryAdd(adj, (false, false));
                 toAdd.Clear();
 
-                var tmp = current;
-                current = next;
-                next = tmp;
+                (current, next) = (next, current);
             }
 
             int answer = current.Values.Count(t => t.isBlack);

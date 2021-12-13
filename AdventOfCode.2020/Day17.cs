@@ -54,9 +54,7 @@ namespace AdventOfCode._2020
                             next[i, j, k] = active ? adjActive is 2 or 3 : adjActive is 3;
                         }
 
-                var tmp = current;
-                current = next;
-                next = tmp;
+                (current, next) = (next, current);
 
                 bounding = (bounding.low - 1, bounding.high + 1);
             }
@@ -115,9 +113,7 @@ namespace AdventOfCode._2020
                                 next[i, j, k, l] = active ? adjActive is 2 or 3 : adjActive is 3;
                             }
 
-                var tmp = current;
-                current = next;
-                next = tmp;
+                (current, next) = (next, current);
 
                 bounding = (bounding.low - 1, bounding.high + 1);
             }
@@ -203,9 +199,7 @@ namespace AdventOfCode._2020
                     p.SetValue(next, (active ? adjActive is 2 or 3 : adjActive is 3) ? s_Sentinel : null);
                 }
 
-                Array tmp = current;
-                current = next;
-                next = tmp;
+                (current, next) = (next, current);
 
                 bounding = (bounding.min - one, bounding.max + one);
             }

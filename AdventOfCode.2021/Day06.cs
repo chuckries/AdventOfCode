@@ -41,9 +41,7 @@
                 next[6] += fish[0];
                 next[8] = fish[0];
 
-                var tmp = fish;
-                fish = next;
-                next = tmp;
+                (fish, next) = (next, fish);
             }
 
             ulong total = 0;

@@ -98,9 +98,7 @@ namespace AdventOfCode._2020
                     _next[x, y] = seat;
                 }
 
-            var tmp = _current;
-            _current = _next;
-            _next = tmp;
+            (_current, _next) = (_next, _current);
 
             return changed;
         }

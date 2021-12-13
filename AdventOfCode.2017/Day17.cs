@@ -22,10 +22,8 @@ namespace AdventOfCode._2017
                 for (int j = 0; j < Input; j++)
                     current = buffer[current];
 
-                int tmp = buffer[current];
+                buffer[i] = buffer[current];
                 buffer[current] = i;
-                buffer[i] = tmp;
-
                 current = i;
             }
 

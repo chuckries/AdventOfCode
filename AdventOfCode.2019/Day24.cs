@@ -273,10 +273,7 @@ namespace AdventOfCode._2019
             for (int i = 0; i < iterations; i++)
             {
                 current.ApplyTo(next);
-
-                Space tmp = current;
-                current = next;
-                next = tmp;
+                (current, next) = (next, current);
             }
 
             return current.CountOns();

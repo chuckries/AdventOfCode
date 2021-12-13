@@ -90,9 +90,7 @@ namespace AdventOfCode._2017
 
             private void Exchange(int pos0, int pos1, char[] programs)
             {
-                char tmp = programs[pos0];
-                programs[pos0] = programs[pos1];
-                programs[pos1] = tmp;
+                (programs[pos0], programs[pos1]) = (programs[pos1], programs[pos0]);
             }
 
             private void Partner(char name0, char name1, char[] programs)

@@ -96,9 +96,7 @@ namespace AdventOfCode._2015
                 }
             }
 
-            char[,] tmp = _current;
-            _current = _next;
-            _next = tmp;
+            (_current, _next) = (_next, _current);
         }
     }
 }

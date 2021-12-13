@@ -7,6 +7,7 @@ using Xunit;
 using AdventOfCode.Common;
 using System.IO;
 using System.Linq;
+using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities.ObjectModel;
 
 namespace AdventOfCode._2015
 {
@@ -53,9 +54,7 @@ namespace AdventOfCode._2015
 
                 positions.Add(current);
 
-                ref IntVec2 tmp = ref current;
-                current = ref next;
-                next = ref tmp;
+                (current, next) = (next, current);
             }
 
             Assert.Equal(2360, positions.Count);

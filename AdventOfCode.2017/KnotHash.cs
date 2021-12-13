@@ -42,9 +42,10 @@ namespace AdventOfCode._2017
 
             for (int i = 0; i < length / 2; i++)
             {
-                int tmp = _list[Index(begin)];
-                _list[Index(begin)] = _list[Index(end)];
-                _list[Index(end)] = tmp;
+                int b = Index(begin);
+                int e = Index(end);
+
+                (_list[b], _list[e]) = (_list[e], _list[b]);
 
                 begin++;
                 end--;

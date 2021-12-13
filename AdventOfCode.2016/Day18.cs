@@ -30,14 +30,14 @@ namespace AdventOfCode._2016
         [Fact]
         public void Part2()
         {
-            int answer = SumSafe(40_000);
-            Assert.Equal(1987, answer);
+            int answer = SumSafe(400_000);
+            Assert.Equal(19984714, answer);
         }
 
         private int SumSafe(int ticks)
         {
             int total = 0;
-            for (int i = 0; i < 40; i++)
+            for (int i = 0; i < ticks; i++)
             {
                 for (int j = 0; j < _current.Length; j++)
                     if (_current[j] == '.')
@@ -62,9 +62,7 @@ namespace AdventOfCode._2016
                           '^' : '.';
             }
 
-            char[] tmp = _current;
-            _current = _next;
-            _next = tmp;
+            (_current, _next) = (_next, _current);
         }
     }
 }

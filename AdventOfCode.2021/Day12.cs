@@ -23,7 +23,7 @@ namespace AdventOfCode._2021
             Func<string, int> getNodeIndex = name =>
             {
                 if (!nodes.TryGetValue(name, out int index))
-                    index = nodes[name] = nodes.Count;
+                    nodes[name] = index = nodes.Count;
                 return index;
             };
 

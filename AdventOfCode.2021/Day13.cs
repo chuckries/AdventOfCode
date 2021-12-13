@@ -53,16 +53,13 @@ namespace AdventOfCode._2021
             foreach (IntVec2 fold in _folds)
             {
                 FoldSet(current, next, fold);
-
-                var tmp = current;
-                current = next;
-                next = tmp;
+                (current, next) = (next, current);
                 next.Clear();
             }
 
-            (_, IntVec2 max) = current.MinMax();
+            IntVec2 max = IntVec2.Max(current);
 
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new StringBuilder((max.X + 3) * (max.Y + 2));
             for (int j = 0; j <= max.Y; j++)
             {
                 sb.Append(Environment.NewLine);
@@ -103,12 +100,7 @@ namespace AdventOfCode._2021
         private IntVec2 FoldY(IntVec2 p, int fold) =>
             new IntVec2(p.X, Fold(p.Y, fold));
 
-        private int Fold(int num, int fold)
-        {
-            if (num < fold)
-                return num;
-            else
-                return fold - (num - fold);
-        }
+        private int Fold(int num, int fold) =>
+            num < fold ? num : fold - (num - fold);
     }
 }
