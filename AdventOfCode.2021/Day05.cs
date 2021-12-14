@@ -9,7 +9,7 @@
         {
             _input = File.ReadAllLines("Inputs/Day05.txt")
                 .Select(l => l.Split(new[] { ",", " ", "->" }, StringSplitOptions.RemoveEmptyEntries))
-                .Select(tok => (new IntVec2(int.Parse(tok[0]), int.Parse(tok[1])), new IntVec2(int.Parse(tok[2]), int.Parse(tok[3]))));
+                .Select(tok => (new IntVec2(tok[0], tok[1]), new IntVec2(tok[2], tok[3])));
         }
 
         [Fact]

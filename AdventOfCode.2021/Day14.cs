@@ -3,14 +3,18 @@
     public class Day14
     {
         readonly int[] _start;
-        Dictionary<IntVec2, int> _rules;
+        readonly int[,] _rules;
 
         public Day14()
         {
             string[] lines = File.ReadAllLines("Inputs/Day14.txt");
 
             _start = lines[0].Select(c => c - 'A').ToArray();
-            _rules = lines[2..].Select(l => l.Split(" -> ")).ToDictionary(tok => new IntVec2(tok[0][0] - 'A', tok[0][1] -'A'), tok => tok[1][0] - 'A');
+            _rules = new int[26, 26];
+            foreach (string[] tok in lines.Skip(2).Select(l => l.Split(" -> ")))
+            {
+                _rules[tok[0][0] - 'A', tok[0][1] - 'A'] = tok[1][0] - 'A';
+            }
         }
 
         [Fact]
@@ -29,35 +33,37 @@
 
         public long Count(int iterations)
         {
-            Dictionary<IntVec2, long> pairs = new();
+            long[,] pairs = new long[26, 26];
             long[] counts = new long[26];
 
             for (int i = 0; i < _start.Length - 1; i++)
             {
                 counts[_start[i]]++;
-                AddPairCount(new IntVec2(_start[i], _start[i + 1]), 1);
+                pairs[_start[i], _start[i + 1]]++;
             }
             counts[_start[^1]]++;
 
+            long current;
             for (int iteration = 0; iteration < iterations; iteration++)
             {
-                var oldPairs = pairs.ToArray();
-                pairs.Clear();
-                foreach (var kvp in oldPairs)
-                {
-                    int next = _rules[kvp.Key];
-                    counts[next] += kvp.Value;
-                    AddPairCount(new IntVec2(kvp.Key.X, next), kvp.Value);
-                    AddPairCount(new IntVec2(next, kvp.Key.Y), kvp.Value);
-                }
+                long[,] newPairs = new long[26, 26];
+                for (int i = 0; i < 26; i++)
+                    for (int j = 0; j < 26; j++)
+                        if (0 != (current = pairs[i, j]))
+                        {
+                            int next = _rules[i, j];
+                            counts[next] += current;
+                            newPairs[i, next] += current;
+                            newPairs[next, j] += current;
+                        }
+
+                pairs = newPairs;
             }
 
             long max = long.MinValue;
             long min = long.MaxValue;
-            foreach (long count in counts)
+            foreach (long count in counts.Where(c => c != 0))
             {
-                if (count == 0)
-                    continue;
                 if (count > max)
                     max = count;
                 if (count < min)
@@ -65,14 +71,6 @@
             }
 
             return max - min;
-
-            void AddPairCount(IntVec2 pair, long count)
-            {
-                if (!pairs.ContainsKey(pair))
-                    pairs[pair] = count;
-                else
-                    pairs[pair] += count;
-            }
         }
     }
 }
