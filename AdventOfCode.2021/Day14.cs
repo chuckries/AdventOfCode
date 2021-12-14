@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace AdventOfCode._2021
+﻿namespace AdventOfCode._2021
 {
     public class Day14
     {
@@ -23,89 +16,63 @@ namespace AdventOfCode._2021
         [Fact]
         public void Part1()
         {
-            int answer = Count(10);
+            long answer = Count(10);
             Assert.Equal(2587, answer);
         }
 
         [Fact]
         public void Part2()
         {
-            long answer = CountDynamic(40);
+            long answer = Count(40);
             Assert.Equal(3318837563123, answer);
         }
 
-        private int Count(int depth)
+        public long Count(int iterations)
         {
-            int[] counts = new int[26];
-
-            foreach (int i in _start)
-            {
-                counts[i]++;
-            }
-
-            for (int i = 0; i < _start.Length - 1; i++)
-                Recurse(0, new IntVec2(_start[i], _start[i + 1]), counts);
-
-            void Recurse(int currentDepth, IntVec2 current, int[] counts)
-            {
-                if (currentDepth == depth)
-                    return;
-
-                int next = _rules[current];
-                counts[next]++;
-
-                Recurse(currentDepth + 1, new IntVec2(current.X, next), counts);
-                Recurse(currentDepth + 1, new IntVec2(next, current.Y), counts);
-            }
-
-            return counts.Where(c => c != 0).Max() - counts.Where(c => c != 0).Min();
-        }
-
-        private long CountDynamic(int depth)
-        {
-            Dictionary<IntVec3, long[]> levelCounts = new();
-
-            long[] finalCounts = new long[26];
-            for (int i = 0; i < _start.Length; i++)
-                finalCounts[_start[i]]++;
+            Dictionary<IntVec2, long> pairs = new();
+            long[] counts = new long[26];
 
             for (int i = 0; i < _start.Length - 1; i++)
             {
-                long[] tmpCounts = Recurse(0, new IntVec2(_start[i], _start[i + 1]));
-                for (int j = 0; j < 26; j++)
-                    finalCounts[j] += tmpCounts[j];
+                counts[_start[i]]++;
+                AddPairCount(new IntVec2(_start[i], _start[i + 1]), 1);
             }
+            counts[_start[^1]]++;
 
-            return finalCounts.Where(c => c != 0).Max() - finalCounts.Where(c => c != 0).Min();
-
-            long[] Recurse(int currentDepth, IntVec2 current)
+            for (int iteration = 0; iteration < iterations; iteration++)
             {
-                if (currentDepth == depth)
-                    return new long[26];
-
-                if (levelCounts.TryGetValue((current.X, current.Y, currentDepth), out long[] counts))
-                    return counts;
-
-                int next = _rules[current];
-
-                IntVec2 left = new IntVec2(current.X, next);
-                IntVec2 right = new IntVec2(next, current.Y);
-
-                long[] countsLeft = Recurse(currentDepth + 1, left);
-                long[] countsRight = Recurse(currentDepth + 1, right);
-
-                counts = new long[26];
-                counts[next]++;
-
-                for (int i = 0; i < 26; i++)
+                var oldPairs = pairs.ToArray();
+                pairs.Clear();
+                foreach (var kvp in oldPairs)
                 {
-                    counts[i] += countsLeft[i] + countsRight[i];
+                    int next = _rules[kvp.Key];
+                    counts[next] += kvp.Value;
+                    AddPairCount(new IntVec2(kvp.Key.X, next), kvp.Value);
+                    AddPairCount(new IntVec2(next, kvp.Key.Y), kvp.Value);
                 }
-
-                levelCounts[new IntVec3(current.X, current.Y, currentDepth)] = counts;
-                return counts;
             }
 
+            long max = long.MinValue;
+            long min = long.MaxValue;
+            foreach (long count in counts)
+            {
+                if (count == 0)
+                    continue;
+                if (count > max)
+                    max = count;
+                if (count < min)
+                    min = count;
+            }
+
+            return max - min;
+
+            void AddPairCount(IntVec2 pair, long count)
+            {
+                if (!pairs.ContainsKey(pair))
+                    pairs[pair] = count;
+                else
+                    pairs[pair] += count;
+            }
         }
     }
 }
