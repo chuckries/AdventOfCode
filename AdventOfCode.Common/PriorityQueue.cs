@@ -105,9 +105,7 @@ namespace AdventOfCode.Common
 
         private void Swap(int a, int b)
         {
-            T temp = _heap[a];
-            _heap[a] = _heap[b];
-            _heap[b] = temp;
+            (_heap[a], _heap[b]) = (_heap[b], _heap[a]);
         }
 
         private IComparer<T> _comparer;

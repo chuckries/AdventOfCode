@@ -17,51 +17,48 @@ namespace AdventOfCode._2017
     {
         class Particle
         {
-            public record struct Vec3(int X, int Y, int Z);
+            private IntVec3 _p;
+            private IntVec3 _v;
+            private IntVec3 _a;
 
-            private Vec3 _p;
-            private Vec3 _v;
-            private Vec3 _a;
-
-            public Vec3 P => _p;
+            public IntVec3 P => _p;
 
             public bool Dead { get; set; } = false;
 
-            public Particle(int px, int py, int pz, int vx, int vy, int vz, int ax, int ay, int az)
+            public int Manhattan => Abs(_p.X) + Abs(_p.Y) + Abs(_p.Z);
+
+            public Particle(IntVec3 p, IntVec3 v, IntVec3 a)
             {
-                _p = new(); _v = new(); _a = new();
-                _p.X = px; _p.Y = py; _p.Z = pz;
-                _v.X = vx; _v.Y = vy; _v.Z = vz;
-                _a.X = ax; _a.Y = ay; _a.Z = az;
+                _p = p;
+                _v = v;
+                _a = a;
+            }
+
+            public static Particle Parse(string str)
+            {
+                GroupCollection g = s_Regex.Match(str).Groups;
+                return new Particle(
+                    new IntVec3(int.Parse(g["px"].Value), int.Parse(g["py"].Value), int.Parse(g["pz"].Value)),
+                    new IntVec3(int.Parse(g["vx"].Value), int.Parse(g["vy"].Value), int.Parse(g["vz"].Value)),
+                    new IntVec3(int.Parse(g["ax"].Value), int.Parse(g["ay"].Value), int.Parse(g["az"].Value)));
             }
 
             public void Tick()
             {
-                _v.X += _a.X;
-                _v.Y += _a.Y;
-                _v.Z += _a.Z;
-                _p.X += _v.X;
-                _p.Y += _v.Y;
-                _p.Z += _v.Z;
+                _v += _a;
+                _p += _v;
             }
 
-            public int Manhattan => Abs(_p.X) + Abs(_p.Y) + Abs(_p.Z);
+            private static Regex s_Regex = new Regex(
+                @"^p=<(?'px'-?[0-9]+),(?'py'-?[0-9]+),(?'pz'-?[0-9]+)>, v=<(?'vx'-?[0-9]+),(?'vy'-?[0-9]+),(?'vz'-?[0-9]+)>, a=<(?'ax'-?[0-9]+),(?'ay'-?[0-9]+),(?'az'-?[0-9]+)>$",
+                RegexOptions.Compiled);
         }
 
         private readonly Particle[] _particles;
 
         public Day20()
         {
-            string[] lines = File.ReadAllLines("Inputs/Day20.txt");
-            _particles = lines.Select(s =>
-            {
-                GroupCollection g = s_Regex.Match(s).Groups;
-                return new Particle(
-                    int.Parse(g["px"].Value), int.Parse(g["py"].Value), int.Parse(g["pz"].Value),
-                    int.Parse(g["vx"].Value), int.Parse(g["vy"].Value), int.Parse(g["vz"].Value),
-                    int.Parse(g["ax"].Value), int.Parse(g["ay"].Value), int.Parse(g["az"].Value)
-                );
-            }).ToArray();
+            _particles = File.ReadAllLines("Inputs/Day20.txt").Select(Particle.Parse).ToArray();
         }
 
         [Fact]
@@ -110,9 +107,5 @@ namespace AdventOfCode._2017
             int answer = _particles.Count(p => !p.Dead);
             Assert.Equal(504, answer);
         }
-
-        private static Regex s_Regex = new Regex(
-            @"^p=<(?'px'-?[0-9]+),(?'py'-?[0-9]+),(?'pz'-?[0-9]+)>, v=<(?'vx'-?[0-9]+),(?'vy'-?[0-9]+),(?'vz'-?[0-9]+)>, a=<(?'ax'-?[0-9]+),(?'ay'-?[0-9]+),(?'az'-?[0-9]+)>$",
-            RegexOptions.Compiled);
     }
 }

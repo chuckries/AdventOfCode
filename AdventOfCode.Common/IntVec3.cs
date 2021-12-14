@@ -84,6 +84,12 @@ namespace AdventOfCode.Common
                    Z == other.Z;
         }
 
+        public static bool operator ==(IntVec3 a, IntVec3 b) =>
+            a.X == b.X && a.Y == b.Y && a.Z == b.Z;
+
+        public static bool operator !=(IntVec3 a, IntVec3 b) =>
+            !(a == b);
+
         public override int GetHashCode()
         {
             return HashCode.Combine(X, Y, Z);

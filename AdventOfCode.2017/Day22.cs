@@ -17,7 +17,6 @@ namespace AdventOfCode._2017
         private IntVec2 _pos;
         private IntVec2 _dir;
 
-
         public Day22()
         {
             string[] lines = File.ReadAllLines("Inputs/Day22.txt");

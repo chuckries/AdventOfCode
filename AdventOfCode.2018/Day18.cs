@@ -69,7 +69,7 @@ namespace AdventOfCode._2018
 
             int periodStart = 0;
             int periodLength = 0;
-            for (; ;)
+            while (true)
             {
                 for (int i = 0; i < _bounds.X; i++)
                 {
@@ -122,35 +122,25 @@ namespace AdventOfCode._2018
                     int adjacentTrees = 0;
                     int adjacentLumber = 0;
 
-                    for (int u = x - 1; u <= x + 1; u++)
-                    {
-                        if (u < 0 || u >= _bounds.X)
-                            continue;
-
-                        for (int v = y - 1; v <= y + 1; v++)
+                    foreach (var adj in new IntVec2(x, y).Surrounding(_bounds))
+                        switch (_current[adj.X, adj.Y])
                         {
-                            if (v < 0 || v >= _bounds.Y || (u == x && v ==y))
-                                continue;
-
-                            if (_current[u, v] == Cell.Tree) adjacentTrees++;
-                            else if (_current[u, v] == Cell.Lumber) adjacentLumber++;
+                            case Cell.Tree: adjacentTrees++; break;
+                            case Cell.Lumber: adjacentLumber++; break;
                         }
-                    }
 
                     Cell current = _current[x, y];
                     _next[x, y] = current switch
                     {
                         Cell.Open when adjacentTrees >= 3 => Cell.Tree,
-                        Cell.Tree when adjacentLumber >=3 => Cell.Lumber,
+                        Cell.Tree when adjacentLumber >= 3 => Cell.Lumber,
                         Cell.Lumber when !(adjacentLumber >= 1 && adjacentTrees >= 1) => Cell.Open,
                         _ => current
                     };
                 }
             }
 
-            Cell[,] temp = _current;
-            _current = _next;
-            _next = temp;
+            (_current, _next) = (_next, _current);
         }
     }
 }
