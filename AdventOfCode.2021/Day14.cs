@@ -10,7 +10,10 @@
         {
             string[] lines = File.ReadAllLines("Inputs/Day14.txt");
 
-            Dictionary<char, int> ids = new();
+            int[] ids = new int[26];
+            for (int i = 0; i < ids.Length; i++)
+                ids[i] = -1;
+            int nextId = 0;
 
             _start = lines[0].Select(c => GetId(c)).ToArray();
 
@@ -20,14 +23,14 @@
                 SetRule(GetId(tok[0][0]), GetId(tok[0][1]), GetId(tok[1][0]));
             }
 
-            _size = ids.Count;
+            _size = nextId;
 
             int GetId(char c)
             {
-                if (!ids.TryGetValue(c, out int id))
-                {
-                    ids[c] = id = ids.Count;
-                }
+                int idx = c - 'A';
+                int id = ids[idx];
+                if (id == -1)
+                    ids[idx] = id = nextId++;
                 return id;
             }
 
