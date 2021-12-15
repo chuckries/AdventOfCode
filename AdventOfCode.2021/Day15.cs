@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -69,28 +70,28 @@ namespace AdventOfCode._2021
 
         private static int MinDistance(IntVec2 start, IntVec2 end, int[,] map, IntVec2 bounds)
         {
-            int CompareNodes(Node lhs, Node rhs) =>
-                lhs.distance - rhs.distance;
-
-            PriorityQueue<Node> toSearch = new(Comparer<Node>.Create(CompareNodes));
+            PriorityQueue<Node, int> toSearch = new PriorityQueue<Node, int>();
             bool[,] visited = new bool[bounds.X, bounds.Y];
 
-            toSearch.Enqueue(new Node(start, 0));
+            toSearch.Enqueue(new Node(start, 0), 0);
             while (toSearch.Count > 0)
             {
                 Node current = toSearch.Dequeue();
 
-                if (visited[current.p.X, current.p.Y])
-                    continue;
-
                 if (current.p == end)
                     return current.distance;
+
+                if (visited[current.p.X, current.p.Y])
+                    continue;
 
                 visited[current.p.X, current.p.Y] = true;
 
                 foreach (IntVec2 adj in current.p.Adjacent(bounds))
                     if (!visited[adj.X, adj.Y])
-                        toSearch.Enqueue(new Node(adj, current.distance + map[adj.X, adj.Y]));
+                    {
+                        int adjDistance = current.distance + map[adj.X, adj.Y];
+                        toSearch.Enqueue(new Node(adj, adjDistance), adjDistance + adj.ManhattanDistanceFrom(end));
+                    }
             }
 
             throw new InvalidOperationException();

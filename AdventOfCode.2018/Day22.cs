@@ -14,7 +14,7 @@ namespace AdventOfCode._2018
         const int Depth = 10689;
         const int TargetX = 11;
         const int TargetY = 722;
-        static readonly IntVec2 TargetCoord = (TargetX, TargetY);
+        static readonly IntVec2 TargetCoord = new IntVec2(TargetX, TargetY);
 
         enum Terrain : int
         {
@@ -35,7 +35,6 @@ namespace AdventOfCode._2018
         [DebuggerDisplay("{Coord}, {Terrain}")]
         private readonly record struct Region(
             IntVec2 Coord,
-            int Index,
             int Erosion,
             Terrain Terrain);
 
@@ -49,17 +48,15 @@ namespace AdventOfCode._2018
             public readonly Region Region;
             public readonly Tool Tool;
             public readonly int Time;
-            public readonly int Distance;
+            public readonly SearchCoord SearchCoord;
 
             public Node(Region region, Tool tool, int time)
             {
                 Region = region;
                 Tool = tool;
                 Time = time;
-                Distance = region.Coord.ManhattanDistanceFrom(TargetCoord);
+                SearchCoord = new SearchCoord(Region.Coord, Tool);
             }
-
-            public SearchCoord SearchCoord => new SearchCoord(Region.Coord, Tool);
         }
 
         Dictionary<IntVec2, Region> _regions = new Dictionary<IntVec2, Region>();
@@ -88,23 +85,9 @@ namespace AdventOfCode._2018
 
         private int Search()
         {
-            Tool[,] otherValidTool =
-            {
-                { Tool.Invalid, Tool.Torch, Tool.Climbing },
-                { Tool.Climbing, Tool.None, Tool.Invalid },
-                { Tool.Torch, Tool.Invalid, Tool.None }
-            };
-
-            bool[,] validToolRegions =
-            {
-                { false, true, true },
-                { true, true, false },
-                { true, false, true },
-            };
-
             IEnumerable<Node> GetAdjacentNodes(Node current)
             {
-                Tool newTool = otherValidTool[(int)current.Region.Terrain, (int)current.Tool];
+                Tool newTool = OtherValidTool[(int)current.Region.Terrain, (int)current.Tool];
                 yield return new Node(current.Region, newTool, current.Time + 7);
 
                 foreach (IntVec2 adjacent in current.Region.Coord.Adjacent())
@@ -112,43 +95,33 @@ namespace AdventOfCode._2018
                     if (adjacent.X >= 0 && adjacent.Y >= 0)
                     {
                         Region region = GetRegion(adjacent);
-                        if (validToolRegions[(int)current.Tool, (int)region.Terrain])
+                        if (ValidToolRegions[(int)current.Tool, (int)region.Terrain])
                             yield return new Node(region, current.Tool, current.Time + 1);
                     }
                 }
             }
 
-            IComparer<Node> comparer = Comparer<Node>.Create((left, right) =>
-            {
-                return (left.Time + left.Distance) -
-                       (right.Time + right.Distance);
-            });
+            PriorityQueue<Node, int> searchSet = new PriorityQueue<Node, int>();
+            HashSet<SearchCoord> visited = new();
 
-            Node current = new Node(GetRegion(IntVec2.Zero), Tool.Torch, 0);
-            PriorityQueue<Node> searchSet = new PriorityQueue<Node>(comparer);
-            Dictionary<SearchCoord, int> times = new Dictionary<SearchCoord, int>();
-
-            searchSet.Enqueue(current);
-            times.Add(current.SearchCoord, 0);
+            searchSet.Enqueue(new Node(GetRegion(IntVec2.Zero), Tool.Torch, 0), 0);
 
             while (searchSet.Count > 0)
             {
-                current = searchSet.Dequeue();
+                Node current = searchSet.Dequeue();
 
-                if (current.Region.Coord.Equals(TargetCoord) && current.Tool == Tool.Torch)
+                if (visited.Contains(current.SearchCoord))
+                    continue;
+
+                if (current.Region.Coord == TargetCoord && current.Tool == Tool.Torch)
                 {
                     return current.Time;
                 }
 
-                foreach (Node adjacent in GetAdjacentNodes(current))
-                {
-                    if (!times.TryGetValue(adjacent.SearchCoord, out int existingTime) ||
-                        adjacent.Time < existingTime)
-                    {
-                        times[adjacent.SearchCoord] = adjacent.Time;
-                        searchSet.Enqueue(adjacent);
-                    }
-                }
+                visited.Add(current.SearchCoord);
+
+                foreach (Node adjacent in GetAdjacentNodes(current).Where(adj => !visited.Contains(adj.SearchCoord)))
+                    searchSet.Enqueue(adjacent, adjacent.Time + adjacent.Region.Coord.ManhattanDistanceFrom(TargetCoord));
             }
 
             throw new InvalidOperationException();
@@ -169,9 +142,23 @@ namespace AdventOfCode._2018
                 int erosion = (index + Depth) % 20183;
                 Terrain terrain = (Terrain)(erosion % 3);
 
-                _regions.Add(coord, region = new Region(coord, index, erosion, terrain));
+                _regions.Add(coord, region = new Region(coord, erosion, terrain));
             }
             return region;
         }
+
+            private static Tool[,] OtherValidTool =
+            {
+                { Tool.Invalid, Tool.Torch, Tool.Climbing },
+                { Tool.Climbing, Tool.None, Tool.Invalid },
+                { Tool.Torch, Tool.Invalid, Tool.None }
+            };
+
+            private static bool[,] ValidToolRegions =
+            {
+                { false, true, true },
+                { true, true, false },
+                { true, false, true },
+            };
     }
 }
