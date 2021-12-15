@@ -55,10 +55,23 @@ namespace AdventOfCode._2021
             Assert.Equal(2914, answer);
         }
 
-        private readonly record struct Node(IntVec2 p, int distance);
+        private readonly struct Node
+        {
+            public readonly IntVec2 p;
+            public readonly int distance;
+
+            public Node(IntVec2 p, int distance)
+            {
+                this.p = p;
+                this.distance = distance;
+            }
+        }
 
         private static int MinDistance(IntVec2 start, IntVec2 end, int[,] map, IntVec2 bounds)
         {
+            int CompareNodes(Node lhs, Node rhs) =>
+                lhs.distance - rhs.distance;
+
             PriorityQueue<Node> toSearch = new(Comparer<Node>.Create(CompareNodes));
             bool[,] visited = new bool[bounds.X, bounds.Y];
 
@@ -81,9 +94,6 @@ namespace AdventOfCode._2021
             }
 
             throw new InvalidOperationException();
-
-            int CompareNodes(Node lhs, Node rhs) =>
-                (lhs.distance + lhs.p.ManhattanDistanceFrom(end)) - (rhs.distance + rhs.p.ManhattanDistanceFrom(end));
         }
     }
 }
