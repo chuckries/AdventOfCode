@@ -74,40 +74,44 @@ namespace AdventOfCode._2019
             Task.Run(() => backtrackHelper(IntVec2.Zero)).Wait();
         }
 
+        struct Node
+        {
+            public readonly IntVec2 Position;
+            public readonly int Distance;
+
+            public Node(IntVec2 position, int distance)
+            {
+                Position = position;
+                Distance = distance;
+            }
+        }
+
         [Fact]
         public void Part1()
         {
-            PriorityQueue<(IntVec2 position, int distance)> toExplore = 
-                new PriorityQueue<(IntVec2, int)>(Comparer<(IntVec2 position, int distance)>.Create((left, right) =>
-                {
-                    return (left.position.ManhattanDistanceFrom(_oxygen) + left.distance) - 
-                           (right.position.ManhattanDistanceFrom(_oxygen) + right.distance);
-                }));
+            Stack<Node> stack = new Stack<Node>();
             HashSet<IntVec2> visisted = new HashSet<IntVec2>(_map.Count);
-            toExplore.Enqueue((IntVec2.Zero, 0));
+
+            stack.Push(new Node(IntVec2.Zero, 0));
 
             int answer = 0;
-            do
+            while (stack.TryPop(out Node current))
             {
-                var current = toExplore.Dequeue();
-
-                if (current.position.Equals(_oxygen))
+                if (current.Position == _oxygen)
                 {
-                    answer = current.distance;
+                    answer = current.Distance;
                     break;
                 }
 
-                int newDistance = current.distance + 1;
-                foreach (IntVec2 adjacent in current.position.Adjacent())
+                if (!visisted.Contains(current.Position))
                 {
-                    if (_map.TryGetValue(adjacent, out Status status) && status != Status.Wall && !visisted.Contains(adjacent))
-                    {
-                        toExplore.Enqueue((adjacent, newDistance));
-                    }
+                    visisted.Add(current.Position);
+                    int newDistance = current.Distance + 1;
+                    foreach (IntVec2 adj in current.Position.Adjacent())
+                        if (!visisted.Contains(adj) && _map.TryGetValue(adj, out Status status) && status != Status.Wall)
+                            stack.Push(new Node(adj, newDistance));
                 }
-
-                visisted.Add(current.position);
-            } while (toExplore.Count > 0);
+            }
 
             Assert.Equal(380, answer);
         }
@@ -129,15 +133,10 @@ namespace AdventOfCode._2019
                     filled.Add(current);
 
                 foreach (IntVec2 current in currentNodes)
-                {
                     foreach (IntVec2 adjacent in current.Adjacent())
-                    {
                         if (_map.TryGetValue(adjacent, out Status status) && status != Status.Wall && !filled.Contains(adjacent))
-                        {
                             toFill.Add(adjacent);
-                        }
-                    }
-                }
+
             } while (toFill.Count > 0);
 
             Assert.Equal(410, iterations);

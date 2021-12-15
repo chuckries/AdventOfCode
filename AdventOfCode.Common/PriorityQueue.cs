@@ -4,6 +4,7 @@ using System.Text;
 
 namespace AdventOfCode.Common
 {
+    [Obsolete(".NET has a better PriorityQueue built in now. Keeping this for posterity.")]
     public class PriorityQueue<T>
     {
         public int Count => _size;

@@ -90,14 +90,12 @@ namespace AdventOfCode._2016
             public int MinSteps()
             {
                 HashSet<(IntVec2 goal, IntVec2 empty, IntVec2 emptyTarget)> visited = new();
-                PriorityQueue<SearchNode> queue = new PriorityQueue<SearchNode>(Comparer<SearchNode>.Create(SearchComparsion));
+                PriorityQueue<SearchNode, int> queue = new();
+
                 foreach (IntVec2 adj in Adjacent(_goalData))
                 {
-                    queue.Enqueue(new SearchNode(
-                        _goalData,
-                        _initialEmpty,
-                        adj,
-                        0));
+                    SearchNode adjNode = new(_goalData, _initialEmpty, adj, 0);
+                    queue.Enqueue(adjNode, WeightedDistance(adjNode));
                 }
 
                 while (queue.Count > 0)
@@ -119,11 +117,8 @@ namespace AdventOfCode._2016
                             {
                                 if (!adj.Equals(current.Data))
                                 {
-                                    queue.Enqueue(new SearchNode(
-                                        current.EmptyTarget,
-                                        current.Data,
-                                        adj,
-                                        current.Steps + 1));
+                                    SearchNode adjNode = new(current.EmptyTarget, current.Data, adj, current.Steps + 1);
+                                    queue.Enqueue(adjNode, WeightedDistance(adjNode));
                                 }
                             }
                         }
@@ -134,11 +129,8 @@ namespace AdventOfCode._2016
                         {
                             if (!adj.Equals(current.Data) && !visited.Contains((current.Data, adj, current.EmptyTarget)))
                             {
-                                queue.Enqueue(new SearchNode(
-                                    current.Data,
-                                    adj,
-                                    current.EmptyTarget,
-                                    current.Steps + 1));
+                                SearchNode adjNode = new(current.Data, adj, current.EmptyTarget, current.Steps + 1);
+                                queue.Enqueue(adjNode, WeightedDistance(adjNode));
                             }
                         }
                     }
@@ -161,15 +153,8 @@ namespace AdventOfCode._2016
                 }
             }
 
-            private static int SearchComparsion(SearchNode lhs, SearchNode rhs)
-            {
-                return WeightedDistance(lhs) - WeightedDistance(rhs);
-
-                static int WeightedDistance(in SearchNode n)
-                {
-                    return n.Steps + n.Data.Manhattan + n.EmptyTarget.Manhattan + n.Empty.ManhattanDistanceFrom(n.EmptyTarget);
-                }
-            }
+            private static int WeightedDistance(in SearchNode n) =>
+                n.Steps + n.Data.Manhattan + n.EmptyTarget.Manhattan + n.Empty.ManhattanDistanceFrom(n.EmptyTarget);
 
             private static Regex s_Regex = new Regex(
                 @"^/dev/grid/node-x(?'x'\d+)-y(?'y'\d+)\s+(?'size'\d+)T\s+(?'used'\d+)T\s+(?'avail'\d+)T\s+\d+%$",

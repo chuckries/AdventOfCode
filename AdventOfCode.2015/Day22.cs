@@ -215,21 +215,18 @@ namespace AdventOfCode._2015
 
         private int Search(GameState initial)
         {
-            GameState current = initial;
-            PriorityQueue<GameState> queue = new PriorityQueue<GameState>(Comparer<GameState>.Create((lhs, rhs) =>
-            {
-                return lhs.ManaSpent - rhs.ManaSpent;
-            }));
-            queue.Enqueue(current);
+            PriorityQueue<GameState, int> queue = new();
+            queue.Enqueue(initial, initial.ManaSpent);
 
             while (queue.Count > 0)
             {
-                current = queue.Dequeue();
+                GameState current = queue.Dequeue();
 
                 if (current.IsWin)
                     return current.ManaSpent;
 
-                queue.EnqueueRange(current.EnumNextGameStates());
+                foreach (GameState next in current.EnumNextGameStates())
+                    queue.Enqueue(next, next.ManaSpent);
             }
 
             throw new InvalidOperationException();

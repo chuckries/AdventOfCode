@@ -45,18 +45,16 @@
             int count = 0;
 
             toSearch.Enqueue(start);
-            while (toSearch.Count > 0)
+            while (toSearch.TryDequeue(out IntVec2 current))
             {
-                IntVec2 current = toSearch.Dequeue();
+                if (!visited[current.X, current.Y])
+                {
+                    visited[current.X, current.Y] = true;
+                    count++;
 
-                if (visited[current.X, current.Y])
-                    continue;
-
-                visited[current.X, current.Y] = true;
-                count++;
-
-                foreach (IntVec2 next in current.Adjacent(_bounds).Where(adj => !visited[adj.X, adj.Y] && _map[adj.X, adj.Y] != 9))
-                    toSearch.Enqueue(next);
+                    foreach (IntVec2 next in current.Adjacent(_bounds).Where(adj => !visited[adj.X, adj.Y] && _map[adj.X, adj.Y] != 9))
+                        toSearch.Enqueue(next);
+                }
             }
 
             return count;

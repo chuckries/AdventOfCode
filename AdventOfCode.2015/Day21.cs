@@ -231,28 +231,24 @@ namespace AdventOfCode._2015
         private int Search(IEnumerable<Outfit> initial, Func<Outfit, IEnumerable<Outfit>> getAdjacent, Predicate<Actor> test, Comparison<Outfit> comparison)
         {
             HashSet<int> visited = new HashSet<int>();
-            PriorityQueue<Outfit> queue = new PriorityQueue<Outfit>(
-                initial,
-                Comparer<Outfit>.Create(comparison));
+            PriorityQueue<Outfit, Outfit> queue = new(Comparer<Outfit>.Create(comparison));
+            foreach (Outfit outfit in initial)
+                queue.Enqueue(outfit, outfit);
 
-            Outfit current;
             while (queue.Count > 0)
             {
-                current = queue.Dequeue();
+                Outfit current = queue.Dequeue();
 
-                if (visited.Contains(current.Id))
-                    continue;
-                visited.Add(current.Id);
-
-                if (test(new Actor(MyHp, current.Damage, current.ArmorCount)))
-                    return current.Cost;
-                else
+                if (!visited.Contains(current.Id))
                 {
+                    visited.Add(current.Id);
+
+                    if (test(new Actor(MyHp, current.Damage, current.ArmorCount)))
+                        return current.Cost;
+
                     foreach (var adjacent in getAdjacent(current))
-                    {
                         if (!visited.Contains(adjacent.Id))
-                            queue.Enqueue(adjacent);
-                    }
+                            queue.Enqueue(adjacent, adjacent);
                 }
             }
 

@@ -148,27 +148,24 @@ namespace AdventOfCode._2018
                 return value;
             });
 
-            var searchSet = new PriorityQueue<(BoundingBox, int botsInRange)>(comparer);
-            searchSet.Enqueue((initialBox, _bots.Length));
+            var searchSet = new PriorityQueue<BoundingBox, (BoundingBox, int)>(comparer);
+            searchSet.Enqueue(initialBox, (initialBox, _bots.Length));
 
             IntVec3 answer = IntVec3.Zero;
             while (searchSet.Count > 0)
             {
-                (BoundingBox current, _) = searchSet.Dequeue();
+                BoundingBox current = searchSet.Dequeue();
 
                 if (current.IsPoint)
                 {
                     answer = current.Center;
                     break;
                 }
-                else
-                {
-                    foreach (BoundingBox subBox in current.SubBoxes())
-                    {
-                        int botsInRange = _bots.Count(b => b.InRange(subBox.Closest(b.P)));
 
-                        searchSet.Enqueue((subBox, botsInRange));
-                    }
+                foreach (BoundingBox subBox in current.SubBoxes())
+                {
+                    int botsInRange = _bots.Count(b => b.InRange(subBox.Closest(b.P)));
+                    searchSet.Enqueue(subBox, (subBox, botsInRange));
                 }
             }
 

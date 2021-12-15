@@ -75,32 +75,31 @@ namespace AdventOfCode._2019
                 int sink = GetNodeIndex(GetNode("ZZ", Orientation.Outside));
 
                 (int index, int distance) current = (source, 0);
-                bool[] visited = new bool[_nodes.Count];
-                PriorityQueue<(int index, int distance)> queue = new PriorityQueue<(int index, int distance)>(
-                    Comparer<(int index, int distance)>.Create((lhs, rhs) =>
-                    {
-                        return lhs.distance - rhs.distance;
-                    }));
+                PriorityQueue<(int index, int distance), int> queue = new();
+                int[] distances = new int[_nodes.Count];
+                for (int i = 0; i < distances.Length; i++)
+                    distances[i] = int.MaxValue;
 
-                queue.Enqueue(current);
+                queue.Enqueue(current, 0);
+                distances[current.index] = 0;
 
                 while (queue.Count > 0)
                 {
                     current = queue.Dequeue();
 
-                    if (visited[current.index])
-                        continue;
-                    visited[current.index] = true;
-
                     if (current.index == sink)
                         return current.distance;
-                    else
+
+                    if (current.distance == distances[current.index])
                     {
                         foreach (var adj in Adjacent(current.index))
                         {
-                            if (!visited[adj.index])
+                            int adjDistance = current.distance + adj.distance;
+                            ref int existingDist = ref distances[adj.index];
+                            if (adjDistance < existingDist)
                             {
-                                queue.Enqueue((adj.index, current.distance + adj.distance));
+                                existingDist = adjDistance;
+                                queue.Enqueue((adj.index, adjDistance), adjDistance);
                             }
                         }
                     }
@@ -115,36 +114,34 @@ namespace AdventOfCode._2019
                 int sink = GetNodeIndex(GetNode("ZZ", Orientation.Outside));
 
                 (int index, int distance, int level) current = (source, 0, 0);
-                HashSet<(int index, int level)> visited = new HashSet<(int index, int level)>();
 
-                PriorityQueue<(int index, int distance, int level)> queue = new PriorityQueue<(int index, int distance, int level)>(
-                    Comparer<(int index, int distance, int level)>.Create((lhs, rhs) =>
-                    {
-                        return (lhs.distance + lhs.level) - (rhs.distance + rhs.level);
-                    }));
+                PriorityQueue<(int index, int distance, int level), int> queue = new();
+                Dictionary<(int index, int level), int> distances = new();
 
-                queue.Enqueue(current);
+                queue.Enqueue(current, 0);
+                distances[(current.index, current.level)] = 0;
 
                 while (queue.Count > 0)
                 {
                     current = queue.Dequeue();
 
-                    if (visited.Contains((current.index, current.level)))
-                        continue;
-                    visited.Add((current.index, current.level));
-
                     if (current.index == sink && current.level == 0)
                         return current.distance;
-                    else
+
+                    if (current.distance == distances[(current.index, current.level)])
                     {
                         foreach (var adj in Adjacent(current.index))
                         {
-                            if (current.level + adj.levelDelta < 0)
+                            int nextLevel = current.level + adj.levelDelta;
+                            if (nextLevel < 0)
                                 continue;
 
-                            var next = (adj.index, current.distance + adj.distance, current.level + adj.levelDelta);
-                            if (!visited.Contains((next.index, next.Item3)))
-                                queue.Enqueue(next);
+                            int nextDistance = current.distance + adj.distance;
+                            if (!distances.TryGetValue((adj.index, nextLevel), out int adjDist) || nextDistance < adjDist)
+                            {
+                                distances[(adj.index, nextLevel)] = nextDistance;
+                                queue.Enqueue((adj.index, nextDistance, nextLevel), nextDistance);
+                            }
                         }
                     }
                 }
@@ -173,51 +170,49 @@ namespace AdventOfCode._2019
 
                 foreach (var node in _nodes.Keys)
                 {
-                    Bfs(node);
+                    Dfs(node);
                 }
             }
 
-            private void Bfs(in Node n)
+            private void Dfs(in Node n)
             {
                 int source = GetNodeIndex(n);
-                (IntVec2 p, int dist) current = (n.Coord, 0);
-                HashSet<IntVec2> visited = new HashSet<IntVec2>();
-                Queue<(IntVec2, int)> toVisit = new Queue<(IntVec2 p, int dist)>();
+                Stack<(IntVec2 p, int dist)> stack = new();
+                HashSet<IntVec2> visited = new();
 
-                toVisit.Enqueue(current);
-
-                while (toVisit.Count > 0)
+                stack.Push((n.Coord, 0));
+                while (stack.TryPop(out var current))
                 {
-                    current = toVisit.Dequeue();
-
-                    if (visited.Contains(current.p))
-                        continue;
-                    visited.Add(current.p);
-
-                    foreach (var adj in current.p.Adjacent(_bounds))
+                    if (!visited.Contains(current.p))
                     {
-                        char c = _map[adj.X, adj.Y];
-                        if (c == '.' && !visited.Contains(adj))
-                            toVisit.Enqueue((adj, current.dist + 1));
-                        else if (char.IsLetter(c) && !adj.Equals(n.LabelCoord))
+                        visited.Add(current.p);
+
+                        int newDistance = current.dist + 1;
+                        foreach (IntVec2 adj in current.p.Adjacent(_bounds))
                         {
-                            Node sink = GetNode(current.p);
-                            int distance = current.dist;
-                            int levelDelta = 0;
-
-                            if (sink.Name != "AA" && sink.Name != "ZZ")
+                            char c = _map[adj.X, adj.Y];
+                            if (c == '.' && !visited.Contains(adj))
+                                stack.Push((adj, newDistance));
+                            else if (char.IsLetter(c) && !adj.Equals(n.LabelCoord))
                             {
-                                if (sink.Orientation == Orientation.Outside)
-                                    levelDelta = -1;
-                                else
-                                    levelDelta = 1;
+                                Node sink = GetNode(current.p);
+                                int distance = current.dist;
+                                int levelDelta = 0;
 
-                                distance++;
-                                sink = GetNode(sink.Name, sink.Orientation == Orientation.Outside ? Orientation.Inside : Orientation.Outside);
+                                if (sink.Name != "AA" && sink.Name != "ZZ")
+                                {
+                                    if (sink.Orientation == Orientation.Outside)
+                                        levelDelta = -1;
+                                    else
+                                        levelDelta = 1;
+
+                                    distance++;
+                                    sink = GetNode(sink.Name, sink.Orientation == Orientation.Outside ? Orientation.Inside : Orientation.Outside);
+                                }
+
+                                int sinkIndex = GetNodeIndex(sink);
+                                _graph[source, sinkIndex] = (distance, levelDelta);
                             }
-                           
-                            int sinkIndex = GetNodeIndex(sink);
-                            _graph[source, sinkIndex] = (distance, levelDelta);
                         }
                     }
                 }
