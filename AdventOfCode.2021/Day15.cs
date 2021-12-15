@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace AdventOfCode._2021
+﻿namespace AdventOfCode._2021
 {
     public class Day15
     {
@@ -56,42 +49,34 @@ namespace AdventOfCode._2021
             Assert.Equal(2914, answer);
         }
 
-        private readonly struct Node
-        {
-            public readonly IntVec2 p;
-            public readonly int distance;
-
-            public Node(IntVec2 p, int distance)
-            {
-                this.p = p;
-                this.distance = distance;
-            }
-        }
-
         private static int MinDistance(IntVec2 start, IntVec2 end, int[,] map, IntVec2 bounds)
         {
-            PriorityQueue<Node, int> toSearch = new PriorityQueue<Node, int>();
-            bool[,] visited = new bool[bounds.X, bounds.Y];
+            PriorityQueue<IntVec2, int> toSearch = new(bounds.X * bounds.Y);
+            int[,] dists = new int[bounds.X, bounds.Y];
+            for (int i = 0; i < bounds.X; i++)
+                for (int j = 0; j < bounds.Y; j++)
+                    dists[i, j] = int.MaxValue;
 
-            toSearch.Enqueue(new Node(start, 0), 0);
-            while (toSearch.Count > 0)
+            toSearch.Enqueue(start, 0);
+            dists[start.X, start.Y] = 0;
+            while (toSearch.TryDequeue(out IntVec2 pCurrent, out int dCurrent))
             {
-                Node current = toSearch.Dequeue();
+                if (pCurrent == end)
+                    return dCurrent;
 
-                if (current.p == end)
-                    return current.distance;
-
-                if (visited[current.p.X, current.p.Y])
-                    continue;
-
-                visited[current.p.X, current.p.Y] = true;
-
-                foreach (IntVec2 adj in current.p.Adjacent(bounds))
-                    if (!visited[adj.X, adj.Y])
+                if (dCurrent == dists[pCurrent.X, pCurrent.Y])
+                {
+                    foreach (IntVec2 adj in pCurrent.Adjacent(bounds))
                     {
-                        int adjDistance = current.distance + map[adj.X, adj.Y];
-                        toSearch.Enqueue(new Node(adj, adjDistance), adjDistance + adj.ManhattanDistanceFrom(end));
+                        int candDist = dCurrent + map[adj.X, adj.Y];
+                        ref int adjDist = ref dists[adj.X, adj.Y];
+                        if (candDist < adjDist)
+                        {
+                            adjDist = candDist;
+                            toSearch.Enqueue(adj, adjDist);
+                        }
                     }
+                }
             }
 
             throw new InvalidOperationException();

@@ -66,12 +66,8 @@ namespace AdventOfCode._2018
         {
             int answer = 0;
             for (int i = 0; i <= TargetCoord.X; i++)
-            {
                 for (int j = 0; j <= TargetCoord.Y; j++)
-                {
                     answer += (int)GetRegion(new IntVec2(i, j)).Terrain;
-                }
-            }
 
             Assert.Equal(8575, answer);
         }
@@ -101,27 +97,27 @@ namespace AdventOfCode._2018
                 }
             }
 
-            PriorityQueue<Node, int> searchSet = new PriorityQueue<Node, int>();
-            HashSet<SearchCoord> visited = new();
+            PriorityQueue<Node, int> searchSet = new PriorityQueue<Node, int>(TargetCoord.X * TargetCoord.Y);
+            Dictionary<SearchCoord, int> dists = new(TargetCoord.X * TargetCoord.Y * 2);
 
-            searchSet.Enqueue(new Node(GetRegion(IntVec2.Zero), Tool.Torch, 0), 0);
+            Node start = new Node(GetRegion(IntVec2.Zero), Tool.Torch, 0);
+            searchSet.Enqueue(start, 0);
+            dists.Add(start.SearchCoord, 0);
 
             while (searchSet.Count > 0)
             {
                 Node current = searchSet.Dequeue();
 
-                if (visited.Contains(current.SearchCoord))
-                    continue;
-
                 if (current.Region.Coord == TargetCoord && current.Tool == Tool.Torch)
-                {
                     return current.Time;
-                }
 
-                visited.Add(current.SearchCoord);
-
-                foreach (Node adjacent in GetAdjacentNodes(current).Where(adj => !visited.Contains(adj.SearchCoord)))
-                    searchSet.Enqueue(adjacent, adjacent.Time + adjacent.Region.Coord.ManhattanDistanceFrom(TargetCoord));
+                if (dists[current.SearchCoord] == current.Time)
+                    foreach (Node adjacent in GetAdjacentNodes(current))
+                        if (!dists.TryGetValue(adjacent.SearchCoord, out int adjDist) || adjacent.Time < adjDist)
+                        {
+                            dists[adjacent.SearchCoord] = adjacent.Time;
+                            searchSet.Enqueue(adjacent, adjacent.Time + adjacent.Region.Coord.ManhattanDistanceFrom(TargetCoord));
+                        }
             }
 
             throw new InvalidOperationException();
