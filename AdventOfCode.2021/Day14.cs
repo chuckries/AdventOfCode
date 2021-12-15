@@ -1,4 +1,6 @@
-﻿namespace AdventOfCode._2021
+﻿using System.Runtime.ExceptionServices;
+
+namespace AdventOfCode._2021
 {
     public class Day14
     {
@@ -17,7 +19,7 @@
 
             _start = lines[0].Select(c => GetId(c)).ToArray();
 
-            _rules = new();
+            _rules = new(26);
             foreach (string[] tok in lines.Skip(2).Select(l => l.Split(" -> ")))
             {
                 SetRule(GetId(tok[0][0]), GetId(tok[0][1]), GetId(tok[1][0]));
@@ -37,12 +39,12 @@
             void SetRule(int x, int y, int z)
             {
                 while (x >= _rules.Count)
-                    _rules.Add(new());
+                    _rules.Add(new(26));
 
                 List<int> list = _rules[x];
 
                 while (y >= list.Count)
-                    list.Add(0);
+                    list.Add(-1);
 
                 list[y] = z;
             }
@@ -83,19 +85,23 @@
                     for (int j = 0; j < _size; j++)
                     {
                         current = pairs[i, j];
-                        next = _rules[i][j];
-                        counts[next] += current;
-                        newPairs[i, next] += current;
-                        newPairs[next, j] += current;
+                        if (current != 0)
+                        {
+                            next = _rules[i][j];
+                            counts[next] += current;
+                            newPairs[i, next] += current;
+                            newPairs[next, j] += current;
+                        }
                     }
 
                 pairs = newPairs;
             }
 
-            long max = long.MinValue;
-            long min = long.MaxValue;
-            foreach (long count in counts)
+            long max = counts[0];
+            long min = counts[0];
+            for (int i = 1; i < counts.Length; i++)
             {
+                long count = counts[i];
                 if (count > max)
                     max = count;
                 if (count < min)
