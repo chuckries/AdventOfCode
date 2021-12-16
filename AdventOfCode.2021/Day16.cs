@@ -96,7 +96,7 @@ namespace AdventOfCode._2021
                 return true;
             }
 
-            public bool TryReadLiteral (out long literal, out int bitLength)
+            public bool TryReadLiteral(out long literal, out int bitLength)
             {
                 literal = 0;
                 bitLength = 0;
@@ -158,39 +158,27 @@ namespace AdventOfCode._2021
                 return (packet.Literal, packet.BitCount);
             else
             {
-                tryEvalNextPacket tryEvalNext;
                 int totalBitCount = 0;
+                int immediateSubs = 0;
+                int max = packet.Count;
 
-                if (packet.LengthTypeId is 0)
+                bool CheckBitCount() => totalBitCount >= max;
+                bool CheckImmediateSubCount() => immediateSubs >= max;
+
+                Func<bool> check = packet.LengthTypeId is 0 ?
+                    CheckBitCount :
+                    CheckImmediateSubCount;
+
+                bool TryEvalNext(out long evalResult)
                 {
-                    int maxBitCount = packet.Count;
-                    tryEvalNext = (out long evalResult) =>
-                    {
-                        evalResult = 0;
-                        if (totalBitCount >= maxBitCount)
-                            return false;
+                    evalResult = 0;
+                    if (check())
+                        return false;
 
-                        (evalResult, int bitCount) = EvalNextPacket();
-                        totalBitCount += bitCount;
-                        return true;
-                    };
-                }
-                else
-                {
-                    int count = 0;
-                    int total = packet.Count;
-
-                    tryEvalNext = (out long evalResult) =>
-                    {
-                        evalResult = 0;
-                        if (count >= total)
-                            return false;
-
-                        (evalResult, int bitCount) = EvalNextPacket();
-                        totalBitCount += bitCount;
-                        count++;
-                        return true;
-                    };
+                    (evalResult, int bitCount) = EvalNextPacket();
+                    immediateSubs++;
+                    totalBitCount += bitCount;
+                    return true;
                 }
 
                 long result = 0;
@@ -201,45 +189,45 @@ namespace AdventOfCode._2021
                 switch (packet.Type)
                 {
                     case 0:
-                        while (tryEvalNext(out evalResult))
+                        while (TryEvalNext(out evalResult))
                             result += evalResult;
                         break;
 
                     case 1:
                         result = 1;
-                        while (tryEvalNext(out evalResult))
+                        while (TryEvalNext(out evalResult))
                             result *= evalResult;
                         break;
 
                     case 2:
-                        tryEvalNext(out result);
-                        while (tryEvalNext(out evalResult))
+                        TryEvalNext(out result);
+                        while (TryEvalNext(out evalResult))
                             if (evalResult < result)
                                 result = evalResult;
                         break;
 
                     case 3:
-                        tryEvalNext(out result);
-                        while (tryEvalNext(out evalResult))
+                        TryEvalNext(out result);
+                        while (TryEvalNext(out evalResult))
                             if (evalResult > result)
                                 result = evalResult;
                         break;
 
                     case 5:
-                        tryEvalNext(out a);
-                        tryEvalNext(out b);
+                        TryEvalNext(out a);
+                        TryEvalNext(out b);
                         result = a > b ? 1 : 0;
                         break;
 
                     case 6:
-                        tryEvalNext(out a);
-                        tryEvalNext(out b);
+                        TryEvalNext(out a);
+                        TryEvalNext(out b);
                         result = a < b ? 1 : 0;
                         break;
 
                     case 7:
-                        tryEvalNext(out a);
-                        tryEvalNext(out b);
+                        TryEvalNext(out a);
+                        TryEvalNext(out b);
                         result = a == b ? 1 : 0;
                         break;
 
