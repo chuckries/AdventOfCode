@@ -1,11 +1,4 @@
-﻿using Microsoft.VisualStudio.TestPlatform.ObjectModel;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Xunit.Sdk;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace AdventOfCode._2021
 {
@@ -16,11 +9,11 @@ namespace AdventOfCode._2021
             int Version,
             int Type,
             int LengthTypeId,
-            ulong Data);
+            int Count,
+            long Literal);
 
         private class BitReader
         {
-            //readonly string _packet;
             readonly int[] _packet;
             int _packetIdx;
             int _bitIdx;
@@ -39,7 +32,7 @@ namespace AdventOfCode._2021
                 if (_packetIdx >= _packet.Length)
                     return false;
 
-                if (bits > 31)
+                if (bits > 32)
                     throw new InvalidOperationException();
 
                 while (bits-- > 0)
@@ -51,7 +44,7 @@ namespace AdventOfCode._2021
                         _packetIdx++;
                         _bitIdx = 3;
 
-                        if (_packetIdx >= _packet.Length && bits != 0)
+                        if (_packetIdx >= _packet.Length && bits >= 0)
                             return false;
                     }
                 }
@@ -71,11 +64,12 @@ namespace AdventOfCode._2021
 
                 int bitCount = 6;
                 int lengthTypeId = 0;
-                ulong data = 0;
+                long literal = 0;
+                int count = 0;
 
                 if (type == 4)
                 {
-                    if (!TryReadLiteral(out data, out int literalLength))
+                    if (!TryReadLiteral(out literal, out int literalLength))
                         return false;
                     bitCount += literalLength;
                 }
@@ -84,27 +78,25 @@ namespace AdventOfCode._2021
                     if (!TryReadBits(1, out lengthTypeId))
                         return false;
 
-                    int intData = 0;
                     if (lengthTypeId == 0)
                     {
-                        if (!TryReadBits(15, out intData))
+                        if (!TryReadBits(15, out count))
                             return false;
                         bitCount += 16;
                     }
                     else
                     {
-                        if (!TryReadBits(11, out intData))
+                        if (!TryReadBits(11, out count))
                             return false;
                         bitCount += 12;
                     }
-                    data = (ulong)(long)intData;
                 }
 
-                packet = new Packet(bitCount, version, type, lengthTypeId, data);
+                packet = new Packet(bitCount, version, type, lengthTypeId, count, literal);
                 return true;
             }
 
-            public bool TryReadLiteral (out ulong literal, out int bitLength)
+            public bool TryReadLiteral (out long literal, out int bitLength)
             {
                 literal = 0;
                 bitLength = 0;
@@ -118,7 +110,7 @@ namespace AdventOfCode._2021
                     if (bitLength > 80)
                         throw new InvalidOperationException();
 
-                    literal = (literal << 4) | (ulong)(long)(next & 0x0F);
+                    literal = (literal << 4) | (long)(next & 0x0F);
 
                     if ((next & 0x10) == 0)
                         break;
@@ -131,160 +123,132 @@ namespace AdventOfCode._2021
                 (byte)(c <= '9' ? c - '0' : c - 'A' + 10);
         }
 
-        readonly Packet[] _packets;
+        BitReader _reader;
 
         public Day16()
         {
-            BitReader reader = new BitReader(File.ReadAllText("Inputs/Day16.txt"));
-            List<Packet> packets = new();
-            while (reader.TryReadPacket(out Packet? packet))
-                packets.Add(packet);
-
-            _packets = packets.ToArray();
-        }
-
-        [Fact]
-        public void TestReader()
-        {
-            BitReader reader = new BitReader("D2FE28");
-
-            Assert.True(reader.TryReadBits(3, out int version));
-            Assert.Equal(6, version);
-
-            Assert.True(reader.TryReadBits(3, out int type));
-            Assert.Equal(4, type);
-
-            Assert.True(reader.TryReadLiteral(out ulong literal, out int bitLength));
-            Assert.Equal(2021ul, literal);
-            Assert.Equal(15, bitLength);
-
-            reader = new BitReader("D2FE28");
-            Assert.True(reader.TryReadPacket(out Packet? packet));
-
-            Assert.Equal(6, packet!.Version);
-            Assert.Equal(4, packet!.Type);
-            Assert.Equal(2021ul, packet!.Data);
-            Assert.Equal(0, packet!.LengthTypeId);
-            Assert.Equal(21, packet!.BitCount);
+            _reader = new BitReader(File.ReadAllText("Inputs/Day16.txt"));
         }
 
         [Fact]
         public void Part1()
         {
-            int answer = _packets.Sum(p => p.Version);
+            int answer = 0;
+            while (_reader.TryReadPacket(out Packet? packet))
+                answer += packet.Version;
+
             Assert.Equal(893, answer);
         }
 
         [Fact]
         public void Part2()
         {
-            (ulong answer, int bitCount, int nextIndex) = EvalPacket(0);
-            Assert.Equal(0ul, answer);
+            (long answer, _) = EvalNextPacket();
+            Assert.Equal(4358595186090, answer);
         }
 
-        private delegate bool tryEvalNextPacket(out ulong result);
+        private delegate bool tryEvalNextPacket(out long result);
 
-        private (ulong result, int bitCount, int nextIndex) EvalPacket(int index)
+        private (long result, int bitCount) EvalNextPacket()
         {
-            int currentIndex = index;
-            Packet p = _packets[currentIndex];
+            if (!_reader.TryReadPacket(out Packet? packet))
+                throw new InvalidOperationException();
 
-            if (p.Type == 4)
-            {
-                return (p.Data, p.BitCount, index);
-            }
+            if (packet.Type is 4)
+                return (packet.Literal, packet.BitCount);
             else
             {
                 tryEvalNextPacket tryEvalNext;
                 int totalBitCount = 0;
 
-                if (p.LengthTypeId == 0)
+                if (packet.LengthTypeId is 0)
                 {
-                    int maxBitCount = (int)p.Data;
-                    tryEvalNext = (out ulong evalResult) => {
+                    int maxBitCount = packet.Count;
+                    tryEvalNext = (out long evalResult) =>
+                    {
                         evalResult = 0;
                         if (totalBitCount >= maxBitCount)
                             return false;
 
-                        (evalResult, int bitCount, index) = EvalPacket(index + 1);
+                        (evalResult, int bitCount) = EvalNextPacket();
                         totalBitCount += bitCount;
                         return true;
                     };
                 }
                 else
                 {
-                    int packet = 0;
-                    int packets = (int)p.Data;
+                    int count = 0;
+                    int total = packet.Count;
 
-                    tryEvalNext = (out ulong evalResult) =>
+                    tryEvalNext = (out long evalResult) =>
                     {
                         evalResult = 0;
-                        if (packet >= packets)
+                        if (count >= total)
                             return false;
 
-                        (evalResult, int bitCount, index) = EvalPacket(index + 1);
+                        (evalResult, int bitCount) = EvalNextPacket();
                         totalBitCount += bitCount;
-                        packet++;
+                        count++;
                         return true;
                     };
                 }
 
-                ulong result = 0;
+                long result = 0;
+                long evalResult;
+                long a;
+                long b;
 
-                if (p.Type == 0)
+                switch (packet.Type)
                 {
-                    while (tryEvalNext(out ulong evalResult))
-                        result += evalResult;
-                }
-                else if (p.Type == 1)
-                {
-                    result = 1;
-                    while (tryEvalNext(out ulong evalResult))
-                        result *= evalResult;
-                }
-                else if (p.Type == 2)
-                {
-                    result = ulong.MaxValue;
-                    while (tryEvalNext(out ulong evalResult))
-                        if (evalResult < result)
-                            result = evalResult;
-                }
-                else if (p.Type == 3)
-                {
-                    result = ulong.MinValue;
-                    while (tryEvalNext(out ulong evalResult))
-                        if (evalResult > result)
-                            result = evalResult;
-                }
-                else if (p.Type == 5)
-                {
-                    tryEvalNext(out ulong a);
-                    tryEvalNext(out ulong b);
+                    case 0:
+                        while (tryEvalNext(out evalResult))
+                            result += evalResult;
+                        break;
 
-                    result = (ulong)(a > b ? 1 : 0);
-                }
-                else if (p.Type == 6)
-                {
-                    tryEvalNext(out ulong a);
-                    tryEvalNext(out ulong b);
+                    case 1:
+                        result = 1;
+                        while (tryEvalNext(out evalResult))
+                            result *= evalResult;
+                        break;
 
-                    result = (ulong)(a < b ? 1 : 0);
-                }
-                else if (p.Type == 7)
-                {
-                    tryEvalNext(out ulong a);
-                    tryEvalNext(out ulong b);
+                    case 2:
+                        tryEvalNext(out result);
+                        while (tryEvalNext(out evalResult))
+                            if (evalResult < result)
+                                result = evalResult;
+                        break;
 
-                    result = (ulong)(a == b ? 1 : 0);
-                }
-                else
-                {
-                    throw new InvalidOperationException();
+                    case 3:
+                        tryEvalNext(out result);
+                        while (tryEvalNext(out evalResult))
+                            if (evalResult > result)
+                                result = evalResult;
+                        break;
+
+                    case 5:
+                        tryEvalNext(out a);
+                        tryEvalNext(out b);
+                        result = a > b ? 1 : 0;
+                        break;
+
+                    case 6:
+                        tryEvalNext(out a);
+                        tryEvalNext(out b);
+                        result = a < b ? 1 : 0;
+                        break;
+
+                    case 7:
+                        tryEvalNext(out a);
+                        tryEvalNext(out b);
+                        result = a == b ? 1 : 0;
+                        break;
+
+                    default:
+                        throw new InvalidOperationException();
                 }
 
-                return (result, totalBitCount + p.BitCount, index);
+                return (result, totalBitCount + packet.BitCount);
             }
-
         }
-    } 
+    }
 }
