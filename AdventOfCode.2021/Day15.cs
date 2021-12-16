@@ -1,4 +1,6 @@
-﻿namespace AdventOfCode._2021
+﻿using System.Diagnostics;
+
+namespace AdventOfCode._2021
 {
     public class Day15
     {
@@ -46,6 +48,7 @@
                 }
 
             int answer = MinDistance(IntVec2.Zero, bounds - 1, map, bounds);
+
             Assert.Equal(2914, answer);
         }
 
@@ -65,7 +68,6 @@
                     return dCurrent;
 
                 if (dCurrent == dists[pCurrent.X, pCurrent.Y])
-                {
                     foreach (IntVec2 adj in pCurrent.Adjacent(bounds))
                     {
                         int candDist = dCurrent + map[adj.X, adj.Y];
@@ -76,7 +78,6 @@
                             toSearch.Enqueue(adj, adjDist);
                         }
                     }
-                }
             }
 
             throw new InvalidOperationException();
