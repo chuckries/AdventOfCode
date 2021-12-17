@@ -12,16 +12,22 @@
 
             private class PacketReader
             {
-                readonly int[] _data;
+                readonly byte[] _data;
                 int _dataIdx;
                 int _bitIdx;
                 int _position;
 
                 public PacketReader(string input)
                 {
-                    _data = input.Select(c => c <= '9' ? c - '0' : c - 'A' + 10).ToArray();
+                    _data = new byte[input.Length / 2];
+                    for (int i = 0; i < input.Length; i += 2)
+                    {
+                        int a = ParseChar(input[i]);
+                        int b = ParseChar(input[i + 1]);
+                        _data[i << 1] = (byte)(a << 4 | b);
+                    }
                     _dataIdx = 0;
-                    _bitIdx = 3;
+                    _bitIdx = 7;
                     _position = 0;
                 }
 
@@ -70,7 +76,7 @@
                     while (true)
                     {
                         int next = ReadBits(5);
-                        literal = (literal << 4) | (long)(next & 0x0F);
+                        literal = checked(literal << 4) | (long)(next & 0x0F);
                         if ((next & 0x10) == 0)
                             break;
                     }
@@ -80,24 +86,24 @@
 
                 private int ReadBits(int bits)
                 {
-                    if (bits > 32)
-                        throw new InvalidOperationException();
-
                     int result = 0;
                     for (int i = 0; i < bits; i++)
                     {
-                        result = (result << 1) | (_data[_dataIdx] & (1 << _bitIdx)) >> (_bitIdx);
+                        result = checked(result << 1) | (_data[_dataIdx] & (1 << _bitIdx)) >> (_bitIdx);
                         _bitIdx--;
                         if (_bitIdx < 0)
                         {
                             _dataIdx++;
-                            _bitIdx = 3;
+                            _bitIdx = 7;
                         }
                     }
 
                     _position += bits;
                     return result;
                 }
+
+                private static int ParseChar(char c) => c <= '9' ? c - '0' : c - 'A' + 10;
+
             }
 
             private Packet(int version, int type, long literal)
@@ -114,10 +120,8 @@
                 return reader.ReadPackets();
             }
 
-            public int SumVersions()
-            {
-                return Version + _subPackets.Sum(p => p.SumVersions());
-            }
+            public int SumVersions() =>
+                Version + _subPackets.Sum(p => p.SumVersions());
 
             public long Evaluate() => Type switch
             {
