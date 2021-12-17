@@ -16,7 +16,7 @@
         public void Part1()
         {
             int maxY = 0;
-            for (int i = 0; i < 250; i++)
+            for (int i = 0; i < 200; i++)
                 if (HitsY(i, out int y) && y > maxY)
                     maxY = y;
 
@@ -26,13 +26,42 @@
         [Fact]
         public void Part2()
         {
+            List<int> xVels = new();
+            List<int> yVels = new();
+
+            for (int i = 1; i <= 200; i++)
+                if (HitsX(i))
+                    xVels.Add(i);
+
+            for (int j = -200; j <= 200; j++)
+                if (HitsY(j, out _))
+                    yVels.Add(j);
+
             int count = 0;
-            for (int i = 1; i <= 1000; i++)
-                for (int j = -1000; j <= 1000; j++)
+            foreach (int i in xVels)
+                foreach (int j in yVels)
                     if (HitsXY(i, j))
                         count++;
 
             Assert.Equal(3229, count);
+        }
+
+        bool HitsX(int vx0)
+        {
+            int px = 0;
+            int vx = vx0;
+            while (true)
+            {
+                if (InXRange(px))
+                    return true;
+
+                if (px > _bounds.hi.X || (vx == 0 && px < _bounds.low.X))
+                    return false;
+
+                px += vx;
+                if (vx > 0)
+                    vx--;
+            }
         }
 
         bool HitsY(int vy0, out int maxY)
@@ -46,7 +75,8 @@
                 {
                     return true;
                 }
-                else if (vy < 0)
+
+                if (vy < 0)
                 {
                     // we are only decreasing, if we are lower than the range fail
                     if (py < _bounds.low.Y)
@@ -79,10 +109,7 @@
                 if (vy < 0 && py < _bounds.low.Y)
                     return false;
 
-                if (px > _bounds.hi.X)
-                    return false;
-
-                if (vx == 0 && px < _bounds.low.X)
+                if (px > _bounds.hi.X || (vx == 0 && px < _bounds.low.X))
                     return false;
 
                 px += vx;
