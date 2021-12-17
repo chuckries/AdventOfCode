@@ -24,7 +24,7 @@
                     {
                         int a = ParseChar(input[i]);
                         int b = ParseChar(input[i + 1]);
-                        _data[i << 1] = (byte)(a << 4 | b);
+                        _data[i >> 1] = (byte)(a << 4 | b);
                     }
                     _dataIdx = 0;
                     _bitIdx = 7;
