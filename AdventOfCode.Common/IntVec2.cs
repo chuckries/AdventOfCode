@@ -46,6 +46,14 @@ namespace AdventOfCode.Common
             if (Y < bounds.Y - 1)   yield return new IntVec2(X    , Y + 1);
         }
 
+        public void Adjacent(IntVec2 bounds, Action<IntVec2> actOnAdjacent)
+        {
+            if (X > 0)              actOnAdjacent(new IntVec2(X - 1, Y    ));
+            if (X < bounds.X - 1)   actOnAdjacent(new IntVec2(X + 1, Y    ));
+            if (Y > 0)              actOnAdjacent(new IntVec2(X    , Y - 1));
+            if (Y < bounds.Y - 1)   actOnAdjacent(new IntVec2(X    , Y + 1));
+        }
+
         public IEnumerable<IntVec2> Surrounding()
         {
             yield return new IntVec2(X - 1, Y - 1);

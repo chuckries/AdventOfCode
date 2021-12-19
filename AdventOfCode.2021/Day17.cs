@@ -15,7 +15,7 @@
         [Fact]
         public void Part1()
         {
-            // vax vy0 is -(bounds.lo.y + 1): assuming a positive vy0 and the target in the stricly negative y,
+            // max vy0 is -(bounds.lo.y + 1): assuming a positive vy0 and the target in the stricly negative y,
             // we will go up and come back down to y = 0 with v = -vy0. Fastest vel would be going from y = 0 to y = bounds.lo.y 
             // in a single step. 
             // max py caused by vy0 is 0 + v0 + (v0 - 1) + (v0 - 2) + ... + (v0 - (v0 -1)) + (v0 - v0) = 
@@ -38,18 +38,12 @@
             // we will then only search for velocities that take > 1 step
             count += (_bounds.hi.X - _bounds.low.X + 1) * (_bounds.hi.Y - _bounds.low.Y + 1);
 
-            List<int> xVels = new();
-            List<int> yVels = new();
-
+            // this is the minX that will reach the range, any lower x will stall before it reaches the range
             // result of calculating v0 * (v0 + 1) / 2 >= _bouds.low.X
             int minX = (int)Ceiling((Sqrt(1 + 8 * _bounds.low.X) - 1) / 2);
 
             // largest initial velocity that will hit in 2 steps
             int maxX = (_bounds.hi.X + 1) / 2;
-
-            for (int i = minX; i <= maxX; i++)
-                if (HitsX(i))
-                    xVels.Add(i);
 
             // similar math to x, most negative vel we can have and hit the target in 2 steps
             int minY = (_bounds.low.Y + 1) / 2;
@@ -57,6 +51,13 @@
             // highest velocity where we can still hit the range
             // on the way back down, when y == 0, v == -v0. if v0 > the lower bound of y, we will always pass over it
             int maxY = -(_bounds.low.Y + 1);
+
+            List<int> xVels = new(maxX - minX + 1);
+            List<int> yVels = new(maxY - minY + 1);
+
+            for (int i = minX; i <= maxX; i++)
+                if (HitsX(i))
+                    xVels.Add(i);
 
             for (int j = minY; j <= maxY; j++)
                 if (HitsY(j))
@@ -81,16 +82,17 @@
             // calculate vx0's that will stall within the range and have valid t's at any time > stall t
             List<int> xStalls = new();
 
-            // result of calculating v0 * (v0 + 1) / 2 >= _bouds.low.X
+            // result of calculating v0 * (v0 + 1) / 2 >= _bouds.low.X and <= _bounds.hi.X
             int minStallX = (int)Ceiling((Sqrt(1 + 8 * _bounds.low.X) - 1) / 2);
             int maxStallX = (int)((Sqrt(1 + 8 * _bounds.hi.X) - 1) / 2);
             for (int xStall = minStallX; xStall <= maxStallX; xStall++)
             {
                 // for this stall we want to add the min time it hits the range, not the time it stalls
+                // this is a calculation of t*v0 - (t * (t - 1) / 2) >= _bounds.low.x
                 xStalls.Add((int)Ceiling((2 * xStall + 1 - Sqrt(Pow(2 * xStall + 1, 2) - 8 * _bounds.low.X)) / 2));
             }
 
-            // collect hits in our unknown range
+            // collect hits in our unknown v0 range
             // our lower bound is maxStallX + 1
             // our upper bound is (_bounds.hi.X + 1) / 2 because math (this is the highest velocity that hits the range in 2 steps, we've already account for all 1 steps)
             int minSearchX = maxStallX + 1;
