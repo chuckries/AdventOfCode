@@ -59,13 +59,8 @@ namespace AdventOfCode._2021
 
         private (HashSet<IntVec3>, int) Solve()
         {
-            HashSet<IntVec3> points = new();
-            foreach (IntVec3 p in _scanners[0])
-                points.Add(p);
-
-            List<List<IntVec3>> knownScanners = new() { _scanners[0] };
+            HashSet<IntVec3> points = new(_scanners[0]);
             List<List<IntVec3>> unknownScanners = _scanners.Skip(1).ToList();
-
             List<IntVec3> offsets = new();
 
             while (unknownScanners.Count > 0)
@@ -73,28 +68,22 @@ namespace AdventOfCode._2021
                 List<IntVec3>? foundScanner = null;
                 List<IntVec3>? resolvedScanner = null;
                 foreach (var candScanner in unknownScanners)
-                {
                     for (int i = 0; i < 24; i++)
                     {
                         List<IntVec3> rotation = candScanner.Select(p => RotatePoint(p, i)).ToList();
-                        foreach (List<IntVec3> knownScanner in knownScanners)
+                        if (TryMatchScanners(points, rotation, out IntVec3 offset))
                         {
-                            if (TryMatchScanners(knownScanner, rotation, out IntVec3 offset))
-                            {
-                                offsets.Add(offset);
-                                foundScanner = candScanner;
-                                resolvedScanner = rotation.Select(p => p + offset).ToList();
-                                goto found;
-                            }
+                            offsets.Add(offset);
+                            foundScanner = candScanner;
+                            resolvedScanner = rotation.Select(p => p + offset).ToList();
+                            goto found;
                         }
                     }
-                }
 
                 throw new InvalidOperationException();
 
             found:
                 unknownScanners.Remove(foundScanner!);
-                knownScanners.Add(resolvedScanner!);
                 foreach (IntVec3 p in resolvedScanner!)
                     points.Add(p);
             }
@@ -111,28 +100,27 @@ namespace AdventOfCode._2021
             return (points, maxDistance);
         }
 
-        private bool TryMatchScanners(List<IntVec3> a, List<IntVec3> b, out IntVec3 scannerOffset)
+        private bool TryMatchScanners(ICollection<IntVec3> a, List<IntVec3> b, out IntVec3 scannerOffset)
         {
             scannerOffset = IntVec3.Zero;
-            Dictionary<IntVec3, int> offsetCounts = new();
+            int offsetCount;
+            Dictionary<IntVec3, int> offsetCounts = new(a.Count * b.Count);
             foreach (IntVec3 pa in a)
                 foreach (IntVec3 pb in b)
                 {
                     IntVec3 offset = pa - pb;
-                    if (!offsetCounts.ContainsKey(offset))
-                        offsetCounts.Add(offset, 1);
+                    if (!offsetCounts.TryGetValue(offset, out offsetCount))
+                        offsetCounts[offset] = 1;
+                    else if(offsetCount == 11)
+                    {
+                        scannerOffset = offset;
+                        return true;
+                    }
                     else
-                        offsetCounts[offset]++;
+                    {
+                        offsetCounts[offset] = offsetCount + 1;
+                    }
                 }
-
-            foreach (var kvp in offsetCounts)
-            {
-                if (kvp.Value >= 12)
-                {
-                    scannerOffset = kvp.Key;
-                    return true;
-                }
-            }
 
             return false;
         }
@@ -141,22 +129,22 @@ namespace AdventOfCode._2021
         {
             return rot switch
             {
-                0 => new IntVec3( p.X,  p.Y,  p.Z),
+                0 => new IntVec3(p.X, p.Y, p.Z),
 
                 // y axis
-                1 => new IntVec3(-p.Z,  p.Y,  p.X),
-                2 => new IntVec3(-p.X,  p.Y, -p.Z),
-                3 => new IntVec3( p.Z,  p.Y, -p.X),
+                1 => new IntVec3(-p.Z, p.Y, p.X),
+                2 => new IntVec3(-p.X, p.Y, -p.Z),
+                3 => new IntVec3(p.Z, p.Y, -p.X),
 
                 // x axis
-                4 => new IntVec3( p.X,  p.Z, -p.Y),
-                5 => new IntVec3( p.X, -p.Y, -p.Z),
-                6 => new IntVec3( p.X, -p.Z,  p.Y),
+                4 => new IntVec3(p.X, p.Z, -p.Y),
+                5 => new IntVec3(p.X, -p.Y, -p.Z),
+                6 => new IntVec3(p.X, -p.Z, p.Y),
 
                 // z axis
-                7 => new IntVec3( p.Y, -p.X,  p.Z),
-                8 => new IntVec3(-p.X, -p.Y,  p.Z),
-                9 => new IntVec3(-p.Y,  p.X,  p.Z),
+                7 => new IntVec3(p.Y, -p.X, p.Z),
+                8 => new IntVec3(-p.X, -p.Y, p.Z),
+                9 => new IntVec3(-p.Y, p.X, p.Z),
 
                 // lazy... maybe do later?
 
@@ -181,21 +169,6 @@ namespace AdventOfCode._2021
 
                 _ => throw new InvalidOperationException()
             };
-        }
-
-        static int PointCompare(IntVec3 lhs, IntVec3 rhs)
-        {
-            int val = lhs.X - rhs.X;
-            if (val is 0)
-            {
-                val = lhs.Y - rhs.Y;
-                if (val is 0)
-                {
-                    val = lhs.Z - rhs.Z;
-                }
-            }
-
-            return val;
         }
     }
 }
