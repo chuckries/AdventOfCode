@@ -1,95 +1,91 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace AdventOfCode._2021
+﻿namespace AdventOfCode._2021
 {
     public class Day20
     {
-        bool _doToggle;
-        bool _toggle;
-        bool[] _lookup;
-        Dictionary<IntVec2, bool> _current;
-        Dictionary<IntVec2, bool> _next;
-        (IntVec2 low, IntVec2 hi) _nextBounds;
+        readonly bool[] _lookup;
+        readonly bool[,] _start;
+        readonly IntVec2 _startBounds;
 
         public Day20()
         {
             string[] lines = File.ReadAllLines("Inputs/Day20.txt");
             _lookup = lines[0].Select(c => c is '#').ToArray();
-            if (_lookup[0] && !_lookup[^1])
-                _doToggle = true;
-            else if (!_lookup[0])
-                throw new InvalidOperationException();
 
-            _current = new();
-            _next = new();
+            _startBounds = new IntVec2(lines[2].Length, lines.Length - 2);
+            _start = new bool[_startBounds.X, _startBounds.Y];
             for (int j = 2; j < lines.Length; j++)
                 for (int i = 0; i < lines[2].Length; i++)
                     if (lines[j][i] is '#')
-                        _current[new(i, j - 2)] = true;
-
-            _nextBounds = (new(-1, -1), new(lines[2].Length, lines.Length - 2));
-            _toggle = false;
+                        _start[i, j - 2] = true;
         }
 
         [Fact]
         public void Part1()
         {
-            Tick();
-            Tick();
-
-            int answer = _current.Count;
+            int answer = Run(2);
             Assert.Equal(5663, answer);
         }
 
         [Fact]
         public void Part2()
         {
-            for (int i = 0; i < 50; i++)
-                Tick();
-
-            int answer = _current.Count;
+            int answer = Run(50);
             Assert.Equal(19638, answer);
         }
 
-        private void Tick()
+        private int Run(int iterations)
         {
-            for (int j = _nextBounds.low.Y; j <= _nextBounds.hi.Y; j++)
-            { 
-                for (int i = _nextBounds.low.X; i <= _nextBounds.hi.X; i++)
-                {
-                    int val = 0;
-                    for (int v = j - 1; v <= j + 1; v++)
+            if (iterations % 2 is not 0)
+                throw new InvalidOperationException();
+
+            IntVec2 finalSize = _startBounds + (2 * iterations);
+            bool[,] current = new bool[finalSize.X, finalSize.Y];
+            bool[,] next = (bool[,])current.Clone();
+
+            (IntVec2 low, IntVec2 hi) bounds = (new IntVec2(iterations, iterations), new IntVec2(finalSize.X - iterations - 1, finalSize.Y - iterations - 1));
+
+            for (int i = bounds.low.X; i <= bounds.hi.X; i++)
+                for (int j = bounds.low.Y; j <= bounds.hi.Y; j++)
+                    current[i, j] = _start[i - bounds.low.X, j - bounds.low.Y];
+
+            bounds = (bounds.low - 1, bounds.hi + 1);
+
+            bool toggle = false;
+            for (int iteration = 0; iteration < iterations; iteration++)
+            {
+                for (int i = bounds.low.X; i <= bounds.hi.X; i++)
+                    for (int j = bounds.low.Y; j <= bounds.hi.Y; j++)
                     {
-                        for (int u = i - 1; u <= i + 1; u++)
-                        {
-                            if (Get(u, v))
-                                val |= 1;
-                            val <<= 1;
-                        }
+                        int val = 0;
+                        for (int v = j - 1; v <= j + 1; v++)
+                            for (int u = i - 1; u <= i + 1; u++)
+                            {
+                                bool sample;
+                                if (u <= bounds.low.X || u >= bounds.hi.X || v <= bounds.low.Y || v >= bounds.hi.Y)
+                                    sample = toggle;
+                                else
+                                    sample = current[u, v];
+
+                                val <<= 1;
+                                if (sample)
+                                    val |= 1;
+                            }
+
+                        next[i, j] = _lookup[val];
                     }
-                    val >>= 1;
-                    if (_lookup[val])
-                        _next[new(i, j)] = true;
-                }
+
+                bounds = (bounds.low - 1, bounds.hi + 1);
+                (current, next) = (next, current);
+                toggle = !toggle;
             }
 
-            (_current, _next) = (_next, _current);
-            _next.Clear();
+            int count = 0;
+            for (int i = 0; i < finalSize.X; i++)
+                for (int j = 0; j < finalSize.Y; j++)
+                    if (current[i, j])
+                        count++;
 
-            _nextBounds = (_nextBounds.low - 1, _nextBounds.hi + 1);
-            _toggle = !_toggle;
-        }
-
-        private bool Get(int x, int y)
-        {
-            if (_doToggle && (x <= _nextBounds.low.X || x >= _nextBounds.hi.X || y <= _nextBounds.low.Y || y >= _nextBounds.hi.Y))
-                return _toggle;
-
-            return _current.TryGetValue(new(x, y), out bool val) && val;
+            return count;
         }
     }
 }
