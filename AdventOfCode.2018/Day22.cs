@@ -75,10 +75,7 @@ namespace AdventOfCode._2018
         [Fact]
         public void Part2()
         {
-            Stopwatch sw = Stopwatch.StartNew();
             int answer = Search();
-            var elapsed = sw.Elapsed;
-            Assert.Equal(elapsed, default);
             Assert.Equal(999, answer);
         }
 
