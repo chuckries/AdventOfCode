@@ -53,7 +53,6 @@ namespace AdventOfCode._2018
             public readonly IntVec3 Max;
             public readonly IntVec3 Center;
             public readonly bool IsPoint;
-            public readonly long Volume;
 
             public BoundingBox(in IntVec3 min, in IntVec3 max)
             {
@@ -63,8 +62,7 @@ namespace AdventOfCode._2018
                 Min = min;
                 Max = max;
                 Center = Min + ((Max - Min) / 2);
-                Volume = (Max.X - Min.X + 1) * (Max.Y - Min.Y + 1) * (Max.Z - Min.Z + 1);
-                IsPoint = Volume == 1;
+                IsPoint = min.X == max.X && min.Y == max.Y && min.Z == max.Z;
             }
 
             public IntVec3 Closest(in IntVec3 point)
@@ -138,11 +136,7 @@ namespace AdventOfCode._2018
                 int value = right.botsInRange - left.botsInRange;
                 if (value == 0)
                 {
-                    value = (int)(left.box.Volume - right.box.Volume);
-                    if (value == 0)
-                    {
-                        value = left.box.Center.Manhattan - right.box.Center.Manhattan;
-                    }
+                    value = left.box.Center.Manhattan - right.box.Center.Manhattan;
                 }
 
                 return value;

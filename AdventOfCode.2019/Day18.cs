@@ -1,6 +1,7 @@
 ﻿using AdventOfCode.Common;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -80,20 +81,68 @@ namespace AdventOfCode._2019
                 return states[(pos, keystate)];
             }
 
+            class ArrayEqualityComparer : IEqualityComparer<int[]>
+            {
+                public bool Equals(int[] x, int[] y)
+                {
+                    if (x.Length != y.Length)
+                        return false;
+
+                    for (int i = 0; i < x.Length; i++)
+                    {
+                        if (x[i] != y[i])
+                            return false;
+                    }
+
+                    return true;
+                }
+
+                public int GetHashCode([DisallowNull] int[] obj)
+                {
+                    if (obj.Length == 0)
+                    {
+                        return obj.GetHashCode();
+                    }
+
+                    int hash = HashCode.Combine(obj[0]);
+                    for (int i = 1; i < obj.Length; i++)
+                    {
+                        hash = HashCode.Combine(hash, obj[i]);
+                    }
+                    return hash;
+                }
+            }
+
+            class EqualityComparer : IEqualityComparer<(int[], int)>
+            {
+                static ArrayEqualityComparer s_arrayComparer = new ArrayEqualityComparer();
+
+                public bool Equals((int[], int) x, (int[], int) y)
+                {
+                    return x.Item2 == y.Item2 && s_arrayComparer.Equals(x.Item1, y.Item1);
+                }
+
+                public int GetHashCode([DisallowNull] (int[], int) obj)
+                {
+                    return HashCode.Combine(obj.Item2, s_arrayComparer.GetHashCode(obj.Item1));
+                }
+            }
+
             public int MinDistance4()
             {
-                Dictionary<(int, int, int, int, int), int> states = new Dictionary<(int, int, int, int, int), int>((1 << (_count - 4)) - 1);
+                Dictionary<(int[], int), int> states = new(new EqualityComparer());
                 return DynamicHelper4(new int[] { _count - 4, _count - 3, _count - 2, _count - 1 }, 0, 0, states);
             }
 
-            private int DynamicHelper4(int[] pos, int keyState, int keycount, Dictionary<(int, int, int, int, int), int> states)
+            private int DynamicHelper4(int[] pos, int keyState, int keycount, Dictionary<(int[], int), int> states)
             {
                 if (keycount == _count - 4)
                     return 0;
 
-                if (states.TryGetValue((pos[0], pos[1], pos[2], pos[3], keyState), out int cached))
+                if (states.TryGetValue((pos, keyState), out int cached))
                     return cached;
 
+                int min = int.MaxValue;
                 for (int cPos = 0; cPos < pos.Length; cPos++)
                 {
                     int oldPos = pos[cPos];
@@ -113,14 +162,12 @@ namespace AdventOfCode._2019
                         int delta = DynamicHelper4(pos, keyState | edge.SinkKeyFlag, keycount + 1, states);
                         int distance = delta == int.MaxValue ? int.MaxValue : edge.Distance + delta;
                         pos[cPos] = oldPos;
-                        if (!states.TryGetValue((pos[0], pos[1], pos[2], pos[3], keyState), out int minDistance) || distance < minDistance)
-                            states[(pos[0], pos[1], pos[2], pos[3], keyState)] = distance;
+                        if (distance < min)
+                            min = distance;
                     }
                 }
-
-                if (states.TryGetValue((pos[0], pos[1], pos[2], pos[3], keyState), out int returnValue))
-                    return returnValue;
-                return int.MaxValue;
+                states[(pos, keyState)] = min;
+                return min;
             }
 
             int _count;

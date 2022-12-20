@@ -1,15 +1,33 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Diagnostics;
 
 namespace AdventOfCode._2021
 {
     public class Day19
     {
-        List<List<IntVec3>> _scanners;
+        [DebuggerDisplay("{Index,nq}")]
+        private class Scanner
+        {
+            private readonly IntVec3[] _points;
+            private readonly IntVec3[][] _rotatedPoints;
+
+            public readonly int Index;
+
+            public IEnumerable<IntVec3> Points => _points;
+
+            public Scanner(int index, IEnumerable<IntVec3> points)
+            {
+                Index = index;
+                _points = points.ToArray();
+                _rotatedPoints = new IntVec3[24][];
+            }
+
+            public ICollection<IntVec3> GetRotatedPoints(int rot)
+            {
+                return _rotatedPoints[rot] ??= _points.Select(p => RotatePoint(p, rot)).ToArray();
+            }
+        }
+
+        List<Scanner> _scanners;
 
         public Day19()
         {
@@ -19,6 +37,7 @@ namespace AdventOfCode._2021
             _ = sr.ReadLine();
 
             List<IntVec3> current = new();
+            int index = 0;
             string? line;
             while (true)
             {
@@ -26,7 +45,7 @@ namespace AdventOfCode._2021
 
                 if (string.IsNullOrEmpty(line))
                 {
-                    _scanners.Add(current);
+                    _scanners.Add(new(index++, current));
                     if (line is null)
                         break;
 
@@ -59,23 +78,23 @@ namespace AdventOfCode._2021
 
         private (HashSet<IntVec3>, int) Solve()
         {
-            HashSet<IntVec3> points = new(_scanners[0]);
-            List<List<IntVec3>> unknownScanners = _scanners.Skip(1).ToList();
+            HashSet<IntVec3> points = new(_scanners[0].Points);
+            List<Scanner> unknownScanners = _scanners.Skip(1).ToList();
             List<IntVec3> offsets = new();
 
             while (unknownScanners.Count > 0)
             {
-                List<IntVec3>? foundScanner = null;
-                List<IntVec3>? resolvedScanner = null;
+                Scanner? foundScanner = null;
+                IntVec3[]? resolvedScanner = null;
                 foreach (var candScanner in unknownScanners)
                     for (int i = 0; i < 24; i++)
                     {
-                        List<IntVec3> rotation = candScanner.Select(p => RotatePoint(p, i)).ToList();
+                        ICollection<IntVec3> rotation = candScanner.GetRotatedPoints(i);
                         if (TryMatchScanners(points, rotation, out IntVec3 offset))
                         {
                             offsets.Add(offset);
                             foundScanner = candScanner;
-                            resolvedScanner = rotation.Select(p => p + offset).ToList();
+                            resolvedScanner = rotation.Select(p => p + offset).ToArray();
                             goto found;
                         }
                     }
@@ -100,7 +119,7 @@ namespace AdventOfCode._2021
             return (points, maxDistance);
         }
 
-        private bool TryMatchScanners(ICollection<IntVec3> a, List<IntVec3> b, out IntVec3 scannerOffset)
+        private bool TryMatchScanners(ICollection<IntVec3> a, ICollection<IntVec3> b, out IntVec3 scannerOffset)
         {
             scannerOffset = IntVec3.Zero;
             int offsetCount;
@@ -125,7 +144,7 @@ namespace AdventOfCode._2021
             return false;
         }
 
-        private IntVec3 RotatePoint(IntVec3 p, int rot)
+        private static IntVec3 RotatePoint(IntVec3 p, int rot)
         {
             return rot switch
             {
