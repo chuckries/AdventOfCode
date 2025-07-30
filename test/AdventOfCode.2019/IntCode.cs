@@ -1,257 +1,247 @@
-﻿using System;
-using System.Buffers;
-using System.Collections.Generic;
-using System.Dynamic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Buffers;
 
-namespace AdventOfCode._2019
+namespace AdventOfCode._2019;
+
+public abstract class IntCodeBase
 {
-    public abstract class IntCodeBase
+    protected enum Op : long
     {
-        protected enum Op : long
+        Add = 1,
+        Mul = 2,
+        In = 3,
+        Out = 4,
+        JumpTrue = 5,
+        JumpFalse = 6,
+        LessThan = 7,
+        Equals = 8,
+        Base = 9,
+        Halt = 99,
+    }
+
+    protected enum Mode : long
+    {
+        Pos = 0,
+        Imm = 1,
+        Relative = 2
+    }
+
+    public delegate void OutputWriter(long value);
+
+    public long PC { get; set; }
+
+    public long RelativeBase { get; set; }
+
+    public bool IsHalt { get; private set; }
+
+    public long this[int index]
+    {
+        get => ReadMemory(index);
+        set => WriteMemory(index, value);
+    }
+
+    public OutputWriter Writer { get; set; }
+
+    protected IntCodeBase(IEnumerable<long> program)
+        : this(program, null)
+    {
+    }
+
+    protected IntCodeBase(IEnumerable<long> program, OutputWriter writer)
+    {
+        _program = program.ToArray();
+        Writer = writer;
+
+        Reset();
+    }
+
+    public void Reset()
+    {
+        if (_memory == null || _memory.Length < _program.Length)
         {
-            Add = 1,
-            Mul = 2,
-            In = 3,
-            Out = 4,
-            JumpTrue = 5,
-            JumpFalse = 6,
-            LessThan = 7,
-            Equals = 8,
-            Base = 9,
-            Halt = 99,
+            _memory = (long[])_program.Clone();
+        }
+        else
+        {
+            Array.Clear(_memory, _program.Length, _memory.Length - _program.Length);
+            Array.Copy(_program, 0, _memory, 0, _program.Length);
         }
 
-        protected enum Mode : long
+        PC = 0;
+        RelativeBase = 0;
+        IsHalt = false;
+    }
+
+    protected void StepCore(Op op, Mode[] modes)
+    {
+        switch (op)
         {
-            Pos = 0,
-            Imm = 1,
-            Relative = 2
+            case Op.Halt: IsHalt = true; break;
+            case Op.Out: Writer(ReadPC(modes[0])); break;
+            case Op.Base: RelativeBase += ReadPC(modes[0]); break;
+            default:
+                long arg1 = ReadPC(modes[0]);
+                long arg2 = ReadPC(modes[1]);
+
+                if (op == Op.JumpTrue || op == Op.JumpFalse)
+                {
+                    if ((op == Op.JumpTrue && arg1 != 0) || (op == Op.JumpFalse && arg1 == 0))
+                        PC = arg2;
+                }
+                else
+                {
+                    long result = op switch
+                    {
+                        Op.Add => arg1 + arg2,
+                        Op.Mul => arg1 * arg2,
+                        Op.LessThan => arg1 < arg2 ? 1 : 0,
+                        Op.Equals => arg1 == arg2 ? 1 : 0,
+                        _ => throw new InvalidOperationException("invalid op code")
+                    };
+
+                    WritePC(modes[2], result);
+                }
+                break;
         }
+    }
 
-        public delegate void OutputWriter(long value);
+    protected void Decode(out Op op, Mode[] modes)
+    {
+        long instr = ReadPC();
 
-        public long PC { get; set; }
+        op = (Op)(instr % 100);
+        instr /= 100;
 
-        public long RelativeBase { get; set; }
+        modes[0] = (Mode)(instr % 10);
+        instr /= 10;
+        modes[1] = (Mode)(instr % 10);
+        instr /= 10;
+        modes[2] = (Mode)(instr % 10);
+    }
 
-        public bool IsHalt { get; private set; }
+    protected long ReadPC() => ReadPC(Mode.Imm);
 
-        public long this[int index]
+    protected long ReadPC(Mode mode) => ReadMemory(PC++, mode);
+
+    protected long ReadMemory(long address, Mode mode) => mode switch
+    {
+        Mode.Imm => ReadMemory(address),
+        _ => ReadMemory(IndirectAddressTarget(address, mode))
+    };
+
+    protected void WritePC(Mode mode, long value) => WriteMemory(PC++, mode, value);
+
+    protected void WriteMemory(long address, Mode mode, long value) =>
+        WriteMemory(IndirectAddressTarget(address, mode), value);
+
+    protected long IndirectAddressTarget(long address, Mode mode) => mode switch
+    {
+        Mode.Pos => ReadMemory(address),
+        Mode.Relative => ReadMemory(address) + RelativeBase,
+        _ => throw new InvalidOperationException("invalid address mode")
+    };
+
+    protected long ReadMemory(long address)
+    {
+        EnsureMemory(address);
+        return _memory[address];
+    }
+
+    protected void WriteMemory(long address, long value)
+    {
+        EnsureMemory(address);
+        _memory[address] = value;
+    }
+
+    private void EnsureMemory(long address)
+    {
+        if (address >= _memory.Length)
         {
-            get => ReadMemory(index);
-            set => WriteMemory(index, value);
+            long[] newMemory = new long[Math.Max(address + 1, _memory.Length * 2)];
+            Array.Copy(_memory, 0, newMemory, 0, _memory.Length);
+            _memory = newMemory;
         }
+    }
 
-        public OutputWriter Writer { get; set; }
+    private long[] _program;
+    private long[] _memory;
+}
 
-        protected IntCodeBase(IEnumerable<long> program)
-            : this(program, null)
+public class IntCodeAsync : IntCodeBase
+{
+    public delegate Task<long> InputReaderAsync(CancellationToken cancellationToken);
+    public InputReaderAsync Reader { get; set; }
+
+    public IntCodeAsync(IEnumerable<long> program)
+        : base(program)
+    {
+    }
+
+    public IntCodeAsync(IEnumerable<long> program, InputReaderAsync reader, OutputWriter writer)
+        : base(program, writer)
+    {
+        Reader = reader;
+    }
+
+    public async Task RunAsync()
+    {
+        await RunAsync(CancellationToken.None);
+    }
+
+    public async Task RunAsync(CancellationToken cancellationToken = default)
+    {
+        Op op;
+        Mode[] modes = new Mode[3];
+        while (!IsHalt)
         {
-        }
+            cancellationToken.ThrowIfCancellationRequested();
+            Decode(out op, modes);
 
-        protected IntCodeBase(IEnumerable<long> program, OutputWriter writer)
-        {
-            _program = program.ToArray();
-            Writer = writer;
-
-            Reset();
-        }
-
-        public void Reset()
-        {
-            if (_memory == null || _memory.Length < _program.Length)
-            {
-                _memory = (long[])_program.Clone();
-            }
-            else
-            {
-                Array.Clear(_memory, _program.Length, _memory.Length - _program.Length);
-                Array.Copy(_program, 0, _memory, 0, _program.Length);
-            }
-
-            PC = 0;
-            RelativeBase = 0;
-            IsHalt = false;
-        }
-
-        protected void StepCore(Op op, Mode[] modes)
-        {
             switch (op)
             {
-                case Op.Halt: IsHalt = true; break;
-                case Op.Out: Writer(ReadPC(modes[0])); break;
-                case Op.Base: RelativeBase += ReadPC(modes[0]); break;
-                default:
-                    long arg1 = ReadPC(modes[0]);
-                    long arg2 = ReadPC(modes[1]);
-
-                    if (op == Op.JumpTrue || op == Op.JumpFalse)
-                    {
-                        if ((op == Op.JumpTrue && arg1 != 0) || (op == Op.JumpFalse && arg1 == 0))
-                            PC = arg2;
-                    }
-                    else
-                    {
-                        long result = op switch
-                        {
-                            Op.Add => arg1 + arg2,
-                            Op.Mul => arg1 * arg2,
-                            Op.LessThan => arg1 < arg2 ? 1 : 0,
-                            Op.Equals => arg1 == arg2 ? 1 : 0,
-                            _ => throw new InvalidOperationException("invalid op code")
-                        };
-
-                        WritePC(modes[2], result);
-                    }
-                    break;
+                case Op.In: WritePC(modes[0], await Reader(cancellationToken)); break;
+                default: StepCore(op, modes); break;
             }
         }
-
-        protected void Decode(out Op op, Mode[] modes)
-        {
-            long instr = ReadPC();
-
-            op = (Op)(instr % 100);
-            instr /= 100;
-
-            modes[0] = (Mode)(instr % 10);
-            instr /= 10;
-            modes[1] = (Mode)(instr % 10);
-            instr /= 10;
-            modes[2] = (Mode)(instr % 10);
-        }
-
-        protected long ReadPC() => ReadPC(Mode.Imm);
-
-        protected long ReadPC(Mode mode) => ReadMemory(PC++, mode);
-
-        protected long ReadMemory(long address, Mode mode) => mode switch
-        {
-            Mode.Imm => ReadMemory(address),
-            _ => ReadMemory(IndirectAddressTarget(address, mode))
-        };
-
-        protected void WritePC(Mode mode, long value) => WriteMemory(PC++, mode, value);
-
-        protected void WriteMemory(long address, Mode mode, long value) =>
-            WriteMemory(IndirectAddressTarget(address, mode), value);
-
-        protected long IndirectAddressTarget(long address, Mode mode) => mode switch
-        {
-            Mode.Pos => ReadMemory(address),
-            Mode.Relative => ReadMemory(address) + RelativeBase,
-            _ => throw new InvalidOperationException("invalid address mode")
-        };
-
-        protected long ReadMemory(long address)
-        {
-            EnsureMemory(address);
-            return _memory[address];
-        }
-
-        protected void WriteMemory(long address, long value)
-        {
-            EnsureMemory(address);
-            _memory[address] = value;
-        }
-
-        private void EnsureMemory(long address)
-        {
-            if (address >= _memory.Length)
-            {
-                long[] newMemory = new long[Math.Max(address + 1, _memory.Length * 2)];
-                Array.Copy(_memory, 0, newMemory, 0, _memory.Length);
-                _memory = newMemory;
-            }
-        }
-
-        private long[] _program;
-        private long[] _memory;
     }
+}
 
-    public class IntCodeAsync : IntCodeBase
+public class IntCode : IntCodeBase
+{
+    public delegate long InputReader();
+    public InputReader Reader { get; set; }
+
+    public IntCode(IEnumerable<long> program)
+        : base(program)
     {
-        public delegate Task<long> InputReaderAsync(CancellationToken cancellationToken);
-        public InputReaderAsync Reader { get; set; }
-
-        public IntCodeAsync(IEnumerable<long> program)
-            : base(program)
-        { 
-        }
-
-        public IntCodeAsync(IEnumerable<long> program, InputReaderAsync reader, OutputWriter writer)
-            : base(program, writer)
-        {
-            Reader = reader;
-        }
-
-        public async Task RunAsync()
-        {
-            await RunAsync(CancellationToken.None);
-        }
-
-        public async Task RunAsync(CancellationToken cancellationToken = default)
-        {
-            Op op;
-            Mode[] modes = new Mode[3];
-            while (!IsHalt)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                Decode(out op, modes);
-
-                switch (op)
-                {
-                    case Op.In: WritePC(modes[0], await Reader(cancellationToken)); break;
-                    default: StepCore(op, modes); break;
-                }
-            }
-        }
     }
 
-    public class IntCode : IntCodeBase
+    public IntCode(IEnumerable<long> program, InputReader reader, OutputWriter writer)
+        : base(program, writer)
     {
-        public delegate long InputReader();
-        public InputReader Reader { get; set; }
+        Reader = reader;
+    }
 
-        public IntCode(IEnumerable<long> program)
-            : base(program)
+    public void Run()
+    {
+        while (!IsHalt)
         {
-        }
-
-        public IntCode(IEnumerable<long> program, InputReader reader, OutputWriter writer)
-            : base(program, writer)
-        {
-            Reader = reader;
-        }
-
-        public void Run()
-        {
-            while (!IsHalt)
-            {
-                Step();
-            }
-        }
-
-        public void Step()
-        {
-            Op op;
-            Mode[] modes = new Mode[3];
-            if (!IsHalt)
-            {
-                Decode(out op, modes);
-
-                switch (op)
-                {
-                    case Op.In: WritePC(modes[0], Reader()); break;
-                    default: StepCore(op, modes); break;
-                }
-            }
+            Step();
         }
     }
 
+    public void Step()
+    {
+        Op op;
+        Mode[] modes = new Mode[3];
+        if (!IsHalt)
+        {
+            Decode(out op, modes);
+
+            switch (op)
+            {
+                case Op.In: WritePC(modes[0], Reader()); break;
+                default: StepCore(op, modes); break;
+            }
+        }
+    }
 }

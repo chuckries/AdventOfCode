@@ -1,235 +1,225 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿namespace AdventOfCode._2015;
 
-using AdventOfCode.Common;
-
-using Xunit;
-
-namespace AdventOfCode._2015
+public class Day22
 {
-    public class Day22
+    private class Spell
     {
-        private class Spell
+        public readonly int Id;
+        public readonly int ManaCost;
+        private readonly Action<GameState> _action;
+
+        public Spell(int id, int cost, Action<GameState> action)
         {
-            public readonly int Id;
-            public readonly int ManaCost;
-            private readonly Action<GameState> _action;
-
-            public Spell(int id, int cost, Action<GameState> action)
-            {
-                Id = id;
-                ManaCost = cost;
-                _action = action;
-            }
-
-            public static Spell Effect(int id, int cost, int durtion, Action<GameState> effectAction)
-            {
-                return new Spell(id, cost, state => state.ActiveEffects.Add(new Effect(id, durtion, effectAction)));
-            }
-
-            public void Apply(GameState state)
-            {
-                _action(state);
-            }
+            Id = id;
+            ManaCost = cost;
+            _action = action;
         }
 
-        private class Effect
+        public static Spell Effect(int id, int cost, int durtion, Action<GameState> effectAction)
         {
-            public readonly int SpellId;
-            private readonly Action<GameState> _action;
-
-            public int Timer { get; private set; }
-
-            public Effect(int spellId, int duration, Action<GameState> action)
-            {
-                SpellId = spellId;
-                Timer = duration;
-                _action = action;
-            }
-
-            public void Apply(GameState state)
-            {
-                if (Timer <= 0)
-                    throw new InvalidOperationException();
-
-                _action(state);
-                Timer--;
-            }
-
-            public Effect Clone()
-            {
-                return new Effect(SpellId, Timer, _action);
-            }
+            return new Spell(id, cost, state => state.ActiveEffects.Add(new Effect(id, durtion, effectAction)));
         }
 
-        static void MagicMissile(GameState state)
+        public void Apply(GameState state)
         {
-            state.OpponentHp -= 4;
+            _action(state);
+        }
+    }
+
+    private class Effect
+    {
+        public readonly int SpellId;
+        private readonly Action<GameState> _action;
+
+        public int Timer { get; private set; }
+
+        public Effect(int spellId, int duration, Action<GameState> action)
+        {
+            SpellId = spellId;
+            Timer = duration;
+            _action = action;
         }
 
-        static void Drain(GameState state)
+        public void Apply(GameState state)
         {
-            state.OpponentHp -= 2;
-            state.MyHp += 2;
+            if (Timer <= 0)
+                throw new InvalidOperationException();
+
+            _action(state);
+            Timer--;
         }
 
-        static void ShieldEffect(GameState state)
+        public Effect Clone()
         {
-            state.MyArmor += 7;
+            return new Effect(SpellId, Timer, _action);
+        }
+    }
+
+    static void MagicMissile(GameState state)
+    {
+        state.OpponentHp -= 4;
+    }
+
+    static void Drain(GameState state)
+    {
+        state.OpponentHp -= 2;
+        state.MyHp += 2;
+    }
+
+    static void ShieldEffect(GameState state)
+    {
+        state.MyArmor += 7;
+    }
+
+    static void PoisonEffect(GameState state)
+    {
+        state.OpponentHp -= 3;
+    }
+
+    static void RechargeEffect(GameState state)
+    {
+        state.MyMana += 101;
+    }
+
+    static Spell[] s_Spells = new Spell[]
+    {
+        new Spell(0, 53, MagicMissile),
+        new Spell(1, 73, Drain),
+        Spell.Effect(2, 113, 6, ShieldEffect),
+        Spell.Effect(3, 173, 6, PoisonEffect),
+        Spell.Effect(4, 229, 5, RechargeEffect)
+    };
+
+    private class GameState
+    {
+        const int OpponentAttack = 9;
+
+        public int MyHp { get; set; }
+        public int MyArmor { get; set; }
+        public int MyMana { get; set; }
+        public int ManaSpent { get; set; }
+        public int OpponentHp { get; set; }
+        public List<Effect> ActiveEffects { get; set; }
+        public int HpLostOnPlayerTurn { get; set; }
+
+        public bool IsLoss => MyHp <= 0 && OpponentHp > 0;
+        public bool IsWin => OpponentHp <= 0;
+
+        private void ApplyEffects()
+        {
+            MyArmor = 0;
+            foreach (Effect effect in ActiveEffects)
+                effect.Apply(this);
+
+            ActiveEffects.RemoveAll(e => e.Timer == 0);
         }
 
-        static void PoisonEffect(GameState state)
+        private void ApplySpell(Spell spell)
         {
-            state.OpponentHp -= 3;
+            spell.Apply(this);
         }
 
-        static void RechargeEffect(GameState state)
+        private void DoOpponentAttack()
         {
-            state.MyMana += 101;
+            MyHp -= Math.Max(OpponentAttack - MyArmor, 1);
         }
 
-        static Spell[] s_Spells = new Spell[]
+        public IEnumerable<GameState> EnumNextGameStates()
         {
-            new Spell(0, 53, MagicMissile),
-            new Spell(1, 73, Drain),
-            Spell.Effect(2, 113, 6, ShieldEffect),
-            Spell.Effect(3, 173, 6, PoisonEffect),
-            Spell.Effect(4, 229, 5, RechargeEffect)
-        };
+            MyHp -= HpLostOnPlayerTurn;
+            if (MyHp == 0)
+                yield break;
 
-        private class GameState
-        {
-            const int OpponentAttack = 9;
-
-            public int MyHp { get; set; }
-            public int MyArmor { get; set; }
-            public int MyMana { get; set; }
-            public int ManaSpent { get; set; }
-            public int OpponentHp { get; set; }
-            public List<Effect> ActiveEffects { get; set; }
-            public int HpLostOnPlayerTurn { get; set; }
-
-            public bool IsLoss => MyHp <= 0 && OpponentHp > 0;
-            public bool IsWin => OpponentHp <= 0;
-
-            private void ApplyEffects()
+            ApplyEffects();
+            if (IsWin)
             {
-                MyArmor = 0;
-                foreach (Effect effect in ActiveEffects)
-                    effect.Apply(this);
-
-                ActiveEffects.RemoveAll(e => e.Timer == 0);
+                yield return this;
+                yield break;
             }
 
-            private void ApplySpell(Spell spell)
+            foreach (Spell s in s_Spells.Where(s => s.ManaCost <= MyMana && !ActiveEffects.Any(e => e.SpellId == s.Id)))
             {
-                spell.Apply(this);
-            }
-
-            private void DoOpponentAttack()
-            {
-                MyHp -= Math.Max(OpponentAttack - MyArmor, 1);
-            }
-
-            public IEnumerable<GameState> EnumNextGameStates()
-            {
-                MyHp -= HpLostOnPlayerTurn;
-                if (MyHp == 0)
-                    yield break;
-
-                ApplyEffects();
-                if (IsWin)
+                GameState nextState = new GameState
                 {
-                    yield return this;
-                    yield break;
-                }
+                    MyHp = MyHp,
+                    MyArmor = 0,
+                    MyMana = MyMana - s.ManaCost,
+                    ManaSpent = ManaSpent + s.ManaCost,
+                    OpponentHp = OpponentHp,
+                    ActiveEffects = ActiveEffects.Select(e => e.Clone()).ToList(),
+                    HpLostOnPlayerTurn = HpLostOnPlayerTurn
+                };
 
-                foreach (Spell s in s_Spells.Where(s => s.ManaCost <= MyMana && !ActiveEffects.Any(e => e.SpellId == s.Id)))
+                nextState.ApplySpell(s);
+                if (!nextState.IsWin)
                 {
-                    GameState nextState = new GameState
-                    {
-                        MyHp = MyHp,
-                        MyArmor = 0,
-                        MyMana = MyMana - s.ManaCost,
-                        ManaSpent = ManaSpent + s.ManaCost,
-                        OpponentHp = OpponentHp,
-                        ActiveEffects = ActiveEffects.Select(e => e.Clone()).ToList(),
-                        HpLostOnPlayerTurn = HpLostOnPlayerTurn
-                    };
-
-                    nextState.ApplySpell(s);
+                    nextState.ApplyEffects();
                     if (!nextState.IsWin)
                     {
-                        nextState.ApplyEffects();
-                        if (!nextState.IsWin)
-                        {
-                            nextState.DoOpponentAttack();
-                        }
+                        nextState.DoOpponentAttack();
                     }
-
-                    if (!nextState.IsLoss)
-                        yield return nextState;
                 }
+
+                if (!nextState.IsLoss)
+                    yield return nextState;
             }
         }
+    }
 
-        [Fact]
-        public void Part1()
+    [Fact]
+    public void Part1()
+    {
+        GameState initial = new GameState
         {
-            GameState initial = new GameState
-            {
-                MyHp = 50,
-                MyArmor = 0,
-                MyMana = 500,
-                ManaSpent = 0,
-                OpponentHp = 51,
-                ActiveEffects = new List<Effect>(),
-                HpLostOnPlayerTurn = 0
-            };
+            MyHp = 50,
+            MyArmor = 0,
+            MyMana = 500,
+            ManaSpent = 0,
+            OpponentHp = 51,
+            ActiveEffects = new List<Effect>(),
+            HpLostOnPlayerTurn = 0
+        };
 
-            int answer = Search(initial);
+        int answer = Search(initial);
 
-            Assert.Equal(900, answer);
+        Assert.Equal(900, answer);
+    }
+
+    [Fact]
+    public void Part2()
+    {
+        GameState initial = new GameState
+        {
+            MyHp = 50,
+            MyArmor = 0,
+            MyMana = 500,
+            ManaSpent = 0,
+            OpponentHp = 51,
+            ActiveEffects = new List<Effect>(),
+            HpLostOnPlayerTurn = 1
+        };
+
+        int answer = Search(initial);
+
+        Assert.Equal(1216, answer);
+    }
+
+    private int Search(GameState initial)
+    {
+        PriorityQueue<GameState, int> queue = new();
+        queue.Enqueue(initial, initial.ManaSpent);
+
+        while (queue.Count > 0)
+        {
+            GameState current = queue.Dequeue();
+
+            if (current.IsWin)
+                return current.ManaSpent;
+
+            foreach (GameState next in current.EnumNextGameStates())
+                queue.Enqueue(next, next.ManaSpent);
         }
 
-        [Fact]
-        public void Part2()
-        {
-            GameState initial = new GameState
-            {
-                MyHp = 50,
-                MyArmor = 0,
-                MyMana = 500,
-                ManaSpent = 0,
-                OpponentHp = 51,
-                ActiveEffects = new List<Effect>(),
-                HpLostOnPlayerTurn = 1
-            };
-
-            int answer = Search(initial);
-
-            Assert.Equal(1216, answer);
-        }
-
-        private int Search(GameState initial)
-        {
-            PriorityQueue<GameState, int> queue = new();
-            queue.Enqueue(initial, initial.ManaSpent);
-
-            while (queue.Count > 0)
-            {
-                GameState current = queue.Dequeue();
-
-                if (current.IsWin)
-                    return current.ManaSpent;
-
-                foreach (GameState next in current.EnumNextGameStates())
-                    queue.Enqueue(next, next.ManaSpent);
-            }
-
-            throw new InvalidOperationException();
-        }
+        throw new InvalidOperationException();
     }
 }

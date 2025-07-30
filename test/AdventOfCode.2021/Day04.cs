@@ -1,136 +1,135 @@
-﻿namespace AdventOfCode._2021
+﻿namespace AdventOfCode._2021;
+
+public class Day04
 {
-    public class Day04
+    const int BoardSize = 5;
+
+    private class Board
     {
-        const int BoardSize = 5;
+        private (int num, bool has)[,] _spaces = new (int, bool)[BoardSize, BoardSize];
 
-        private class Board
+        public static Board Parse(TextReader reader)
         {
-            private (int num, bool has)[,] _spaces = new(int, bool)[BoardSize, BoardSize];
-
-            public static Board Parse(TextReader reader)
+            Board board = new Board();
+            for (int j = 0; j < BoardSize; j++)
             {
-                Board board = new Board();
-                for (int j = 0; j < BoardSize; j++)
+                int i = 0;
+                string line = reader.ReadLine()!;
+                foreach (int num in line.Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(int.Parse))
                 {
-                    int i = 0;
-                    string line = reader.ReadLine()!;
-                    foreach (int num in line.Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(int.Parse))
-                    {
-                        board._spaces[i, j] = (num, false);
-                        i++;
-                    }
+                    board._spaces[i, j] = (num, false);
+                    i++;
                 }
-
-                return board;
             }
 
-            public void CallNum(int num)
-            {
-                for (int i = 0; i < BoardSize; i++)
-                    for (int j = 0; j < BoardSize; j++)
-                        if (_spaces[i, j].num == num)
-                            _spaces[i, j].has = true;
-            }
-
-            public bool IsWinner()
-            {
-                bool isWin;
-                for (int i = 0; i < BoardSize; i++)
-                {
-                    isWin = true;
-                    for (int j = 0; j < BoardSize && isWin; j++)
-                        isWin &= _spaces[i, j].has;
-                    if (isWin)
-                        return true;
-                }
-
-                for (int j = 0; j < BoardSize; j++)
-                {
-                    isWin = true;
-                    for (int i = 0; i < BoardSize && isWin; i++)
-                        isWin &= _spaces[i, j].has;
-                    if (isWin)
-                        return true;
-                }
-
-                return false;
-            }
-
-            public int SumUnmarked()
-            {
-                int sum = 0;
-                for (int i = 0; i < BoardSize; i++)
-                    for (int j = 0; j < BoardSize; j++)
-                        if (!_spaces[i, j].has)
-                            sum += _spaces[i, j].num;
-                return sum;
-            }
+            return board;
         }
 
-        int[] _numbers;
-        List<Board> _boards;
-
-        public Day04()
+        public void CallNum(int num)
         {
-            using (StreamReader sr = new StreamReader(new FileStream("Inputs/Day04.txt", FileMode.Open, FileAccess.Read)))
-            {
-                _numbers = sr.ReadLine()!.Split(',').Select(int.Parse).ToArray();
-
-                _boards = new();
-                while (true)
-                {
-                    if (sr.ReadLine() is null)
-                        break;
-
-                    _boards.Add(Board.Parse(sr));
-                }
-            }
+            for (int i = 0; i < BoardSize; i++)
+                for (int j = 0; j < BoardSize; j++)
+                    if (_spaces[i, j].num == num)
+                        _spaces[i, j].has = true;
         }
 
-        [Fact]
-        public void Part1()
+        public bool IsWinner()
         {
-            int answer = 0;
-            foreach (int num in _numbers)
+            bool isWin;
+            for (int i = 0; i < BoardSize; i++)
             {
-                foreach (Board board in _boards)
-                    board.CallNum(num);
+                isWin = true;
+                for (int j = 0; j < BoardSize && isWin; j++)
+                    isWin &= _spaces[i, j].has;
+                if (isWin)
+                    return true;
+            }
 
-                Board? winner = _boards.FirstOrDefault(b => b.IsWinner());
-                if (winner is not null)
-                {
-                    answer = winner.SumUnmarked() * num;
+            for (int j = 0; j < BoardSize; j++)
+            {
+                isWin = true;
+                for (int i = 0; i < BoardSize && isWin; i++)
+                    isWin &= _spaces[i, j].has;
+                if (isWin)
+                    return true;
+            }
+
+            return false;
+        }
+
+        public int SumUnmarked()
+        {
+            int sum = 0;
+            for (int i = 0; i < BoardSize; i++)
+                for (int j = 0; j < BoardSize; j++)
+                    if (!_spaces[i, j].has)
+                        sum += _spaces[i, j].num;
+            return sum;
+        }
+    }
+
+    int[] _numbers;
+    List<Board> _boards;
+
+    public Day04()
+    {
+        using (StreamReader sr = new StreamReader(new FileStream("Inputs/Day04.txt", FileMode.Open, FileAccess.Read)))
+        {
+            _numbers = sr.ReadLine()!.Split(',').Select(int.Parse).ToArray();
+
+            _boards = new();
+            while (true)
+            {
+                if (sr.ReadLine() is null)
                     break;
-                }
+
+                _boards.Add(Board.Parse(sr));
             }
-
-            Assert.Equal(54275, answer);
         }
+    }
 
-        [Fact]
-        public void Part2()
+    [Fact]
+    public void Part1()
+    {
+        int answer = 0;
+        foreach (int num in _numbers)
         {
-            Board? lastWinner = null;
-            int winningNumber = 0;
-            foreach (int num in _numbers)
-            {
-                foreach (Board board in _boards)
-                {
-                    board.CallNum(num);
-                    if (board.IsWinner())
-                    {
-                        lastWinner = board;
-                        winningNumber = num;
-                    }
-                }
+            foreach (Board board in _boards)
+                board.CallNum(num);
 
-                _boards.RemoveAll(b => b.IsWinner());
+            Board? winner = _boards.FirstOrDefault(b => b.IsWinner());
+            if (winner is not null)
+            {
+                answer = winner.SumUnmarked() * num;
+                break;
+            }
+        }
+
+        Assert.Equal(54275, answer);
+    }
+
+    [Fact]
+    public void Part2()
+    {
+        Board? lastWinner = null;
+        int winningNumber = 0;
+        foreach (int num in _numbers)
+        {
+            foreach (Board board in _boards)
+            {
+                board.CallNum(num);
+                if (board.IsWinner())
+                {
+                    lastWinner = board;
+                    winningNumber = num;
+                }
             }
 
-            int answer = lastWinner!.SumUnmarked() * winningNumber;
-
-            Assert.Equal(13158, answer);
+            _boards.RemoveAll(b => b.IsWinner());
         }
+
+        int answer = lastWinner!.SumUnmarked() * winningNumber;
+
+        Assert.Equal(13158, answer);
     }
 }

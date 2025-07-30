@@ -1,93 +1,86 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿namespace AdventOfCode._2015;
 
-using Xunit;
-
-namespace AdventOfCode._2015
+public class Day11
 {
-    public class Day11
+    const string Input = "hepxcrrq";
+
+    [Fact]
+    public void Part1()
     {
-        const string Input = "hepxcrrq";
+        char[] password = Input.ToCharArray();
+        NexPassword(password);
 
-        [Fact]
-        public void Part1()
+        Assert.Equal("hepxxyzz", new string(password));
+    }
+
+    [Fact]
+    public void Part2()
+    {
+        char[] password = Input.ToCharArray();
+        NexPassword(password);
+        NexPassword(password);
+
+        Assert.Equal("heqaabcc", new string(password));
+    }
+
+    private static void NexPassword(char[] password)
+    {
+        while (true)
         {
-            char[] password = Input.ToCharArray();
-            NexPassword(password);
-
-            Assert.Equal("hepxxyzz", new string(password));
+            IncrementPassword(password);
+            if (ValidatePassword(password))
+                break;
         }
+    }
 
-        [Fact]
-        public void Part2()
+    private static bool ValidatePassword(char[] password)
+    {
+        bool hasStraight = false;
+        int numPairs = 0;
+        int lastPairEndIndex = -1;
+
+        for (int i = 0; i < password.Length - 1; i++)
         {
-            char[] password = Input.ToCharArray();
-            NexPassword(password);
-            NexPassword(password);
+            char c = password[i];
 
-            Assert.Equal("heqaabcc", new string(password));
-        }
-
-        private static void NexPassword(char[] password)
-        {
-            while (true)
+            if (!hasStraight &&
+                c <= 'x' &&
+                password[i + 1] == (c + 1) &&
+                (i + 2) < password.Length &&
+                password[i + 2] == (c + 2))
             {
-                IncrementPassword(password);
-                if (ValidatePassword(password))
-                    break;
+                hasStraight = true;
+            }
+
+            if (numPairs < 2 &&
+                i > lastPairEndIndex &&
+                password[i + 1] == c)
+            {
+                numPairs++;
+                lastPairEndIndex = i + 1;
             }
         }
 
-        private static bool ValidatePassword(char[] password)
+        return hasStraight && numPairs >= 2;
+    }
+
+    private static void IncrementPassword(char[] password)
+    {
+        int index = password.Length - 1;
+
+        while (index >= 0)
         {
-            bool hasStraight = false;
-            int numPairs = 0;
-            int lastPairEndIndex = -1;
-
-            for (int i = 0; i < password.Length - 1; i++)
+            if (password[index] == 'z')
             {
-                char c = password[i];
-
-                if (!hasStraight &&
-                    c <= 'x' &&
-                    password[i + 1] == (c + 1) &&
-                    (i + 2) < password.Length &&
-                    password[i + 2] == (c + 2))
-                {
-                    hasStraight = true;
-                }
-
-                if (numPairs < 2 &&
-                    i > lastPairEndIndex &&
-                    password[i + 1] == c)
-                {
-                    numPairs++;
-                    lastPairEndIndex = i + 1;
-                }
+                password[index] = 'a';
+                index--;
             }
-
-            return hasStraight && numPairs >= 2;
-        }
-
-        private static void IncrementPassword(char[] password)
-        {
-            int index = password.Length - 1;
-
-            while (index >= 0)
+            else
             {
-                if (password[index] == 'z')
-                {
-                    password[index] = 'a';
-                    index--;
-                }
-                else
-                {
-                    char c = ++password[index];
-                    if (c == 'i' || c == 'o' || c == 'l')
-                        password[index]++;
-                    break;
-                }
+                char c = ++password[index];
+                if (c == 'i' || c == 'o' || c == 'l')
+                    password[index]++;
+                break;
             }
         }
     }

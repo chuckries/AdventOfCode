@@ -1,92 +1,88 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
-using Xunit;
+﻿using System.Text;
 
-namespace AdventOfCode._2019
+namespace AdventOfCode._2019;
+
+public class Day08
 {
-    public class Day08
+    const int WIDTH = 25;
+    const int HEIGHT = 6;
+    const int AREA = WIDTH * HEIGHT;
+
+    char[,,] _layers;
+
+    public Day08()
     {
-        const int WIDTH = 25;
-        const int HEIGHT = 6;
-        const int AREA = WIDTH * HEIGHT;
+        string input = File.ReadAllText("Inputs/Day08.txt");
+        int countLayers = input.Length / AREA;
+        _layers = new char[countLayers, HEIGHT, WIDTH];
 
-        char[,,] _layers;
+        int index = 0;
+        for (int layer = 0; layer < countLayers; layer++)
+            for (int height = 0; height < HEIGHT; height++)
+                for (int width = 0; width < WIDTH; width++)
+                    _layers[layer, height, width] = input[index++];
+    }
 
-        public Day08()
+    [Fact]
+    public void Part1()
+    {
+        int minLayer = -1;
+        int minZeros = int.MaxValue;
+        for (int layer = 0; layer < _layers.GetLength(0); layer++)
         {
-            string input = File.ReadAllText("Inputs/Day08.txt");
-            int countLayers = input.Length / AREA;
-            _layers = new char[countLayers, HEIGHT, WIDTH];
+            int zeros = 0;
+            for (int height = 0; height < HEIGHT; height++)
+                for (int width = 0; width < WIDTH; width++)
+                    if (_layers[layer, height, width] == '0')
+                        zeros++;
 
-            int index = 0;
-            for (int layer = 0; layer < countLayers; layer++)
-                for (int height = 0; height < HEIGHT; height++)
-                    for (int width = 0; width < WIDTH; width++)
-                        _layers[layer, height, width] = input[index++];
+            if (zeros < minZeros)
+            {
+                minZeros = zeros;
+                minLayer = layer;
+            }
         }
 
-        [Fact]
-        public void Part1()
-        {
-            int minLayer = -1 ;
-            int minZeros = int.MaxValue;
-            for (int layer = 0; layer < _layers.GetLength(0); layer++)
+        int ones = 0;
+        int twos = 0;
+        for (int height = 0; height < HEIGHT; height++)
+            for (int width = 0; width < WIDTH; width++)
             {
-                int zeros = 0;
-                for (int height = 0; height < HEIGHT; height++)
-                    for (int width = 0; width < WIDTH; width++)
-                        if (_layers[layer, height, width] == '0')
-                            zeros++;
-
-                if (zeros < minZeros)
-                {
-                    minZeros = zeros;
-                    minLayer = layer;
-                }
+                char c = _layers[minLayer, height, width];
+                if (c == '1') ones++;
+                else if (c == '2') twos++;
             }
 
-            int ones = 0;
-            int twos = 0;
+        int answer = ones * twos;
+        Assert.Equal(2032, answer);
+    }
+
+    [Fact]
+    public void Part2()
+    {
+        char[,] render = new char[HEIGHT, WIDTH];
+        for (int height = 0; height < HEIGHT; height++)
+            for (int width = 0; width < WIDTH; width++)
+                render[height, width] = '2';
+
+        for (int layer = 0; layer < _layers.GetLength(0); layer++)
             for (int height = 0; height < HEIGHT; height++)
                 for (int width = 0; width < WIDTH; width++)
-                {
-                    char c = _layers[minLayer, height, width];
-                    if (c == '1') ones++;
-                    else if (c == '2') twos++;
-                }
+                    if (render[height, width] == '2')
+                        render[height, width] = _layers[layer, height, width];
 
-            int answer = ones * twos;
-            Assert.Equal(2032, answer);
-        }
+        StringBuilder sb = new StringBuilder();
+        sb.AppendLine();
 
-        [Fact]
-        public void Part2()
+        for (int height = 0; height < HEIGHT; height++)
         {
-            char[,] render = new char[HEIGHT, WIDTH];
-            for (int height = 0; height < HEIGHT; height++)
-                for (int width = 0; width < WIDTH; width++)
-                    render[height, width] = '2';
-
-            for (int layer = 0; layer < _layers.GetLength(0); layer++)
-                for (int height = 0; height < HEIGHT; height++)
-                    for (int width = 0; width < WIDTH; width++)
-                        if (render[height, width] == '2')
-                            render[height, width] = _layers[layer, height, width];
-
-            StringBuilder sb = new StringBuilder();
+            for (int width = 0; width < WIDTH; width++)
+                sb.Append(render[height, width] == '1' ? '█' : ' ');
             sb.AppendLine();
+        }
+        string answer = sb.ToString();
 
-            for (int height = 0; height < HEIGHT; height++)
-            {
-                for (int width = 0; width < WIDTH; width++)
-                    sb.Append(render[height, width] == '1' ? '█' : ' ');
-                sb.AppendLine();
-            }
-            string answer = sb.ToString();
-
-            const string expected = @"
+        const string expected = @"
  ██  ████  ██  █  █  ██  
 █  █ █    █  █ █  █ █  █ 
 █    ███  █    █  █ █    
@@ -95,7 +91,6 @@ namespace AdventOfCode._2019
  ██  █     ██   ██   ███ 
 ";
 
-            Assert.Equal(expected, answer);
-        }
+        Assert.Equal(expected, answer);
     }
 }

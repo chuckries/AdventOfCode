@@ -1,72 +1,62 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace AdventOfCode._2018;
 
-using Xunit;
-
-namespace AdventOfCode._2018
+public class Day08
 {
-    public class Day08
+    private class Node
     {
-        private class Node
+        public List<Node> Children { get; } = new List<Node>();
+        public List<int> Metadata { get; } = new List<int>();
+
+        public long GetValue()
         {
-            public List<Node> Children { get; } = new List<Node>();
-            public List<int> Metadata { get; } = new List<int>();
+            if (Children.Count == 0)
+                return Metadata.Sum();
 
-            public long GetValue()
-            {
-                if (Children.Count == 0)
-                    return Metadata.Sum();
-
-                return Metadata
-                    .Where(m => m <= Children.Count)
-                    .Sum(m => Children[m - 1].GetValue());
-            }
+            return Metadata
+                .Where(m => m <= Children.Count)
+                .Sum(m => Children[m - 1].GetValue());
         }
+    }
 
-        Node _root;
+    Node _root;
 
-        public Day08()
+    public Day08()
+    {
+        int[] input = File.ReadAllText("Inputs/Day08.txt").Split().Select(int.Parse).ToArray();
+        int index = 0;
+        _root = Recurse(ref index, input);
+
+        static Node Recurse(ref int index, int[] tree)
         {
-            int[] input = File.ReadAllText("Inputs/Day08.txt").Split().Select(int.Parse).ToArray();
-            int index = 0;
-            _root = Recurse(ref index, input);
+            Node n = new Node();
 
-            static Node Recurse(ref int index, int[] tree)
-            {
-                Node n = new Node();
+            int countChildren = tree[index++];
+            int countMetadata = tree[index++];
 
-                int countChildren = tree[index++];
-                int countMetadata = tree[index++];
+            for (int i = 0; i < countChildren; i++)
+                n.Children.Add(Recurse(ref index, tree));
 
-                for (int i = 0; i < countChildren; i++)
-                    n.Children.Add(Recurse(ref index, tree));
+            for (int i = 0; i < countMetadata; i++)
+                n.Metadata.Add(tree[index++]);
 
-                for (int i = 0; i < countMetadata; i++)
-                    n.Metadata.Add(tree[index++]);
-
-                return n;
-            }
+            return n;
         }
+    }
 
-        [Fact]
-        public void Part1()
-        {
-            long answer = Recurse(_root);
-            Assert.Equal(43825, answer);
+    [Fact]
+    public void Part1()
+    {
+        long answer = Recurse(_root);
+        Assert.Equal(43825, answer);
 
-            static long Recurse(Node n) =>
-                n.Children.Sum(Recurse) + n.Metadata.Sum();
-        }
+        static long Recurse(Node n) =>
+            n.Children.Sum(Recurse) + n.Metadata.Sum();
+    }
 
-        [Fact]
-        public void Part2()
-        {
-            long answer = _root.GetValue();
-            Assert.Equal(19276, answer);
-        }
+    [Fact]
+    public void Part2()
+    {
+        long answer = _root.GetValue();
+        Assert.Equal(19276, answer);
     }
 }

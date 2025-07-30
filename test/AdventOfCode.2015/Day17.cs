@@ -1,142 +1,133 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.IO;
-using System.Linq;
-using System.Text;
+﻿using System.Collections;
 
-using Xunit;
+namespace AdventOfCode._2015;
 
-namespace AdventOfCode._2015
+public class Day17
 {
-    public class Day17
+    private class Recipe : IEquatable<Recipe>
     {
-        private class Recipe : IEquatable<Recipe>
+        public readonly int Size;
+        BitArray _containers;
+
+        public Recipe()
         {
-            public readonly int Size;
-            BitArray _containers;
+            Size = 0;
+            _containers = new BitArray(_sizes.Length);
+        }
 
-            public Recipe()
-            {
-                Size = 0;
-                _containers = new BitArray(_sizes.Length);
-            }
+        protected Recipe(int size, BitArray containers)
+        {
+            Size = size;
+            _containers = containers;
+        }
 
-            protected Recipe(int size, BitArray containers)
+        public IEnumerable<Recipe> NextCandidates()
+        {
+            for (int i = 0; i < _sizes.Length; i++)
             {
-                Size = size;
-                _containers = containers;
-            }
-
-            public IEnumerable<Recipe> NextCandidates()
-            {
-                for (int i = 0; i < _sizes.Length; i++)
+                if (!_containers[i])
                 {
-                    if (!_containers[i])
-                    {
-                        BitArray candidateContainers = new BitArray(_containers);
-                        candidateContainers[i] = true;
-                        yield return new Recipe(Size + _sizes[i], candidateContainers);
-                    }
+                    BitArray candidateContainers = new BitArray(_containers);
+                    candidateContainers[i] = true;
+                    yield return new Recipe(Size + _sizes[i], candidateContainers);
                 }
             }
-
-            public int CountContainers()
-            {
-                int total = 0;
-                for (int i = 0; i < _containers.Count; i++)
-                    if (_containers[i])
-                        total++;
-
-                return total;
-            }
-
-            public override bool Equals(object obj)
-            {
-                return obj is Recipe recipe && Equals(recipe);
-            }
-
-            public bool Equals(Recipe other)
-            {
-                for (int i = 0; i < _containers.Count; i++)
-                    if (_containers[i] != other._containers[i])
-                        return false;
-
-                return true;
-            }
-
-            public override int GetHashCode()
-            {
-                int hash = 0;
-
-                for (int i = 0; i < _containers.Count; i++)
-                    if (_containers[i])
-                        hash ^= 1 << (i % 32);
-
-                return hash;
-            }
         }
 
-        static int[] _sizes;
-
-        static Day17()
+        public int CountContainers()
         {
-            _sizes = File.ReadAllLines("Inputs/Day17.txt").Select(int.Parse).ToArray();
+            int total = 0;
+            for (int i = 0; i < _containers.Count; i++)
+                if (_containers[i])
+                    total++;
+
+            return total;
         }
 
-        [Fact]
-        public void Part1()
+        public override bool Equals(object obj)
         {
-            int answer = Backtrack().Count();
-            Assert.Equal(654, answer);
+            return obj is Recipe recipe && Equals(recipe);
         }
 
-        [Fact]
-        public void Part2()
+        public bool Equals(Recipe other)
         {
-            int minCount = 0;
-            int minContainers = int.MaxValue;
+            for (int i = 0; i < _containers.Count; i++)
+                if (_containers[i] != other._containers[i])
+                    return false;
 
-            foreach (Recipe r in Backtrack())
+            return true;
+        }
+
+        public override int GetHashCode()
+        {
+            int hash = 0;
+
+            for (int i = 0; i < _containers.Count; i++)
+                if (_containers[i])
+                    hash ^= 1 << (i % 32);
+
+            return hash;
+        }
+    }
+
+    static int[] _sizes;
+
+    static Day17()
+    {
+        _sizes = File.ReadAllLines("Inputs/Day17.txt").Select(int.Parse).ToArray();
+    }
+
+    [Fact]
+    public void Part1()
+    {
+        int answer = Backtrack().Count();
+        Assert.Equal(654, answer);
+    }
+
+    [Fact]
+    public void Part2()
+    {
+        int minCount = 0;
+        int minContainers = int.MaxValue;
+
+        foreach (Recipe r in Backtrack())
+        {
+            int countContainers = r.CountContainers();
+            if (countContainers < minContainers)
             {
-                int countContainers = r.CountContainers();
-                if (countContainers < minContainers)
-                {
-                    minCount = 1;
-                    minContainers = countContainers;
-                }
-                else if (countContainers == minContainers)
-                    minCount++;
+                minCount = 1;
+                minContainers = countContainers;
             }
-
-            Assert.Equal(57, minCount);
+            else if (countContainers == minContainers)
+                minCount++;
         }
 
-        private IEnumerable<Recipe> Backtrack()
+        Assert.Equal(57, minCount);
+    }
+
+    private IEnumerable<Recipe> Backtrack()
+    {
+        const int Target = 150;
+
+        Recipe current = new Recipe();
+        HashSet<Recipe> visited = new HashSet<Recipe>();
+        Stack<Recipe> stack = new Stack<Recipe>();
+        stack.Push(current);
+
+        while (stack.Count > 0)
         {
-            const int Target = 150;
+            current = stack.Pop();
+            if (visited.Contains(current))
+                continue;
+            visited.Add(current);
 
-            Recipe current = new Recipe();
-            HashSet<Recipe> visited = new HashSet<Recipe>();
-            Stack<Recipe> stack = new Stack<Recipe>();
-            stack.Push(current);
-
-            while (stack.Count > 0)
+            if (current.Size == Target)
+                yield return current;
+            else
             {
-                current = stack.Pop();
-                if (visited.Contains(current))
-                    continue;
-                visited.Add(current);
-
-                if (current.Size == Target)
-                    yield return current;
-                else
-                {
-                    foreach (Recipe candidate in current.NextCandidates())
-                        if (candidate.Size <= Target && !visited.Contains(candidate))
-                            stack.Push(candidate);
-                }
+                foreach (Recipe candidate in current.NextCandidates())
+                    if (candidate.Size <= Target && !visited.Contains(candidate))
+                        stack.Push(candidate);
             }
         }
     }

@@ -1,99 +1,91 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using Xunit;
+﻿namespace AdventOfCode._2019;
 
-namespace AdventOfCode._2019
+public class Day04
 {
-    public class Day04
+    const int Start = 158126;
+    const int End = 624574;
+
+    IEnumerable<int> _range = Enumerable.Range(Start, End - Start + 1);
+
+    [Fact]
+    public void Part1()
     {
-        const int Start = 158126;
-        const int End = 624574;
+        int answer = _range.Select(GetDigits)
+            .Where(IsStrictlyIncreasing)
+            .Where(HasAnyDouble)
+            .Count();
 
-        IEnumerable<int> _range = Enumerable.Range(Start, End - Start + 1);
+        Assert.Equal(1665, answer);
+    }
 
-        [Fact]
-        public void Part1()
+    [Fact]
+    public void Part2()
+    {
+        int answer = _range.Select(GetDigits)
+            .Where(IsStrictlyIncreasing)
+            .Where(HasAtLeastExactlyOneDouble)
+            .Count();
+
+        Assert.Equal(1131, answer);
+    }
+
+    private bool HasAnyDouble(int[] digits)
+    {
+        for (int i = 0; i < digits.Length - 1; i++)
         {
-            int answer = _range.Select(GetDigits)
-                .Where(IsStrictlyIncreasing)
-                .Where(HasAnyDouble)
-                .Count();
-
-            Assert.Equal(1665, answer);
-        }
-
-        [Fact]
-        public void Part2()
-        {
-            int answer = _range.Select(GetDigits)
-                .Where(IsStrictlyIncreasing)
-                .Where(HasAtLeastExactlyOneDouble)
-                .Count();
-
-            Assert.Equal(1131, answer);
-        }
-
-        private bool HasAnyDouble(int[] digits)
-        {
-            for (int i = 0; i < digits.Length - 1; i++)
+            if (digits[i] == digits[i + 1])
             {
-                if (digits[i] == digits[i + 1])
-                {
-                    return true;
-                }
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private bool HasAtLeastExactlyOneDouble(int[] digits)
+    {
+        int i = 0;
+        while (i < digits.Length)
+        {
+            int candidate = digits[i++];
+            int count = 1;
+
+            while (i < digits.Length && digits[i] == candidate)
+            {
+                count++;
+                i++;
             }
 
-            return false;
+            if (count == 2)
+                return true;
         }
 
-        private bool HasAtLeastExactlyOneDouble(int[] digits)
+        return false;
+    }
+
+    private bool IsStrictlyIncreasing(int[] digits)
+    {
+        for (int i = 0; i < digits.Length - 1; i++)
         {
-            int i = 0;
-            while (i < digits.Length)
+            if (digits[i + 1] > digits[i])
             {
-                int candidate = digits[i++];
-                int count = 1;
-
-                while (i < digits.Length && digits[i] == candidate)
-                {
-                    count++;
-                    i++;
-                }
-
-                if (count == 2)
-                    return true;
+                return false;
             }
-
-            return false;
         }
 
-        private bool IsStrictlyIncreasing(int[] digits)
+        return true;
+    }
+
+    private int[] GetDigits(int number)
+    {
+        List<int> digits = new List<int>();
+
+        while (number > 0)
         {
-            for (int i = 0; i < digits.Length - 1; i++)
-            {
-                if (digits[i + 1] > digits[i])
-                {
-                    return false;
-                }
-            }
-
-            return true;
+            digits.Add(number % 10);
+            number /= 10;
         }
 
-        private int[] GetDigits(int number)
-        {
-            List<int> digits = new List<int>();
-
-            while (number > 0)
-            {
-                digits.Add(number % 10);
-                number /= 10;
-            }
-
-            return digits.ToArray();
-        }
+        return digits.ToArray();
     }
 }
