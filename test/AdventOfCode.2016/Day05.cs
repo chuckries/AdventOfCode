@@ -22,11 +22,11 @@ public class Day05
     public void Part2()
     {
         int count = 0;
-        char?[] password = new char?[8];
+        char[] password = new char[8];
 
         foreach (IntVec2 p in EnumPasswords())
         {
-            if (p.X < 8 && !password[p.X].HasValue)
+            if (p.X < 8 && password[p.X] != '\0')
             {
                 password[p.X] = p.Y.ToString("x")[0];
                 count++;
@@ -36,7 +36,7 @@ public class Day05
                 break;
         }
 
-        string answer = new string(password.Select(c => c.Value).ToArray());
+        string answer = new string(password.Select(c => c).ToArray());
         Assert.Equal("424a0197", answer);
     }
 

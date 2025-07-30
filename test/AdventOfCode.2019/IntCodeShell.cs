@@ -3,7 +3,7 @@
 public class IntCodeShell
 {
     IntCodeAsync _intCode;
-    string _currentLine;
+    string? _currentLine;
     int _currentIndex;
 
     TextReader _reader;

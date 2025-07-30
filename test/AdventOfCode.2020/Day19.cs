@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 
 namespace AdventOfCode._2020;
@@ -10,7 +11,7 @@ public class Day19
     {
         public readonly int Index;
 
-        private List<List<Node>> _childGroups;
+        private List<List<Node>>? _childGroups;
         char? _terminal;
 
         public Node(int index)
@@ -23,6 +24,7 @@ public class Day19
             _terminal = c;
         }
 
+        [MemberNotNull(nameof(_childGroups))]
         public void SetChildGroups(List<List<Node>> childGroups)
         {
             _childGroups = childGroups;
@@ -41,6 +43,9 @@ public class Day19
                 }
                 return false;
             }
+
+            if (_childGroups is null)
+                return false;
 
             foreach (List<Node> group in _childGroups)
             {

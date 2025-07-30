@@ -49,9 +49,9 @@ public class Day21
     private readonly struct Outfit
     {
         public readonly Item Weapon;
-        public readonly Item Armor;
-        public readonly Item Ring1;
-        public readonly Item Ring2;
+        public readonly Item? Armor;
+        public readonly Item? Ring1;
+        public readonly Item? Ring2;
         public readonly int Id;
 
         public readonly int Cost;
@@ -63,7 +63,7 @@ public class Day21
         {
         }
 
-        public Outfit(Item weapon, Item armor, Item ring1, Item ring2)
+        public Outfit(Item weapon, Item? armor, Item? ring1, Item? ring2)
         {
             Weapon = weapon;
             Armor = armor;
@@ -88,7 +88,7 @@ public class Day21
             if (ring2 is object) i += (ring2.Id * 10);
             Id = i;
 
-            static void AddUp(Item item, ref int costTotal, ref int damageTotal, ref int armorTtoal)
+            static void AddUp(Item? item, ref int costTotal, ref int damageTotal, ref int armorTtoal)
             {
                 if (item != null)
                 {

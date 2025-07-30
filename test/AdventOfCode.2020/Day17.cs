@@ -220,12 +220,12 @@ public class Day17
         {
         }
 
-        public object GetValue(Array arr)
+        public object? GetValue(Array arr)
         {
             return arr.GetValue(_values);
         }
 
-        public void SetValue(Array arr, object o)
+        public void SetValue(Array arr, object? o)
         {
             arr.SetValue(o, _values);
         }

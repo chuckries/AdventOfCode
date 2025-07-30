@@ -99,7 +99,7 @@ public class Day22
         public int MyMana { get; set; }
         public int ManaSpent { get; set; }
         public int OpponentHp { get; set; }
-        public List<Effect> ActiveEffects { get; set; }
+        public List<Effect> ActiveEffects { get; set; } = new();
         public int HpLostOnPlayerTurn { get; set; }
 
         public bool IsLoss => MyHp <= 0 && OpponentHp > 0;

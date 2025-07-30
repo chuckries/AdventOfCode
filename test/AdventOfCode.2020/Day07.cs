@@ -95,7 +95,7 @@ public class Day07
 
     private Node GetNode(string color)
     {
-        if (!_nodes.TryGetValue(color, out Node n))
+        if (!_nodes.TryGetValue(color, out Node? n))
         {
             n = new Node(color);
             _nodes.Add(color, n);

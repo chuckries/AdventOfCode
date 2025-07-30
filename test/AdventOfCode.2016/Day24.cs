@@ -1,4 +1,6 @@
-﻿namespace AdventOfCode._2016;
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace AdventOfCode._2016;
 
 public class Day24
 {
@@ -14,6 +16,7 @@ public class Day24
             Parse();
         }
 
+        [MemberNotNull(nameof(_edges), nameof(_nodes))]
         private void Parse()
         {
             DiscoverNodes();
@@ -116,6 +119,7 @@ public class Day24
             }
         }
 
+        [MemberNotNull(nameof(_nodes))]
         private void DiscoverNodes()
         {
             List<(int index, IntVec2 pos)> nodes = new();

@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <RootNamespace>AdventOfCode._2022</RootNamespace>
-    <Nullable>enable</Nullable>
   </PropertyGroup>
 
 </Project>

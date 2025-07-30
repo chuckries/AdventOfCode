@@ -100,9 +100,9 @@ public class Day23
     [Fact]
     public void Part1()
     {
-        int maxRange = 0;
-        Bot maxBot = null;
-        for (int i = 0; i < _bots.Length; i++)
+        int maxRange = _bots[0].R;
+        Bot maxBot = _bots[0];
+        for (int i = 1; i < _bots.Length; i++)
             if (_bots[i].R > maxRange)
             {
                 maxBot = _bots[i];

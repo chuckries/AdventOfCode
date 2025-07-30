@@ -1,4 +1,6 @@
-﻿namespace AdventOfCode._2015;
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace AdventOfCode._2015;
 
 public class Day23
 {
@@ -27,6 +29,7 @@ public class Day23
                 _program[_pc]();
         }
 
+        [MemberNotNull(nameof(_program))]
         private void Parse(string[] input)
         {
             _program = input.Select<string, Action>(s =>

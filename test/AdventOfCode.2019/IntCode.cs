@@ -1,4 +1,5 @@
 ﻿using System.Buffers;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AdventOfCode._2019;
 
@@ -39,14 +40,14 @@ public abstract class IntCodeBase
         set => WriteMemory(index, value);
     }
 
-    public OutputWriter Writer { get; set; }
+    public OutputWriter? Writer { get; set; }
 
     protected IntCodeBase(IEnumerable<long> program)
         : this(program, null)
     {
     }
 
-    protected IntCodeBase(IEnumerable<long> program, OutputWriter writer)
+    protected IntCodeBase(IEnumerable<long> program, OutputWriter? writer)
     {
         _program = program.ToArray();
         Writer = writer;
@@ -54,6 +55,7 @@ public abstract class IntCodeBase
         Reset();
     }
 
+    [MemberNotNull(nameof(_memory))]
     public void Reset()
     {
         if (_memory == null || _memory.Length < _program.Length)
@@ -76,7 +78,7 @@ public abstract class IntCodeBase
         switch (op)
         {
             case Op.Halt: IsHalt = true; break;
-            case Op.Out: Writer(ReadPC(modes[0])); break;
+            case Op.Out: Writer?.Invoke(ReadPC(modes[0])); break;
             case Op.Base: RelativeBase += ReadPC(modes[0]); break;
             default:
                 long arg1 = ReadPC(modes[0]);
@@ -169,7 +171,7 @@ public abstract class IntCodeBase
 public class IntCodeAsync : IntCodeBase
 {
     public delegate Task<long> InputReaderAsync(CancellationToken cancellationToken);
-    public InputReaderAsync Reader { get; set; }
+    public InputReaderAsync? Reader { get; set; }
 
     public IntCodeAsync(IEnumerable<long> program)
         : base(program)
@@ -198,7 +200,10 @@ public class IntCodeAsync : IntCodeBase
 
             switch (op)
             {
-                case Op.In: WritePC(modes[0], await Reader(cancellationToken)); break;
+                case Op.In:
+                    var reader = Reader ?? throw new InvalidOperationException();
+                    WritePC(modes[0], await reader(cancellationToken)); 
+                    break;
                 default: StepCore(op, modes); break;
             }
         }
@@ -208,14 +213,14 @@ public class IntCodeAsync : IntCodeBase
 public class IntCode : IntCodeBase
 {
     public delegate long InputReader();
-    public InputReader Reader { get; set; }
+    public InputReader? Reader { get; set; }
 
     public IntCode(IEnumerable<long> program)
         : base(program)
     {
     }
 
-    public IntCode(IEnumerable<long> program, InputReader reader, OutputWriter writer)
+    public IntCode(IEnumerable<long> program, InputReader? reader, OutputWriter? writer)
         : base(program, writer)
     {
         Reader = reader;
@@ -239,7 +244,7 @@ public class IntCode : IntCodeBase
 
             switch (op)
             {
-                case Op.In: WritePC(modes[0], Reader()); break;
+                case Op.In: WritePC(modes[0], Reader?.Invoke() ?? throw new InvalidOperationException()); break;
                 default: StepCore(op, modes); break;
             }
         }

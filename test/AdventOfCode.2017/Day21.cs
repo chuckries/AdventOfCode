@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AdventOfCode._2017;
 
@@ -157,7 +158,7 @@ public class Day21
                 _rules.Add(new RuleKey(ruleTile.Size, id), matchTile);
         }
 
-        public bool TryGetMatchedTile(int size, uint id, out Tile matched) =>
+        public bool TryGetMatchedTile(int size, uint id, [NotNullWhen(true)] out Tile? matched) =>
             _rules.TryGetValue(new RuleKey(size, id), out matched);
 
         private Tile ParseTile(string[] parts)
@@ -208,7 +209,7 @@ public class Day21
 
             foreach ((Tile currentTile, Tile nextTile) in GetTiles(tileSize).Zip(nextPattern.GetTiles(nextTileSize)))
             {
-                if (!rules.TryGetMatchedTile(currentTile.Size, currentTile.GetPrimaryId(), out Tile matchedTile))
+                if (!rules.TryGetMatchedTile(currentTile.Size, currentTile.GetPrimaryId(), out Tile? matchedTile))
                     throw new InvalidOperationException();
 
                 matchedTile.CopyTo(nextTile);

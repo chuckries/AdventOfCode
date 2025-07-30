@@ -69,7 +69,7 @@ public struct IntVec3 : IEquatable<IntVec3>
         return $"({X}, {Y}, {Z})";
     }
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         return obj is IntVec3 point && Equals(point);
     }

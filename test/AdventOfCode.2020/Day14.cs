@@ -44,7 +44,7 @@ public class Day14
     {
         private Dictionary<string, long> _dict = new();
 
-        public string Mask { get; set; }
+        public string Mask { get; set; } = string.Empty;
 
         public void Add(long address, long value)
         {
@@ -148,7 +148,7 @@ public class Day14
         Assert.Equal(5272149590143, answer);
     }
 
-    private IEnumerable<(long address, long value, string mask)> Parse()
+    private IEnumerable<(long address, long value, string? mask)> Parse()
     {
         foreach (string line in File.ReadAllLines("Inputs/Day14.txt"))
         {

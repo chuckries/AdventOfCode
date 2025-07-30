@@ -44,13 +44,16 @@ public class Day17
             return total;
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
-            return obj is Recipe recipe && Equals(recipe);
+            return Equals(obj as Recipe);
         }
 
-        public bool Equals(Recipe other)
+        public bool Equals(Recipe? other)
         {
+            if (other is null)
+                return false;
+
             for (int i = 0; i < _containers.Count; i++)
                 if (_containers[i] != other._containers[i])
                     return false;

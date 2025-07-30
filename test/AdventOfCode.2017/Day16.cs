@@ -13,7 +13,7 @@ public class Day16
 
             for (int i = 0; i < parts.Length; i++)
             {
-                Action<char[]> action = null;
+                Action<char[]>? action = null;
 
                 string part = parts[i];
                 char code = parts[i][0];

@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AdventOfCode._2019;
 
@@ -34,7 +35,7 @@ public class Day20
                        Orientation == other.Orientation;
             }
 
-            public override bool Equals(object obj)
+            public override bool Equals(object? obj)
             {
                 return obj is Node node && Equals(node);
             }
@@ -151,6 +152,7 @@ public class Day20
             }
         }
 
+        [MemberNotNull(nameof(_graph))]
         private void BuildGraph()
         {
             _graph = new (int, int)[_nodes.Count, _nodes.Count];

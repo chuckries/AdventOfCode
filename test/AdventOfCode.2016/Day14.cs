@@ -7,8 +7,8 @@ public class Day14
 {
     const string Input = "ngcjuoqr";
 
-    private List<string> _hashes = new List<string>(10_000);
-    private Dictionary<int, char[]> _quints = new Dictionary<int, char[]>(10_000);
+    private List<string?> _hashes = new(10_000);
+    private Dictionary<int, char[]?> _quints = new(10_000);
     private static MD5 s_md5 = MD5.Create();
     private static StringBuilder s_sb = new StringBuilder(32);
     private static List<char> s_quintList = new List<char>();
@@ -80,7 +80,7 @@ public class Day14
 
     private bool IsQuint(int index, char c, Func<int, string> hashProvider)
     {
-        if (!_quints.TryGetValue(index, out char[] quintC))
+        if (!_quints.TryGetValue(index, out char[]? quintC))
         {
             s_quintList.Clear();
             quintC = null;
@@ -128,7 +128,7 @@ public class Day14
             _hashes[index] = GetHashString(Input + index.ToString());
         }
 
-        return _hashes[index];
+        return _hashes[index] ?? throw new InvalidOperationException();
     }
 
     private string GetStretchedHash(int index)
@@ -136,7 +136,7 @@ public class Day14
         while (_hashes.Count <= index)
             _hashes.Add(null);
 
-        string hash = _hashes[index];
+        string? hash = _hashes[index];
         if (hash is null)
         {
             hash = GetHashString(Input + index.ToString());

@@ -118,9 +118,11 @@ public class Day10
         private void AddOutput(int index, Func<int> valueFactory)
         {
             while (_outputs.Count <= index)
-                _outputs.Add(null);
+                _outputs.Add(NotImplAction);
             _outputs[index] = valueFactory;
         }
+
+        static int NotImplAction() => throw new NotImplementedException("This action is not implemented in the current context.");
     }
 
     Graph _graph;

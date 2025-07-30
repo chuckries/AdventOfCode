@@ -33,7 +33,7 @@ public class Day06
 
         static IEnumerable<int> InnerParse(StreamReader sr)
         {
-            string line;
+            string? line;
             while (!string.IsNullOrEmpty(line = sr.ReadLine()))
                 yield return line.Aggregate(0, (t, c) => t | 1 << (c - 'a'));
         }

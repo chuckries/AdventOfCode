@@ -14,7 +14,7 @@ public class AsyncQueue<T>
 
     public void Enqueue(T item)
     {
-        TaskCompletionSource<T> outstandingRequest = null;
+        TaskCompletionSource<T>? outstandingRequest = null;
         lock (_lock)
         {
             if (_outstandingRequests.Count > 0)

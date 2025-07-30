@@ -33,8 +33,8 @@ public class Day21
 
             foreach (string allergen in allergens)
             {
-                if (!_allergens.TryGetValue(allergen, out HashSet<string> possibleIngredients))
-                    _allergens.Add(allergen, new HashSet<string>(ingredients));
+                if (!_allergens.TryGetValue(allergen, out HashSet<string>? possibleIngredients))
+                    _allergens.Add(allergen, new(ingredients));
                 else
                     possibleIngredients.IntersectWith(ingredients);
             }

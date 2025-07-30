@@ -123,7 +123,7 @@ public class Day07
             {
                 string[] tokens = s.Split();
                 string nodeName = tokens[^1];
-                Node node = null;
+                Node? node = null;
 
                 if (tokens[0] == "NOT")
                 {

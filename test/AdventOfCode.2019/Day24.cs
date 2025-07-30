@@ -1,4 +1,6 @@
-﻿namespace AdventOfCode._2019;
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace AdventOfCode._2019;
 
 public class Day24
 {
@@ -158,7 +160,7 @@ public class Day24
 
             private int CountFromSpace(int level, Func<Grid, int> func)
             {
-                if (!Space.TryGetGrid(level, out Grid grid))
+                if (!Space.TryGetGrid(level, out Grid? grid))
                     return 0;
 
                 return func(grid);
@@ -214,14 +216,14 @@ public class Day24
             return _grids.Values.Sum(g => g.CountOns());
         }
 
-        private bool TryGetGrid(int level, out Grid grid)
+        private bool TryGetGrid(int level, [NotNullWhen(true)] out Grid? grid)
         {
             return _grids.TryGetValue(level, out grid);
         }
 
         private Grid GetGrid(int level)
         {
-            if (!TryGetGrid(level, out Grid grid))
+            if (!TryGetGrid(level, out Grid? grid))
             {
                 grid = new Grid(this, level);
                 _grids.Add(level, grid);

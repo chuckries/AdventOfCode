@@ -74,8 +74,14 @@ public class Day18
 
         class ArrayEqualityComparer : IEqualityComparer<int[]>
         {
-            public bool Equals(int[] x, int[] y)
+            public bool Equals(int[]? x, int[]? y)
             {
+                if (x is null && y is null)
+                    return true;
+
+                if (x is null || y is null)
+                    return false;
+
                 if (x.Length != y.Length)
                     return false;
 
@@ -169,7 +175,7 @@ public class Day18
     IntVec2 _bounds;
     IntVec2[] _keys;
     IntVec2 _entry;
-    Graph _graph;
+    Graph? _graph;
 
     public Day18()
     {
@@ -264,7 +270,7 @@ public class Day18
             }
             else if (IsKey(c, out int keyIndex) && keyIndex != origin.ToIndex(_bounds))
             {
-                _graph.AddEdge(originIndex, keyIndex, distance, newKeys.ToArray());
+                _graph!.AddEdge(originIndex, keyIndex, distance, newKeys.ToArray());
             }
 
             foreach (IntVec2 adjacent in current.Adjacent())

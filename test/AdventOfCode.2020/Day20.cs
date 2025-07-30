@@ -234,7 +234,7 @@ public class Day20
 
             void AddEdge(int edge, EdgeType type, Tile tile)
             {
-                if (!_edgeLookup.TryGetValue(edge, out List<EdgeId> edges))
+                if (!_edgeLookup.TryGetValue(edge, out List<EdgeId>? edges))
                     _edgeLookup.Add(edge, new List<EdgeId> { new EdgeId(type, tile) });
                 else
                     edges.Add(new EdgeId(type, tile));

@@ -14,7 +14,7 @@ public class Day20
         foreach (var range in Parse())
         {
             var beginRange = _ranges.First;
-            while (true)
+            while (beginRange is not null)
             {
                 if (range.begin >= beginRange.Value.begin && range.begin <= beginRange.Value.end)
                     break;
@@ -22,18 +22,21 @@ public class Day20
             }
 
             var endRange = beginRange;
-            while (true)
+            while (endRange is not null)
             {
                 if (range.end >= endRange.Value.begin && range.end <= endRange.Value.end)
                     break;
                 endRange = endRange.Next;
             }
 
+            if (beginRange is null || endRange is null)
+                throw new InvalidOperationException();
+
             if (beginRange != endRange)
             {
                 var current = beginRange.Next;
 
-                while (true)
+                while (current is not null)
                 {
                     var tmp = current;
                     current = tmp.Next;

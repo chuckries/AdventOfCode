@@ -138,7 +138,7 @@ public struct IntVec2 : IEquatable<IntVec2>
         return $"({X}, {Y})";
     }
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         return obj is IntVec2 point && Equals(point);
     }
