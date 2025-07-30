@@ -1,6 +1,4 @@
-﻿using NuGet.Frameworks;
-
-namespace AdventOfCode._2021
+﻿namespace AdventOfCode._2021
 {
     public class Day22
     {

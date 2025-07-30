@@ -82,7 +82,7 @@ namespace AdventOfCode._2019
         }
 
         [Fact]
-        public void Part1()
+        public async Task Part1()
         {
             TaskCompletionSource<long> answerTcs = new TaskCompletionSource<long>();
             Computer[] network = new Computer[50];
@@ -97,7 +97,7 @@ namespace AdventOfCode._2019
                 });
             }
 
-            Task.Run(() =>
+            _ = Task.Run(() =>
             {
                 while (true)
                 {
@@ -108,12 +108,12 @@ namespace AdventOfCode._2019
                 }
             });
 
-            long answer = answerTcs.Task.Result;
+            long answer = await answerTcs.Task;
             Assert.Equal(22134, answer);
         }
 
         [Fact]
-        public void Part2()
+        public async Task Part2()
         {
             TaskCompletionSource<long> answerTcs = new TaskCompletionSource<long>();
             Computer[] network = new Computer[50];
@@ -130,7 +130,7 @@ namespace AdventOfCode._2019
                 });
             }
 
-            Task.Run(() =>
+            _ = Task.Run(() =>
             {
                 while (true)
                 {
@@ -150,7 +150,7 @@ namespace AdventOfCode._2019
                 }
             });
 
-            long answer = answerTcs.Task.Result;
+            long answer = await answerTcs.Task;
             Assert.Equal(16084, answer);
         }
     }
