@@ -1,0 +1,23 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".gitattributes" />
+    <File Path=".gitignore" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/AdventOfCode.Common/AdventOfCode.Common.csproj" />
+  </Folder>
+  <Folder Name="/test/">
+    <File Path="test/Directory.Build.props" />
+    <Project Path="test/AdventOfCode.2015/AdventOfCode.2015.csproj" />
+    <Project Path="test/AdventOfCode.2016/AdventOfCode.2016.csproj" />
+    <Project Path="test/AdventOfCode.2017/AdventOfCode.2017.csproj" />
+    <Project Path="test/AdventOfCode.2018/AdventOfCode.2018.csproj" />
+    <Project Path="test/AdventOfCode.2019/AdventOfCode.2019.csproj" />
+    <Project Path="test/AdventOfCode.2020/AdventOfCode.2020.csproj" />
+    <Project Path="test/AdventOfCode.2021/AdventOfCode.2021.csproj" />
+    <Project Path="test/AdventOfCode.2022/AdventOfCode.2022.csproj" />
+    <Project Path="test/AdventOfCode.2025/AdventOfCode.2025.csproj" />
+  </Folder>
+</Solution>
