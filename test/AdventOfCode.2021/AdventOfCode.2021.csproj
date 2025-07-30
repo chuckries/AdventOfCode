@@ -1,0 +1,7 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>AdventOfCode._2021</RootNamespace>
+  </PropertyGroup>
+
+</Project>
