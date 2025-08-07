@@ -17,7 +17,7 @@ public class Day20
 {
     (LinkedList<long> list, LinkedListNode<long>[] order) Input(long multiplier)
     {
-        long[] ints = File.ReadAllLines("Inputs/day20.txt").Select(long.Parse).Select(i => i * multiplier).ToArray();
+        long[] ints = File.ReadAllLines("Inputs/Day20.txt").Select(long.Parse).Select(i => i * multiplier).ToArray();
         LinkedListNode<long>[] nodes = ints.Select(n => new LinkedListNode<long>(n)).ToArray();
 
         LinkedList<long> list = new();

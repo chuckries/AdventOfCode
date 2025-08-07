@@ -9,7 +9,7 @@ public class Day01
     {
         this.input = new();
         List<int> current = new();
-        foreach (string line in File.ReadAllLines("Inputs/day01.txt"))
+        foreach (string line in File.ReadAllLines("Inputs/Day01.txt"))
         {
             if (line == string.Empty)
             {
