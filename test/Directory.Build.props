@@ -17,6 +17,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <Using Include="System.Math" Static="true" />
         <Using Include="Xunit" />
         <Using Include="AdventOfCode.Common" />
     </ItemGroup>
