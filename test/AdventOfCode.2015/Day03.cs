@@ -13,8 +13,7 @@ public class Day03
     public void Part1()
     {
         IntVec2 current = default;
-        HashSet<IntVec2> positions = new HashSet<IntVec2>();
-        positions.Add(current);
+        HashSet<IntVec2> positions = [current];
 
         for (int i = 0; i < _input.Length; i++)
         {
