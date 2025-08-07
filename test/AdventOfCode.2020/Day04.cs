@@ -73,10 +73,10 @@ public class Day04
     }
 
     private static Regex s_Regex = new Regex(
-        @"(?'value'(?'key'byr|iyr|eyr|hgt|hcl|ecl|pid|cid):[#\w]+( |\r\n)?){7,8}",
+        @"(?'value'(?'key'byr|iyr|eyr|hgt|hcl|ecl|pid|cid):[#\w]+( |\r?\n)?){7,8}",
         RegexOptions.Compiled);
 
     private static Regex s_Regex2 = new Regex(
-        @"((?'x'(byr|iyr|eyr):\d{4}|hgt:\d{2,3}(cm|in)|hcl:#[a-f0-9]{6}|ecl:(amb|blu|brn|gry|grn|hzl|oth)|pid:\d{9}|cid:\w+)( |\r\n)?){7,8}",
+        @"((?'x'(byr|iyr|eyr):\d{4}|hgt:\d{2,3}(cm|in)|hcl:#[a-f0-9]{6}|ecl:(amb|blu|brn|gry|grn|hzl|oth)|pid:\d{9}|cid:\w+)( |\r?\n)?){7,8}",
         RegexOptions.Compiled);
 }
